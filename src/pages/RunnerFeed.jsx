@@ -110,6 +110,8 @@ export default function RunnerFeed() {
               taskMarkers={filteredTasks}
               height="calc(100dvh - 280px)"
               className="rounded-none border-0"
+              darkMode
+              showUserLocation
             />
           </div>
         ) : (

@@ -117,6 +117,8 @@ export default function ActiveTask() {
           runnerPosition={runnerPos}
           height="45dvh"
           className="rounded-none border-0"
+          showRouteInfo
+          darkMode
         />
         {/* Gradient overlay to blend map into bottom panel */}
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-dark to-transparent pointer-events-none" />

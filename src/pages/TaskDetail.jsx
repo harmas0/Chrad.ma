@@ -165,6 +165,8 @@ export default function TaskDetail() {
             pickup={task.pickup}
             destination={task.destination}
             height="220px"
+            showRouteInfo
+            darkMode
           />
         </div>
 

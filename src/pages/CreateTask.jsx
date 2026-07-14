@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, MapPin, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, Check, Search, Loader2, Crosshair } from 'lucide-react';
 import CategoryCard from '../components/CategoryCard';
 import PriceInput from '../components/PriceInput';
 import PhotoUpload from '../components/PhotoUpload';
@@ -27,6 +27,98 @@ export default function CreateTask() {
     itemBudget: 0,
   });
   const [submitted, setSubmitted] = useState(false);
+
+  const [activeTab, setActiveTab] = useState('pickup');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [locatingGPS, setLocatingGPS] = useState(false);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}+Morocco&limit=5`);
+      const data = await res.json();
+      setSearchResults(data);
+    } catch (err) {
+      console.error('Search error:', err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleSelectResult = (result) => {
+    const loc = {
+      lat: Number(result.lat),
+      lng: Number(result.lon),
+      name: result.display_name.split(',')[0],
+      address: result.display_name,
+    };
+    update(activeTab, loc);
+    setSearchResults([]);
+    setSearchQuery('');
+  };
+
+  const handleMapClick = async (latlng) => {
+    const { lat, lng } = latlng;
+    const loc = {
+      lat,
+      lng,
+      name: 'Custom Location',
+      address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+    };
+    update(activeTab, loc);
+    // Reverse geocode asynchronously to get a readable address
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      if (data && data.display_name) {
+        update(activeTab, {
+          lat,
+          lng,
+          name: data.name || data.display_name.split(',')[0],
+          address: data.display_name,
+        });
+      }
+    } catch (err) {
+      console.error('Reverse geocode error:', err);
+    }
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocatingGPS(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const loc = {
+          lat, lng,
+          name: 'My Location',
+          address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        };
+        update(activeTab, loc);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data?.display_name) {
+            update(activeTab, {
+              lat, lng,
+              name: data.name || data.display_name.split(',')[0],
+              address: data.display_name,
+            });
+          }
+        } catch (err) {
+          console.error('Reverse geocode error:', err);
+        } finally {
+          setLocatingGPS(false);
+        }
+      },
+      () => setLocatingGPS(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
   const canProceed = () => {
@@ -169,43 +261,118 @@ export default function CreateTask() {
           <div>
             <div className="mb-6">
               <h2 className="text-[24px] font-extrabold text-white mb-2">Where?</h2>
-              <p className="text-charcoal-light text-[15px] mb-8 font-medium">Pin the pickup and destination locations.</p>
+              <p className="text-charcoal-light text-[15px] mb-6 font-medium">Search for an address or click anywhere on the map to set a location pin.</p>
             </div>
 
-            {/* Pickup */}
-            <div className="stagger-item mb-6" style={{ animationDelay: '0.1s' }}>
-              <label className="text-[14px] font-bold text-charcoal-light flex items-center gap-2 mb-3 uppercase tracking-wider">
-                <span className="w-6 h-6 bg-accent/20 text-accent rounded-full flex items-center justify-center text-[12px] border border-accent/30">📍</span>
-                Pickup Location
-              </label>
-              <div className="flex items-center gap-3 px-5 py-4 bg-dark-surface border border-border rounded-xl text-[15px] font-semibold text-white">
-                <MapPin size={18} className="text-accent" />
-                {form.pickup.name || 'Maarif, Casablanca'}
+            {/* Tab selection */}
+            {form.category !== 'custom' && (
+              <div className="grid grid-cols-2 gap-3 mb-5 bg-dark-surface p-1.5 rounded-2xl border border-border">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('pickup')}
+                  className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
+                    ${activeTab === 'pickup'
+                      ? 'bg-accent text-dark shadow-[0_0_15px_rgba(0,255,135,0.3)]'
+                      : 'text-charcoal-light hover:text-white'
+                    }`}
+                >
+                  📍 Pickup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('destination')}
+                  className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
+                    ${activeTab === 'destination'
+                      ? 'bg-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                      : 'text-charcoal-light hover:text-white'
+                    }`}
+                >
+                  🏁 Destination
+                </button>
               </div>
+            )}
+
+            {/* Address Search Field */}
+            <form onSubmit={handleSearch} className="relative mb-5 stagger-item">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search address in Morocco for ${activeTab}...`}
+                    className="input-field w-full pl-12 pr-5 py-4 rounded-xl text-[15px] font-semibold"
+                  />
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" />
+                </div>
+                <button
+                  type="submit"
+                  disabled={searching}
+                  className="px-5 rounded-xl btn-accent font-bold text-[14px] flex items-center justify-center transition-all"
+                >
+                  {searching ? <Loader2 size={18} className="animate-spin" /> : 'Search'}
+                </button>
+              </div>
+
+              {/* Suggestions */}
+              {searchResults.length > 0 && (
+                <div className="absolute left-0 right-0 mt-2 z-50 glass-panel border border-border-light rounded-2xl overflow-hidden shadow-2xl divide-y divide-border">
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.place_id}
+                      type="button"
+                      onClick={() => handleSelectResult(result)}
+                      className="w-full px-5 py-3.5 hover:bg-surface text-left text-[13px] font-semibold text-white leading-snug transition-colors flex flex-col gap-0.5"
+                    >
+                      <span className="text-[14px] text-accent font-bold">{result.display_name.split(',')[0]}</span>
+                      <span className="text-charcoal-light text-[11px] truncate">{result.display_name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </form>
+
+            {/* Use My Location GPS Button */}
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              disabled={locatingGPS}
+              className="w-full mt-3 mb-2 flex items-center justify-center gap-2.5 py-3.5 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/15 text-accent font-bold text-[14px] transition-all active:scale-[0.98] disabled:opacity-50"
+            >
+              {locatingGPS ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Crosshair size={18} />
+              )}
+              {locatingGPS ? 'Detecting location...' : `Use my GPS for ${activeTab}`}
+            </button>
+
+            {/* Active Pin Visualizer */}
+            <div className="glass-panel p-4.5 rounded-2xl border border-border-light mb-5 flex flex-col gap-1.5 stagger-item">
+              <span className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${activeTab === 'pickup' ? 'bg-accent' : 'bg-danger'}`} />
+                Configuring {activeTab} pin
+              </span>
+              <h4 className="text-[15px] font-bold text-white leading-snug">
+                {activeTab === 'pickup' ? form.pickup.name : form.destination.name}
+              </h4>
+              <p className="text-[12px] text-charcoal-light leading-relaxed truncate">
+                {activeTab === 'pickup' ? form.pickup.address || 'Select on map' : form.destination.address || 'Select on map'}
+              </p>
             </div>
 
-            {/* Map */}
+            {/* Interactive Leaflet Map */}
             <div className="stagger-item overflow-hidden rounded-2xl border border-border shadow-lg mb-6" style={{ animationDelay: '0.2s' }}>
               <MapView
                 pickup={form.pickup}
                 destination={form.category !== 'custom' ? form.destination : null}
-                height="240px"
+                height="280px"
+                onMapClick={handleMapClick}
+                showUserLocation
+                showRouteInfo
+                darkMode
               />
             </div>
-
-            {/* Destination */}
-            {form.category !== 'custom' && (
-              <div className="stagger-item" style={{ animationDelay: '0.3s' }}>
-                <label className="text-[14px] font-bold text-charcoal-light flex items-center gap-2 mb-3 uppercase tracking-wider mt-4">
-                  <span className="w-6 h-6 bg-danger/20 text-danger rounded-full flex items-center justify-center text-[12px] border border-danger/30">🏁</span>
-                  Destination
-                </label>
-                <div className="flex items-center gap-3 px-5 py-4 bg-dark-surface border border-border rounded-xl text-[15px] font-semibold text-white">
-                  <MapPin size={18} className="text-danger" />
-                  {form.destination.name || 'Anfa, Casablanca'}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

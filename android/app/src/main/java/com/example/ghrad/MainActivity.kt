@@ -1,5 +1,6 @@
 package com.example.ghrad
 
+import android.Manifest
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -7,15 +8,14 @@ import android.webkit.WebChromeClient
 import android.webkit.ConsoleMessage
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceError
+import android.webkit.GeolocationPermissions
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.BackHandler
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.ui.platform.LocalDensity
@@ -31,8 +31,20 @@ class MainActivity : ComponentActivity() {
   private var currentTopPadding = 0f
   private var varBottomPadding = 0f
 
+  // Request location permissions at launch so the WebView GPS works instantly
+  private val requestLocationPermissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions()
+  ) { _ -> }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    requestLocationPermissionLauncher.launch(
+      arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+      )
+    )
 
     enableEdgeToEdge()
     setContent {
@@ -81,6 +93,7 @@ class MainActivity : ComponentActivity() {
               settings.databaseEnabled = true
               settings.allowFileAccessFromFileURLs = true
               settings.allowUniversalAccessFromFileURLs = true
+              settings.setGeolocationEnabled(true) // Enable WebView geolocation settings
               
               webViewClient = object : WebViewClient() {
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -104,6 +117,14 @@ class MainActivity : ComponentActivity() {
                   android.util.Log.d("WebViewConsole", "${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
                   return true
                 }
+
+                // Grant geolocation request inside WebView
+                override fun onGeolocationPermissionsShowPrompt(
+                  origin: String?,
+                  callback: GeolocationPermissions.Callback?
+                ) {
+                  callback?.invoke(origin, true, false)
+                }
               }
               
               loadUrl("file:///android_asset/index.html")
@@ -119,4 +140,3 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
-
