@@ -1,0 +1,383 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ============================================
+   CHRAD DESIGN SYSTEM — PREMIUM DARK MODE
+   ============================================ */
+
+@theme {
+  /* Brand Colors - Dark Mode */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  
+  --color-dark: #0A0A0A; /* App Background */
+  --color-dark-surface: #141414; /* Card Background */
+  --color-surface: #1E1E1E; /* Elevated Surface */
+  --color-surface-alt: #27272A; /* Highest Surface */
+  
+  --color-charcoal: #F4F4F5; /* Primary Text */
+  --color-charcoal-light: #A1A1AA; /* Secondary Text */
+  
+  --color-accent: #00FF87; /* Neon Green */
+  --color-accent-hover: #00E077;
+  --color-accent-light: #60FFAF;
+  --color-accent-glow: rgba(0, 255, 135, 0.25);
+  
+  --color-muted: #52525B;
+  --color-muted-light: #3F3F46;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-light: rgba(255, 255, 255, 0.15);
+  
+  --color-danger: #FF3366;
+  --color-danger-light: rgba(255, 51, 102, 0.15);
+  --color-warning: #FFB020;
+  --color-warning-light: rgba(255, 176, 32, 0.15);
+  --color-info: #00E5FF;
+  --color-info-light: rgba(0, 229, 255, 0.15);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Animations */
+  --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-down: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fadeIn 0.4s ease-out forwards;
+  --animate-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-pulse-glow: pulseGlow 2.5s ease-in-out infinite;
+  --animate-bounce-in: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-scale-in: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px 0 rgba(0, 255, 135, 0.3); }
+  50% { box-shadow: 0 0 25px 8px rgba(0, 255, 135, 0.1); }
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  50% { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pricePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); color: var(--color-accent); }
+  100% { transform: scale(1); }
+}
+
+@keyframes markerBounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-12px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* ============================================
+   BASE RESETS
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  color-scheme: dark; /* Force Dark Mode Scrollbars */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+body {
+  background-color: var(--color-dark);
+  color: var(--color-charcoal);
+  line-height: 1.6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted-light);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted-light) transparent;
+}
+
+/* ============================================
+   UTILITY CLASSES - GLASSMORPHISM
+   ============================================ */
+
+.glass {
+  background: rgba(20, 20, 20, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel {
+  background: linear-gradient(145deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.glass-accent {
+  background: rgba(0, 255, 135, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 135, 0.2);
+}
+
+/* Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-white), var(--color-charcoal-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-accent {
+  background: linear-gradient(135deg, var(--color-accent), #00E5FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Interactions */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  background: rgba(30, 30, 30, 0.85);
+}
+
+.card-hover:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.btn-primary {
+  background: var(--color-charcoal);
+  color: var(--color-dark);
+  transition: all 0.2s ease;
+  font-weight: 600;
+  border: none;
+}
+.btn-primary:hover {
+  background: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-accent {
+  background: var(--color-accent);
+  color: var(--color-dark);
+  transition: all 0.2s ease;
+  font-weight: 600;
+  border: none;
+}
+.btn-accent:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--color-accent-glow);
+}
+.btn-accent:active {
+  transform: translateY(0);
+}
+
+/* Staggered entry for list items */
+.stagger-item {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+.stagger-item:nth-child(7) { animation-delay: 0.35s; }
+.stagger-item:nth-child(8) { animation-delay: 0.4s; }
+
+/* Input fields */
+.input-field {
+  background: var(--color-dark-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-white);
+  transition: all 0.3s ease;
+}
+.input-field:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 255, 135, 0.15);
+  outline: none;
+}
+.input-field::placeholder {
+  color: var(--color-muted);
+}
+
+/* ============================================
+   LEAFLET MAP OVERRIDES (DARK MODE)
+   ============================================ */
+
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+  border-radius: 20px;
+  background: var(--color-dark) !important;
+}
+
+/* Dark mode map tiles via CSS filter */
+.leaflet-layer,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-control-attribution {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.leaflet-control-zoom {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: var(--color-dark-surface) !important;
+}
+
+.leaflet-control-zoom a {
+  background: transparent !important;
+  color: var(--color-charcoal) !important;
+  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 18px !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--color-surface) !important;
+}
+.leaflet-control-attribution {
+  background: rgba(0,0,0,0.5) !important;
+  color: #ccc !important;
+}
+
+.custom-marker {
+  animation: markerBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: none !important; /* ensure marker doesn't get inverted */
+}
+
+/* ============================================
+   RESPONSIVE HELPERS & SAFE AREAS
+   ============================================ */
+
+:root {
+  --safe-area-top: env(safe-area-inset-top, 24px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.pt-safe { padding-top: calc(24px + var(--safe-area-top)); }
+.pb-safe { padding-bottom: calc(130px + var(--safe-area-bottom)); }
+.pb-safe-only { padding-bottom: calc(30px + var(--safe-area-bottom)); }
+.pb-action-bar { padding-bottom: calc(150px + var(--safe-area-bottom)); }
+.mt-safe { margin-top: var(--safe-area-top); }
+.mb-safe { margin-bottom: var(--safe-area-bottom); }
+
+/* Mobile-first container */
+.app-container {
+  width: 100%;
+  min-height: 100dvh;
+  position: relative;
+  background-color: var(--color-dark);
+  overflow-x: hidden;
+}
+
+@media (min-width: 481px) {
+  .app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+  }
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Price pulse animation */
+.price-pulse {
+  animation: pricePulse 0.4s ease;
+}
+
