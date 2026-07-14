@@ -7,12 +7,14 @@ import PhotoUpload from '../components/PhotoUpload';
 import MapView from '../components/MapView';
 import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/mockTasks';
 import { getCurrentUserId } from '../data/mockUsers';
+import { useAuth } from '../context/AuthContext';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];
 
 export default function CreateTask() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const initialCategory = location.state?.category || null;
 
   const [step, setStep] = useState(initialCategory ? 1 : 0);
@@ -128,7 +130,11 @@ export default function CreateTask() {
   };
 
   const handleSubmit = async () => {
-    const clientId = getCurrentUserId();
+    const clientId = user?.id;
+    if (!clientId) {
+      alert('You must be logged in to post a task.');
+      return;
+    }
     const result = await createTask({
       clientId,
       category: form.category,

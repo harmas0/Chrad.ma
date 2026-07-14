@@ -5,8 +5,11 @@ import { fetchTaskById, updateTaskStatus } from '../data/mockTasks';
 import { fetchProfileById } from '../data/mockUsers';
 import MapView from '../components/MapView';
 import StatusTimeline from '../components/StatusTimeline';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabaseClient';
 
 export default function ActiveTask() {
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [task, setTask] = useState(null);
@@ -37,32 +40,52 @@ export default function ActiveTask() {
   }, [id]);
 
   useEffect(() => {
-    if (!task) return;
+    if (!task || !user) return;
+    const isClient = user.id === task.clientId;
+    const isRunner = user.id === task.acceptedRunnerId;
 
-    // Simulate runner moving along a path
-    const pickup = task.pickup;
-    const dest = task.destination || task.pickup;
+    const channel = supabase.channel(`task-${id}-tracking`);
 
-    // Start runner near pickup
-    const startLat = pickup.lat + (Math.random() - 0.5) * 0.01;
-    const startLng = pickup.lng + (Math.random() - 0.5) * 0.01;
-    setRunnerPos({ lat: startLat, lng: startLng });
+    if (isRunner) {
+      // Runner: Start watching GPS and broadcast it
+      let watchId;
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(
+              (pos) => {
+                const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                setRunnerPos(newPos); // Update locally
+                channel.send({
+                  type: 'broadcast',
+                  event: 'location',
+                  payload: newPos,
+                });
+              },
+              (err) => console.error('GPS error:', err),
+              { enableHighAccuracy: true, maximumAge: 0 }
+            );
+          }
+        }
+      });
 
-    // Move runner toward destination over time
-    let step = 0;
-    const totalSteps = 20;
-    const interval = setInterval(() => {
-      step++;
-      const progress = step / totalSteps;
-      const lat = startLat + (dest.lat - startLat) * progress;
-      const lng = startLng + (dest.lng - startLng) * progress;
-      setRunnerPos({ lat, lng });
+      return () => {
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        supabase.removeChannel(channel);
+      };
+    } else if (isClient) {
+      // Client: Listen for location broadcasts
+      channel
+        .on('broadcast', { event: 'location' }, (payload) => {
+          setRunnerPos(payload.payload);
+        })
+        .subscribe();
 
-      if (step >= totalSteps) clearInterval(interval);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [task]);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [task, user, id]);
 
   if (loading) {
     return (

@@ -21,10 +21,12 @@ export async function fetchRunners() {
   return data;
 }
 
-// Default simulated user id — stored in localStorage so the user can switch
+// Default simulated user id — no longer used for auth, but kept for fallback
 const DEFAULT_USER_ID = 'client-1';
 
 export function getCurrentUserId() {
+  // This should only be used as a fallback if absolutely necessary.
+  // Real auth state is managed by AuthContext.
   if (typeof window !== 'undefined') {
     return localStorage.getItem('ghrad_current_user') || DEFAULT_USER_ID;
   }
@@ -36,6 +38,10 @@ export function setCurrentUserId(id) {
 }
 
 export async function fetchCurrentUser() {
-  const id = getCurrentUserId();
-  return fetchProfileById(id);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    return fetchProfileById(session.user.id);
+  }
+  return null;
 }
+
