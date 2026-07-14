@@ -13,9 +13,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [successMessage, setSuccessMessage] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
     setLoading(true);
 
     try {
@@ -27,24 +30,23 @@ export default function Login() {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              name: name,
+              is_runner: isRunner,
+            }
+          }
         });
         if (error) throw error;
         
-        // Create profile for new user
-        if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
-            id: data.user.id,
-            name,
-            is_runner: isRunner,
-            phone: '',
-            bio: '',
-          });
-          if (profileError) throw profileError;
+        if (data.user && !data.session) {
+          // Email confirmation is required
+          setSuccessMessage('Registration successful! Please check your email to verify your account before logging in.');
+          setIsLogin(true);
+        } else {
+          // Auto-logged in
+          navigate('/');
         }
-        
-        // After signup, typically they are logged in automatically or require email verification
-        // For MVP, we assume auto-login if email verification is off.
-        navigate('/');
       }
     } catch (err) {
       setError(err.message);
@@ -72,6 +74,12 @@ export default function Login() {
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl mb-4 text-sm font-medium">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="bg-accent/10 border border-accent/30 text-accent p-3 rounded-xl mb-4 text-sm font-medium">
+              {successMessage}
             </div>
           )}
 

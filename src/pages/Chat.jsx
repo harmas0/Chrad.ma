@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Image, MoreVertical, Phone, MapPin } from 'lucide-react';
 import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg } from '../data/mockMessages';
 import { getCurrentUserId } from '../data/mockUsers';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 
 function formatTime(dateString) {
@@ -23,7 +24,8 @@ function formatDate(dateString) {
 export default function Chat() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const currentUserId = getCurrentUserId();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
 
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);

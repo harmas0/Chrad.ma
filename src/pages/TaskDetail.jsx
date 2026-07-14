@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send } from 'lucide-reac
 import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/mockTasks';
 import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/mockBids';
 import { getCurrentUserId } from '../data/mockUsers';
+import { useAuth } from '../context/AuthContext';
 import BidCard from '../components/BidCard';
 import MapView from '../components/MapView';
 import Modal from '../components/Modal';
@@ -32,6 +33,7 @@ const statusConfig = {
 export default function TaskDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [task, setTask] = useState(null);
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ export default function TaskDetail() {
 
   const category = TASK_CATEGORIES.find(c => c.id === task.category);
   const status = statusConfig[task.status];
-  const currentUserId = getCurrentUserId();
+  const currentUserId = user?.id;
   const isOwner = task.clientId === currentUserId;
   const runnerBid = bids.find(b => b.runnerId === currentUserId);
 
@@ -114,7 +116,7 @@ export default function TaskDetail() {
   };
 
   const handlePlaceBid = async () => {
-    const currentUserId = getCurrentUserId();
+    const currentUserId = user?.id;
     setPlacingBid(true);
     const newBid = await createBid({
       taskId: task.id,

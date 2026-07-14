@@ -6,7 +6,6 @@ import PriceInput from '../components/PriceInput';
 import PhotoUpload from '../components/PhotoUpload';
 import MapView from '../components/MapView';
 import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/mockTasks';
-import { getCurrentUserId } from '../data/mockUsers';
 import { useAuth } from '../context/AuthContext';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];

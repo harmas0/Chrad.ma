@@ -4,10 +4,11 @@ import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, 
 import { fetchCurrentUser, fetchProfiles, getCurrentUserId, setCurrentUserId } from '../data/mockUsers';
 import { fetchTasks } from '../data/mockTasks';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabaseClient';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { signOut, isAdmin, profile: authProfile } = useAuth();
+  const { signOut, isAdmin, profile: authProfile, refreshProfile } = useAuth();
   const [isRunner, setIsRunner] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [allProfiles, setAllProfiles] = useState([]);
@@ -18,20 +19,20 @@ export default function Profile() {
 
   async function loadData() {
     setLoading(true);
-    const [profile, profiles, tasks] = await Promise.all([
-      fetchCurrentUser(),
+    const activeProfile = authProfile || await fetchCurrentUser();
+    const [profiles, tasks] = await Promise.all([
       fetchProfiles(),
       fetchTasks()
     ]);
-    if (profile) {
-      setUserProfile(profile);
-      setIsRunner(profile.is_runner);
-      const filtered = tasks.filter(t => t.clientId === profile.id || t.acceptedRunnerId === profile.id);
+    if (activeProfile) {
+      setUserProfile(activeProfile);
+      setIsRunner(activeProfile.is_runner);
+      const filtered = tasks.filter(t => t.clientId === activeProfile.id || t.acceptedRunnerId === activeProfile.id);
       setMyTasks(filtered);
       setEditForm({
-        name: profile.name || '',
-        phone: profile.phone || '',
-        bio: profile.bio || '',
+        name: activeProfile.name || '',
+        phone: activeProfile.phone || '',
+        bio: activeProfile.bio || '',
       });
     }
     setAllProfiles(profiles);
@@ -40,7 +41,7 @@ export default function Profile() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [authProfile]);
 
   const handleProfileChange = (e) => {
     const id = e.target.value;
@@ -48,15 +49,38 @@ export default function Profile() {
     loadData();
   };
 
-  const handleSaveProfile = () => {
-    // In a real app this would update Supabase
-    setUserProfile(prev => ({
-      ...prev,
-      name: editForm.name,
-      phone: editForm.phone,
-      bio: editForm.bio,
-    }));
-    setShowEditModal(false);
+  const handleSaveProfile = async () => {
+    if (!userProfile) return;
+    try {
+      const initials = editForm.name ? editForm.name.slice(0, 2).toUpperCase() : '??';
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: editForm.name,
+          phone: editForm.phone,
+          bio: editForm.bio,
+          initials,
+        })
+        .eq('id', userProfile.id);
+
+      if (error) throw error;
+
+      setUserProfile(prev => ({
+        ...prev,
+        name: editForm.name,
+        phone: editForm.phone,
+        bio: editForm.bio,
+        initials,
+      }));
+
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+
+      setShowEditModal(false);
+    } catch (err) {
+      alert('Failed to update profile: ' + err.message);
+    }
   };
 
   if (loading || !userProfile) {

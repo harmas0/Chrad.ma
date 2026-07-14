@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile(session.user.id);
+        loadProfile(session.user.id, session.user);
       } else {
         setLoading(false);
       }
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile(session.user.id);
+        loadProfile(session.user.id, session.user);
       } else {
         setProfile(null);
         setLoading(false);
@@ -34,9 +34,45 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadProfile = async (userId) => {
+  const loadProfile = async (userId, currentUser) => {
     try {
-      const p = await fetchProfileById(userId);
+      let p = await fetchProfileById(userId);
+      
+      if (!p && (currentUser || user)) {
+        const activeUser = currentUser || user;
+        console.warn('Profile not found for authenticated user, creating fallback...');
+        const name = activeUser.user_metadata?.name || activeUser.email?.split('@')[0] || 'User';
+        const isRunner = activeUser.user_metadata?.is_runner || false;
+        const initials = name.slice(0, 2).toUpperCase();
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            name,
+            is_runner: isRunner,
+            initials,
+            phone: '',
+            bio: '',
+            rating: 5.0,
+            completed_tasks: 0,
+            earnings: 0,
+            spent: 0,
+            verified: false,
+            role: 'user',
+            kyc_status: 'none',
+            is_banned: false
+          })
+          .select()
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error creating fallback profile:', error);
+        } else if (data) {
+          p = data;
+        }
+      }
+      
       setProfile(p);
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -56,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     isBanned,
     signOut: () => supabase.auth.signOut(),
-    refreshProfile: () => user && loadProfile(user.id),
+    refreshProfile: () => user && loadProfile(user.id, user),
   };
 
   return (
