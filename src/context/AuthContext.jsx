@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { fetchProfileById } from '../data/mockUsers';
+import { fetchProfileById } from '../data/usersApi';
 
 const AuthContext = createContext({});
 

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard } from 'lucide-react';
-import { fetchCurrentUser, fetchProfiles, getCurrentUserId, setCurrentUserId } from '../data/mockUsers';
-import { fetchTasks } from '../data/mockTasks';
+import { fetchCurrentUser } from '../data/usersApi';
+import { fetchTasks } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 
@@ -11,7 +11,6 @@ export default function Profile() {
   const { signOut, isAdmin, profile: authProfile, refreshProfile } = useAuth();
   const [isRunner, setIsRunner] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-  const [allProfiles, setAllProfiles] = useState([]);
   const [myTasks, setMyTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -20,10 +19,7 @@ export default function Profile() {
   async function loadData() {
     setLoading(true);
     const activeProfile = authProfile || await fetchCurrentUser();
-    const [profiles, tasks] = await Promise.all([
-      fetchProfiles(),
-      fetchTasks()
-    ]);
+    const tasks = await fetchTasks();
     if (activeProfile) {
       setUserProfile(activeProfile);
       setIsRunner(activeProfile.is_runner);
@@ -35,19 +31,12 @@ export default function Profile() {
         bio: activeProfile.bio || '',
       });
     }
-    setAllProfiles(profiles);
     setLoading(false);
   }
 
   useEffect(() => {
     loadData();
   }, [authProfile]);
-
-  const handleProfileChange = (e) => {
-    const id = e.target.value;
-    setCurrentUserId(id);
-    loadData();
-  };
 
   const handleSaveProfile = async () => {
     if (!userProfile) return;
@@ -121,17 +110,6 @@ export default function Profile() {
         <div className="flex items-center justify-between mb-6 pt-4">
           <h1 className="text-[24px] font-extrabold text-white tracking-tight">Profile</h1>
           <div className="flex items-center gap-3">
-            <select
-              value={userProfile.id}
-              onChange={handleProfileChange}
-              className="text-[12px] bg-dark-surface border border-border rounded-xl px-3 py-2 focus:outline-none focus:border-accent text-white font-bold max-w-[160px] truncate"
-            >
-              {allProfiles.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.is_runner ? 'Runner' : 'Client'})
-                </option>
-              ))}
-            </select>
             <button className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-white transition-colors">
               <Settings size={20} />
             </button>

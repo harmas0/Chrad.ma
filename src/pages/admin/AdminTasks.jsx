@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, Filter } from 'lucide-react';
-import { fetchTasks } from '../../data/mockTasks';
-import { fetchProfileById } from '../../data/mockUsers';
+import { fetchTasks } from '../../data/tasksApi';
+import { fetchProfileById } from '../../data/usersApi';
 
 const STATUS_OPTIONS = [
   { key: '', label: 'All' },

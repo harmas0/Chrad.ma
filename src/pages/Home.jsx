@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Star, TrendingUp } from 'lucide-react';
-import { fetchOpenTasks, TASK_CATEGORIES } from '../data/mockTasks';
-import { countBidsForTask } from '../data/mockBids';
+import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
+import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
 
 const howItWorks = [

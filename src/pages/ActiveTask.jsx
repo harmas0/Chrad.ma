@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Camera, Check, Phone, Clock, AlertTriangle } from 'lucide-react';
-import { fetchTaskById, updateTaskStatus } from '../data/mockTasks';
-import { fetchProfileById } from '../data/mockUsers';
+import { fetchTaskById, updateTaskStatus } from '../data/tasksApi';
+import { fetchProfileById } from '../data/usersApi';
 import MapView from '../components/MapView';
 import StatusTimeline from '../components/StatusTimeline';
 import { useAuth } from '../context/AuthContext';
@@ -204,7 +204,7 @@ export default function ActiveTask() {
             <div className="flex gap-2">
               <button
                 onClick={async () => {
-                  const { fetchOrCreateConversation } = await import('../data/mockMessages');
+                  const { fetchOrCreateConversation } = await import('../data/messagesApi');
                   const conv = await fetchOrCreateConversation(task.id, runner.id);
                   if (conv) {
                     navigate(`/chat/${conv.id}`);

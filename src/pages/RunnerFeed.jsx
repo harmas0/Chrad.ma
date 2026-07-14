@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map, List, Filter, Search } from 'lucide-react';
-import { fetchOpenTasks, TASK_CATEGORIES } from '../data/mockTasks';
+import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import TaskCard from '../components/TaskCard';
 import MapView from '../components/MapView';
 

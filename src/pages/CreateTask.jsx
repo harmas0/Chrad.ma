@@ -5,7 +5,7 @@ import CategoryCard from '../components/CategoryCard';
 import PriceInput from '../components/PriceInput';
 import PhotoUpload from '../components/PhotoUpload';
 import MapView from '../components/MapView';
-import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/mockTasks';
+import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];

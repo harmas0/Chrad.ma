@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
-import { fetchConversations } from '../data/mockMessages';
+import { fetchConversations } from '../data/messagesApi';
 
 function timeAgo(dateString) {
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);

@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Image, MoreVertical, Phone, MapPin } from 'lucide-react';
-import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg } from '../data/mockMessages';
-import { getCurrentUserId } from '../data/mockUsers';
+import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg } from '../data/messagesApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 

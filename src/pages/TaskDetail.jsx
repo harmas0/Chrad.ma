@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send } from 'lucide-react';
-import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/mockTasks';
-import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/mockBids';
-import { getCurrentUserId } from '../data/mockUsers';
+import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/tasksApi';
+import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/bidsApi';
 import { useAuth } from '../context/AuthContext';
 import BidCard from '../components/BidCard';
 import MapView from '../components/MapView';

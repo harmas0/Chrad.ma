@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, XCircle, Eye, Clock, Search, MessageCircle, X, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchDisputes, resolveDispute, dismissDispute, updateDisputeStatus } from '../../data/adminApi';
-import { fetchProfileById } from '../../data/mockUsers';
+import { fetchProfileById } from '../../data/usersApi';
 
 const REASON_LABELS = {
   'didnt_deliver': "Didn't deliver",
