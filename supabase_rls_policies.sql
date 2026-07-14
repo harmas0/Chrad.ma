@@ -12,11 +12,11 @@ ON profiles FOR SELECT USING (true);
 
 -- Users can only insert their own profile
 CREATE POLICY "Users can insert their own profile." 
-ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+ON profiles FOR INSERT WITH CHECK (auth.uid()::text = id);
 
 -- Users can only update their own profile
 CREATE POLICY "Users can update own profile." 
-ON profiles FOR UPDATE USING (auth.uid() = id);
+ON profiles FOR UPDATE USING (auth.uid()::text = id);
 
 -- =====================================
 -- TASKS POLICIES
@@ -26,22 +26,22 @@ ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Tasks visibility" 
 ON tasks FOR SELECT 
 USING (
-  auth.uid() = client_id OR 
-  auth.uid() = accepted_runner_id OR 
+  auth.uid()::text = client_id OR 
+  auth.uid()::text = accepted_runner_id OR 
   status IN ('open', 'bidding')
 );
 
 -- Clients can insert tasks (auth.uid() must match client_id)
 CREATE POLICY "Clients can create tasks." 
 ON tasks FOR INSERT 
-WITH CHECK (auth.uid() = client_id);
+WITH CHECK (auth.uid()::text = client_id);
 
 -- Tasks can be updated by the client OR the assigned runner
 CREATE POLICY "Clients and assigned runners can update tasks." 
 ON tasks FOR UPDATE 
 USING (
-  auth.uid() = client_id OR 
-  auth.uid() = accepted_runner_id OR
+  auth.uid()::text = client_id OR 
+  auth.uid()::text = accepted_runner_id OR
   status IN ('open', 'bidding') -- Allow runners to accept open tasks (setting accepted_runner_id)
 );
 
@@ -54,11 +54,11 @@ USING (
 CREATE POLICY "Users can view their conversation messages." 
 ON messages FOR SELECT 
 USING (
-  auth.uid() = sender_id OR 
+  auth.uid()::text = sender_id OR 
   EXISTS (
     SELECT 1 FROM tasks 
     WHERE tasks.id = messages.conversation_id 
-    AND (tasks.client_id = auth.uid() OR tasks.accepted_runner_id = auth.uid())
+    AND (tasks.client_id = auth.uid()::text OR tasks.accepted_runner_id = auth.uid()::text)
   )
 );
 
@@ -66,10 +66,10 @@ USING (
 CREATE POLICY "Users can send messages." 
 ON messages FOR INSERT 
 WITH CHECK (
-  auth.uid() = sender_id AND
+  auth.uid()::text = sender_id AND
   EXISTS (
     SELECT 1 FROM tasks 
     WHERE tasks.id = messages.conversation_id 
-    AND (tasks.client_id = auth.uid() OR tasks.accepted_runner_id = auth.uid())
+    AND (tasks.client_id = auth.uid()::text OR tasks.accepted_runner_id = auth.uid()::text)
   )
 );

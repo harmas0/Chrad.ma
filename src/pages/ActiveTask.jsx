@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, Camera, Check, Phone } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Camera, Check, Phone, Clock, AlertTriangle } from 'lucide-react';
 import { fetchTaskById, updateTaskStatus } from '../data/mockTasks';
 import { fetchProfileById } from '../data/mockUsers';
 import MapView from '../components/MapView';
 import StatusTimeline from '../components/StatusTimeline';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
+import ReportDispute from '../components/ReportDispute';
 
 export default function ActiveTask() {
   const { user } = useAuth();
@@ -18,6 +19,8 @@ export default function ActiveTask() {
 
   // Simulate runner movement
   const [runnerPos, setRunnerPos] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [showReport, setShowReport] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('accepted');
 
   useEffect(() => {
@@ -47,37 +50,60 @@ export default function ActiveTask() {
     const channel = supabase.channel(`task-${id}-tracking`);
 
     if (isRunner) {
-      // Runner: Start watching GPS and broadcast it
+      // Runner: Watch GPS, broadcast location, and persist to DB
       let watchId;
+      const handlePosition = async (pos) => {
+        const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setRunnerPos(newPos);
+        // Broadcast to client
+        channel.send({
+          type: 'broadcast',
+          event: 'location',
+          payload: newPos,
+        });
+        // Persist to lightweight table
+        try {
+          await supabase.from('runner_locations').upsert({
+            task_id: id,
+            runner_id: user.id,
+            lat: newPos.lat,
+            lng: newPos.lng,
+          }, { onConflict: 'task_id' });
+        } catch (e) {
+          console.error('Failed to persist runner location:', e);
+        }
+      };
+
+      const handleError = (err) => {
+        console.error('GPS error:', err);
+      };
+
       channel.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           if (navigator.geolocation) {
-            watchId = navigator.geolocation.watchPosition(
-              (pos) => {
-                const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                setRunnerPos(newPos); // Update locally
-                channel.send({
-                  type: 'broadcast',
-                  event: 'location',
-                  payload: newPos,
-                });
-              },
-              (err) => console.error('GPS error:', err),
-              { enableHighAccuracy: true, maximumAge: 0 }
-            );
+            watchId = navigator.geolocation.watchPosition(handlePosition, handleError, {
+              enableHighAccuracy: true,
+              maximumAge: 0,
+            });
           }
+        }
+        if (status === 'ERROR') {
+          console.error('Realtime channel error');
         }
       });
 
+      // Cleanup on unmount or when task ends
       return () => {
         if (watchId) navigator.geolocation.clearWatch(watchId);
+        // Send a final empty payload to indicate stop (optional)
+        channel.send({ type: 'broadcast', event: 'location', payload: null });
         supabase.removeChannel(channel);
       };
     } else if (isClient) {
       // Client: Listen for location broadcasts
       channel
         .on('broadcast', { event: 'location' }, (payload) => {
-          setRunnerPos(payload.payload);
+          if (payload.payload) setRunnerPos(payload.payload);
         })
         .subscribe();
 
@@ -130,6 +156,13 @@ export default function ActiveTask() {
             </span>
           </div>
         </div>
+        {/* ETA overlay */}
+        {routeInfo && (
+          <div className="mt-2 flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full shadow-md">
+            <Clock size={14} />
+            <span>{formatDuration(routeInfo.duration)} ETA</span>
+          </div>
+        )}
       </div>
 
       {/* Full Map */}
@@ -233,6 +266,17 @@ export default function ActiveTask() {
           )}
         </div>
 
+        {/* Report Problem Button */}
+        {runner && !['confirmed', 'cancelled'].includes(currentStatus) && (
+          <button
+            onClick={() => setShowReport(true)}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[13px] font-bold uppercase tracking-wider mb-6"
+          >
+            <AlertTriangle size={16} />
+            Report a Problem
+          </button>
+        )}
+
         {/* Confirm Delivery */}
         {canConfirm && (
           <div className="animate-fade-in-up mb-6">
@@ -277,6 +321,19 @@ export default function ActiveTask() {
           </div>
         )}
       </div>
+
+      {/* Report Dispute Modal */}
+      {showReport && task && runner && (
+        <ReportDispute
+          taskId={task.id}
+          reportedUserId={runner.id}
+          onClose={() => setShowReport(false)}
+          onSubmitted={() => {
+            setShowReport(false);
+            alert('Your report has been submitted. Our team will review it shortly.');
+          }}
+        />
+      )}
     </div>
   );
 }

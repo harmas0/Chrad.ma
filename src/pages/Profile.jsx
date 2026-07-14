@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { fetchCurrentUser, fetchProfiles, getCurrentUserId, setCurrentUserId } from '../data/mockUsers';
 import { fetchTasks } from '../data/mockTasks';
+import { useAuth } from '../context/AuthContext';
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { signOut, isAdmin, profile: authProfile } = useAuth();
   const [isRunner, setIsRunner] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [allProfiles, setAllProfiles] = useState([]);
@@ -83,8 +85,9 @@ export default function Profile() {
   const menuItems = [
     { icon: CreditCard, label: 'Payment Methods', desc: 'Manage cards & wallets', accent: false },
     { icon: Bell, label: 'Notifications', desc: 'Push & in-app alerts', accent: false },
-    { icon: Shield, label: 'Verification', desc: userProfile.verified ? 'Verified ✓' : 'Verify your identity', accent: userProfile.verified },
+    { icon: Shield, label: 'Verification', desc: userProfile.verified ? 'Verified ✓' : 'Verify your identity', accent: userProfile.verified, onClick: () => navigate('/kyc-upload') },
     { icon: HelpCircle, label: 'Help & Support', desc: 'FAQ, contact us', accent: false },
+    ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Panel', desc: 'Manage platform', accent: true, onClick: () => navigate('/admin') }] : []),
   ];
 
   return (
@@ -282,6 +285,7 @@ export default function Profile() {
           {menuItems.map((item, i) => (
             <button
               key={i}
+              onClick={item.onClick}
               className="w-full flex items-center gap-4 px-6 py-5 hover:bg-dark-surface transition-colors text-left"
             >
               <div className={`w-10 h-10 rounded-xl ${item.accent ? 'bg-accent/10 border-accent/20' : 'bg-dark border-border'} border flex items-center justify-center ${item.accent ? 'text-accent' : 'text-charcoal-light'} shadow-inner`}>
@@ -299,7 +303,10 @@ export default function Profile() {
 
       {/* Logout */}
       <section className="px-5 mb-10 pb-10">
-        <button className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[15px] font-bold uppercase tracking-wider">
+        <button
+          onClick={signOut}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[15px] font-bold uppercase tracking-wider"
+        >
           <LogOut size={18} strokeWidth={2.5} />
           Log Out
         </button>

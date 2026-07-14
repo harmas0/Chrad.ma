@@ -45,11 +45,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Computed helpers
+  const isAdmin = profile?.role === 'admin';
+  const isBanned = profile?.is_banned === true;
+
   const value = {
     user,
     profile,
     loading,
+    isAdmin,
+    isBanned,
     signOut: () => supabase.auth.signOut(),
+    refreshProfile: () => user && loadProfile(user.id),
   };
 
   return (
