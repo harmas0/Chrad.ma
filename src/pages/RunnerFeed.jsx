@@ -5,9 +5,11 @@ import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import TaskCard from '../components/TaskCard';
 import MapView from '../components/MapView';
 import { supabase } from '../utils/supabaseClient';
+import { useI18n } from '../utils/i18n';
 
 export default function RunnerFeed() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,8 +53,8 @@ export default function RunnerFeed() {
       <div className="sticky top-0 z-40 glass-panel border-b border-border-light px-5 pt-safe pb-4 rounded-b-3xl">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-[24px] font-extrabold text-white tracking-tight">Explore Tasks</h1>
-            <p className="text-[13px] text-accent font-semibold">{filteredTasks.length} tasks near you</p>
+            <h1 className="text-[24px] font-extrabold text-white tracking-tight">{t('explore_title')}</h1>
+            <p className="text-[13px] text-accent font-semibold">{filteredTasks.length} {t('tasks_near_you')}</p>
           </div>
           
           {/* View toggle */}
@@ -81,7 +83,7 @@ export default function RunnerFeed() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tasks..."
+            placeholder={t('search_tasks_placeholder')}
             className="input-field w-full pl-11 pr-5 py-3 rounded-xl font-medium"
             id="search-tasks"
           />
@@ -98,7 +100,7 @@ export default function RunnerFeed() {
               }`}
             id="filter-all"
           >
-            All
+            {t('all_filter')}
           </button>
           {TASK_CATEGORIES.map((cat) => (
             <button
@@ -112,7 +114,7 @@ export default function RunnerFeed() {
               id={`filter-${cat.id}`}
             >
               <span className="text-[15px]">{cat.icon}</span>
-              {cat.label}
+              {t(cat.id)}
             </button>
           ))}
         </div>
@@ -135,8 +137,8 @@ export default function RunnerFeed() {
             {filteredTasks.length === 0 ? (
               <div className="text-center py-16">
                 <span className="text-5xl block mb-4 opacity-50">🔍</span>
-                <p className="text-[18px] font-bold text-white mb-2">No tasks found</p>
-                <p className="text-[14px] text-charcoal-light font-medium">Try a different filter or check back later.</p>
+                <p className="text-[18px] font-bold text-white mb-2">{t('no_tasks_found')}</p>
+                <p className="text-[14px] text-charcoal-light font-medium">{t('try_different_filter')}</p>
               </div>
             ) : (
               filteredTasks.map((task, i) => (

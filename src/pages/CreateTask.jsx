@@ -8,6 +8,7 @@ import MapView from '../components/MapView';
 import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
+import { useI18n } from '../utils/i18n';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];
 
@@ -15,6 +16,7 @@ export default function CreateTask() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t, formatPrice } = useI18n();
   const initialCategory = location.state?.category || null;
 
   const [step, setStep] = useState(initialCategory ? 1 : 0);
@@ -217,7 +219,7 @@ export default function CreateTask() {
             <ArrowLeft size={20} />
           </button>
 
-          <h1 className="text-[18px] font-bold text-white tracking-tight">Post a Task</h1>
+          <h1 className="text-[18px] font-bold text-white tracking-tight">{t('post_task')}</h1>
 
           <span className="text-[14px] text-accent font-bold bg-accent/10 px-3 py-1 rounded-full">
             {step + 1}/{STEPS.length}
@@ -238,14 +240,17 @@ export default function CreateTask() {
         {/* STEP 0: Category */}
         {step === 0 && (
           <div>
-            <h2 className="text-[24px] font-extrabold text-white mb-2">What type of task?</h2>
-            <p className="text-charcoal-light text-[15px] mb-8 font-medium">Select the category that best fits your need.</p>
+            <h2 className="text-[24px] font-extrabold text-white mb-2">{t('task_type')}</h2>
+            <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('category_desc')}</p>
 
             <div className="grid grid-cols-2 gap-5">
               {TASK_CATEGORIES.map((cat, i) => (
                 <div key={cat.id} className="stagger-item" style={{ animationDelay: `${i * 0.05}s` }}>
                   <CategoryCard
-                    category={cat}
+                    category={{
+                      ...cat,
+                      label: t(cat.id),
+                    }}
                     isSelected={form.category === cat.id}
                     onClick={(id) => update('category', id)}
                   />
@@ -259,28 +264,28 @@ export default function CreateTask() {
         {step === 1 && (
           <div>
             <div className="mb-6">
-              <h2 className="text-[24px] font-extrabold text-white mb-2">Task Details</h2>
-              <p className="text-charcoal-light text-[15px] mb-8 font-medium">Be specific so runners know exactly what to do.</p>
+              <h2 className="text-[24px] font-extrabold text-white mb-2">{t('task_details')}</h2>
+              <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('details_desc')}</p>
             </div>
 
             <div className="stagger-item mb-6" style={{ animationDelay: '0.1s' }}>
-              <label className="text-[14px] font-bold text-charcoal-light block mb-2 uppercase tracking-wider">Title</label>
+              <label className="text-[14px] font-bold text-charcoal-light block mb-2 uppercase tracking-wider">{t('title_label')}</label>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => update('title', e.target.value)}
-                placeholder="e.g., Send contracts to notary office"
+                placeholder={t('title_placeholder')}
                 className="input-field w-full px-5 py-4 rounded-xl text-[16px] font-medium"
                 id="task-title"
               />
             </div>
 
             <div className="stagger-item mb-6" style={{ animationDelay: '0.2s' }}>
-              <label className="text-[14px] font-bold text-charcoal-light block mb-2 uppercase tracking-wider">Description</label>
+              <label className="text-[14px] font-bold text-charcoal-light block mb-2 uppercase tracking-wider">{t('description_label')}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
-                placeholder="Describe the task in detail..."
+                placeholder={t('description_placeholder')}
                 rows={5}
                 className="input-field w-full px-5 py-4 rounded-xl text-[16px] font-medium resize-none"
                 id="task-description"
@@ -300,8 +305,8 @@ export default function CreateTask() {
         {step === 2 && (
           <div>
             <div className="mb-6">
-              <h2 className="text-[24px] font-extrabold text-white mb-2">Where?</h2>
-              <p className="text-charcoal-light text-[15px] mb-6 font-medium">Search for an address or click anywhere on the map to set a location pin.</p>
+              <h2 className="text-[24px] font-extrabold text-white mb-2">{t('where_label')}</h2>
+              <p className="text-charcoal-light text-[15px] mb-6 font-medium">{t('location_desc')}</p>
             </div>
 
             {/* Tab selection */}
@@ -316,7 +321,7 @@ export default function CreateTask() {
                       : 'text-charcoal-light hover:text-white'
                     }`}
                 >
-                  📍 Pickup
+                  📍 {t('pickup_label')}
                 </button>
                 <button
                   type="button"
@@ -327,91 +332,85 @@ export default function CreateTask() {
                       : 'text-charcoal-light hover:text-white'
                     }`}
                 >
-                  🏁 Destination
+                  🏁 {t('destination_label')}
                 </button>
               </div>
             )}
 
             {/* Address Search Field */}
-            <form onSubmit={handleSearch} className="relative mb-5 stagger-item">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={`Search address in Morocco for ${activeTab}...`}
-                    className="input-field w-full pl-12 pr-5 py-4 rounded-xl text-[15px] font-semibold"
-                  />
-                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" />
-                </div>
-                <button
-                  type="submit"
-                  disabled={searching}
-                  className="px-5 rounded-xl btn-accent font-bold text-[14px] flex items-center justify-center transition-all"
-                >
-                  {searching ? <Loader2 size={18} className="animate-spin" /> : 'Search'}
-                </button>
+            <form onSubmit={handleSearch} className="flex gap-2 mb-4 relative z-10">
+              <div className="relative flex-1">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-light" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('search_address')}
+                  className="input-field w-full pl-11 pr-4 py-3 rounded-xl font-medium"
+                />
               </div>
-
-              {/* Suggestions */}
-              {searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 mt-2 z-50 glass-panel border border-border-light rounded-2xl overflow-hidden shadow-2xl divide-y divide-border">
-                  {searchResults.map((result) => (
-                    <button
-                      key={result.place_id}
-                      type="button"
-                      onClick={() => handleSelectResult(result)}
-                      className="w-full px-5 py-3.5 hover:bg-surface text-left text-[13px] font-semibold text-white leading-snug transition-colors flex flex-col gap-0.5"
-                    >
-                      <span className="text-[14px] text-accent font-bold">{result.display_name.split(',')[0]}</span>
-                      <span className="text-charcoal-light text-[11px] truncate">{result.display_name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <button
+                type="submit"
+                disabled={searching}
+                className="btn-accent px-5 py-3 rounded-xl font-bold flex items-center justify-center"
+              >
+                {searching ? <Loader2 size={18} className="animate-spin" /> : t('explore')}
+              </button>
             </form>
 
-            {/* Use My Location GPS Button */}
-            <button
-              type="button"
-              onClick={handleUseMyLocation}
-              disabled={locatingGPS}
-              className="w-full mt-3 mb-2 flex items-center justify-center gap-2.5 py-3.5 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/15 text-accent font-bold text-[14px] transition-all active:scale-[0.98] disabled:opacity-50"
-            >
-              {locatingGPS ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <Crosshair size={18} />
-              )}
-              {locatingGPS ? 'Detecting location...' : `Use my GPS for ${activeTab}`}
-            </button>
+            {/* Search results list */}
+            {searchResults.length > 0 && (
+              <div className="absolute left-5 right-5 mt-1 bg-dark-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+                {searchResults.map((res, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleSelectResult(res)}
+                    className="w-full px-4 py-3 text-left text-[14px] text-white hover:bg-dark border-b border-border/50 last:border-0 transition-colors flex items-start gap-2.5 font-medium"
+                  >
+                    <MapPin size={16} className="text-accent shrink-0 mt-0.5" />
+                    <span>{res.display_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {/* Active Pin Visualizer */}
-            <div className="glass-panel p-4.5 rounded-2xl border border-border-light mb-5 flex flex-col gap-1.5 stagger-item">
-              <span className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${activeTab === 'pickup' ? 'bg-accent' : 'bg-danger'}`} />
-                Configuring {activeTab} pin
-              </span>
-              <h4 className="text-[15px] font-bold text-white leading-snug">
-                {activeTab === 'pickup' ? form.pickup.name : form.destination.name}
-              </h4>
-              <p className="text-[12px] text-charcoal-light leading-relaxed truncate">
-                {activeTab === 'pickup' ? form.pickup.address || 'Select on map' : form.destination.address || 'Select on map'}
-              </p>
+            <div className="flex gap-3 mb-5">
+              <button
+                type="button"
+                onClick={handleUseMyLocation}
+                disabled={locatingGPS}
+                className="flex-1 py-3 px-4 rounded-xl bg-dark-surface border border-border text-[13px] font-bold text-white hover:border-border-light transition-all flex items-center justify-center gap-2"
+              >
+                <Crosshair size={16} className={locatingGPS ? 'animate-spin text-accent' : 'text-charcoal-light'} />
+                {locatingGPS ? 'Locating...' : t('use_my_location')}
+              </button>
             </div>
 
-            {/* Interactive Leaflet Map */}
-            <div className="stagger-item overflow-hidden rounded-2xl border border-border shadow-lg mb-6" style={{ animationDelay: '0.2s' }}>
+            {/* Interactive map panel */}
+            <div className="w-full aspect-[16/10] rounded-2xl overflow-hidden border border-border shadow-lg mb-6 relative">
               <MapView
-                pickup={form.pickup}
-                destination={form.category !== 'custom' ? form.destination : null}
-                height="280px"
-                onMapClick={handleMapClick}
-                showUserLocation
-                showRouteInfo
+                pickupCoords={form.pickup}
+                destCoords={form.category !== 'custom' ? form.destination : null}
+                height="100%"
                 darkMode
+                onClick={handleMapClick}
               />
+              <div className="absolute bottom-3 left-3 bg-dark/95 border border-border px-3 py-1.5 rounded-lg backdrop-blur-sm z-30 text-[11px] font-bold text-white">
+                {activeTab === 'pickup' ? '📍 Drag to Set Pickup' : '🏁 Drag to Set Destination'}
+              </div>
+            </div>
+
+            <div className="bg-dark-surface rounded-xl p-4 border border-border flex items-start gap-3">
+              <div className="text-xl">🗺️</div>
+              <div className="min-w-0">
+                <p className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                  {activeTab === 'pickup' ? 'Selected Pickup' : 'Selected Destination'}
+                </p>
+                <p className="text-[14px] text-white font-medium truncate">
+                  {activeTab === 'pickup' ? form.pickup.address : form.destination?.address || 'Not set'}
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -420,32 +419,41 @@ export default function CreateTask() {
         {step === 3 && (
           <div>
             <div className="mb-6">
-              <h2 className="text-[24px] font-extrabold text-white mb-2">Name Your Price</h2>
-              <p className="text-charcoal-light text-[15px] mb-8 font-medium">Set a fair starting price. Runners will bid or counter-offer.</p>
+              <h2 className="text-[24px] font-extrabold text-white mb-2">{t('pricing_label')}</h2>
+              <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('pricing_desc')}</p>
             </div>
 
-            <div className="stagger-item mb-6" style={{ animationDelay: '0.1s' }}>
+            <div className="stagger-item mb-8" style={{ animationDelay: '0.1s' }}>
+              <label className="text-[13px] font-bold text-charcoal-light block mb-2.5 uppercase tracking-wider">
+                {t('how_much_pay')}
+              </label>
               <PriceInput
                 value={form.price}
                 onChange={(v) => update('price', v)}
-                label="Runner Fee"
+                min={20}
+                max={500}
               />
             </div>
 
             {form.category === 'shopping' && (
-              <div className="stagger-item mt-8 pt-8 border-t border-border mb-6" style={{ animationDelay: '0.2s' }}>
-                <PriceInput
-                  value={form.itemBudget}
-                  onChange={(v) => update('itemBudget', v)}
-                  label="Item Budget"
-                  min={0}
-                  max={1000}
-                  step={10}
-                />
-                <p className="text-[13px] text-accent mt-4 font-medium flex items-start gap-2 bg-accent/10 p-3 rounded-xl border border-accent/20">
-                  <span className="text-[16px]">💡</span> 
-                  This amount covers the cost of items the runner will purchase for you.
-                </p>
+              <div className="stagger-item animate-scale-in" style={{ animationDelay: '0.2s' }}>
+                <div className="bg-dark-surface rounded-2xl p-5 border border-border">
+                  <div className="mb-4">
+                    <label className="text-[14px] font-bold text-white block mb-1">
+                      {t('shopping_budget')}
+                    </label>
+                    <p className="text-[12px] text-charcoal-light">
+                      {t('shopping_budget_desc')}
+                    </p>
+                  </div>
+                  <PriceInput
+                    value={form.itemBudget}
+                    onChange={(v) => update('itemBudget', v)}
+                    min={0}
+                    max={1500}
+                    step={10}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -455,31 +463,28 @@ export default function CreateTask() {
         {step === 4 && (
           <div>
             <div className="mb-6">
-              <h2 className="text-[24px] font-extrabold text-white mb-2">Review & Post</h2>
-              <p className="text-charcoal-light text-[15px] mb-6 font-medium">Everything look good? Let's get it done.</p>
+              <h2 className="text-[24px] font-extrabold text-white mb-2">{t('review_post')}</h2>
+              <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('review_desc')}</p>
             </div>
 
-            <div className="glass-panel rounded-3xl p-7 border border-border-light stagger-item relative overflow-hidden mb-6" style={{ animationDelay: '0.1s' }}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
-              
-              {/* Category */}
-              <div className="flex items-center gap-3 relative z-10 mb-7">
-                <span className="text-3xl drop-shadow-md">{selectedCategory?.icon}</span>
-                <span className="text-[18px] font-bold text-white tracking-wide">{selectedCategory?.label}</span>
-              </div>
+            <div className="glass-panel border border-border rounded-2xl p-6 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/5 rounded-full blur-2xl" />
 
-              <hr className="border-border mb-7" />
-
-              {/* Title */}
-              <div className="relative z-10 mb-7">
-                <span className="text-[12px] text-charcoal-light font-bold uppercase tracking-widest block mb-1">Task</span>
-                <span className="text-[16px] font-semibold text-white">{form.title || 'Untitled task'}</span>
+              {/* Title & Category */}
+              <div className="flex items-start justify-between gap-4 pb-4 border-b border-border/60 relative z-10 mb-5">
+                <div>
+                  <h3 className="text-[18px] font-black text-white leading-tight mb-1">{form.title}</h3>
+                  <span className="text-[11px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
+                    {t(form.category)}
+                  </span>
+                </div>
+                <span className="text-3xl">{selectedCategory?.icon}</span>
               </div>
 
               {/* Description */}
               {form.description && (
                 <div className="relative z-10 mb-7">
-                  <span className="text-[12px] text-charcoal-light font-bold uppercase tracking-widest block mb-1">Details</span>
+                  <span className="text-[12px] text-charcoal-light font-bold uppercase tracking-widest block mb-1">{t('description_label')}</span>
                   <span className="text-[14px] text-charcoal-light leading-relaxed font-medium">{form.description}</span>
                 </div>
               )}
@@ -501,13 +506,13 @@ export default function CreateTask() {
               {/* Price */}
               <div className="pt-4 border-t border-border relative z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">Your Offer</span>
-                  <span className="text-[28px] font-black text-accent tracking-tighter">{form.price} <span className="text-[14px] text-accent/80 font-bold uppercase tracking-widest">MAD</span></span>
+                  <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">{t('your_offer')}</span>
+                  <span className="text-[28px] font-black text-accent tracking-tighter">{formatPrice(form.price)}</span>
                 </div>
                 {form.category === 'shopping' && form.itemBudget > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">Item Budget</span>
-                    <span className="text-[20px] font-bold text-warning">{form.itemBudget} <span className="text-[14px] text-warning/80 font-bold uppercase tracking-widest">MAD</span></span>
+                    <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">{t('item_budget')}</span>
+                    <span className="text-[20px] font-bold text-warning">{formatPrice(form.itemBudget)}</span>
                   </div>
                 )}
               </div>
@@ -533,7 +538,7 @@ export default function CreateTask() {
                 }`}
               id="create-next"
             >
-              Continue
+              {t('continue')}
               <ArrowRight size={20} strokeWidth={2.5} />
             </button>
           ) : (
@@ -548,7 +553,7 @@ export default function CreateTask() {
               ) : (
                 <>
                   <Check size={20} strokeWidth={3} />
-                  Post Task — {form.price} MAD
+                  {t('post_task_btn')} — {formatPrice(form.price)}
                 </>
               )}
             </button>
