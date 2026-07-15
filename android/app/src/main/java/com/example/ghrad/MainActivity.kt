@@ -127,7 +127,7 @@ class MainActivity : ComponentActivity() {
                 }
               }
               
-              loadUrl("file:///android_asset/index.html")
+              loadUrl("file:///android_asset/public/index.html")
               webView = this
             }
           },
