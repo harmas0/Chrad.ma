@@ -4,26 +4,17 @@ import { ArrowLeft, Send, Image, MoreVertical, Phone, MapPin } from 'lucide-reac
 import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg, markConversationAsRead } from '../data/messagesApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
+import { useI18n } from '../utils/i18n';
 
 function formatTime(dateString) {
   return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-function formatDate(dateString) {
-  const d = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export default function Chat() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const currentUserId = user?.id;
 
   const [conversation, setConversation] = useState(null);
@@ -34,6 +25,17 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  function formatDate(dateString) {
+    const d = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (d.toDateString() === today.toDateString()) return t('today');
+    if (d.toDateString() === yesterday.toDateString()) return t('yesterday');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -113,8 +115,6 @@ export default function Chat() {
     // Persist to Supabase
     await sendMsg(id, currentUserId, text);
     setSending(false);
-
-
   };
 
   if (loading) {
@@ -128,7 +128,7 @@ export default function Chat() {
   if (!conversation) {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center">
-        <p className="text-charcoal-light font-bold">Conversation not found</p>
+        <p className="text-charcoal-light font-bold">{t('conv_not_found')}</p>
       </div>
     );
   }
@@ -176,7 +176,7 @@ export default function Chat() {
               </a>
             ) : (
               <button
-                onClick={() => alert('User has not provided a phone number.')}
+                onClick={() => alert(t('no_phone_error'))}
                 className="w-9 h-9 rounded-full flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-accent transition-colors opacity-50 cursor-not-allowed"
                 aria-label="Call participant"
               >
@@ -193,7 +193,7 @@ export default function Chat() {
         <div className="mt-2 flex items-center gap-2 bg-dark/50 rounded-xl px-3 py-2 border border-border">
           <MapPin size={13} className="text-accent flex-shrink-0" />
           <span className="text-[11px] text-charcoal-light font-medium truncate">
-            {conversation.taskTitle} • Tap to view task
+            {conversation.taskTitle} • {t('tap_view_task')}
           </span>
         </div>
       </div>
@@ -287,7 +287,7 @@ export default function Chat() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Type a message..."
+              placeholder={t('type_message_placeholder')}
               className="input-field w-full px-5 py-3 rounded-full text-[15px] font-medium"
               id="chat-input"
             />
