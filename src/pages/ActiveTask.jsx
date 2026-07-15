@@ -129,7 +129,9 @@ export default function ActiveTask() {
     );
   }
 
-  const canConfirm = currentStatus === 'delivered' || task.status === 'delivered';
+  const isClient = user?.id === task.clientId;
+  const isRunner = user?.id === task.acceptedRunnerId;
+  const canConfirm = isClient && (currentStatus === 'delivered' || task.status === 'delivered');
 
   const handleStatusChange = async (newStatus) => {
     setCurrentStatus(newStatus);
@@ -239,32 +241,34 @@ export default function ActiveTask() {
         </div>
 
         {/* Status action buttons */}
-        <div className="flex gap-4 mb-6">
-          {currentStatus === 'accepted' && (
-            <button
-              onClick={() => handleStatusChange('picked_up')}
-              className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
-            >
-              📦 Simulate: Pick Up
-            </button>
-          )}
-          {currentStatus === 'picked_up' && (
-            <button
-              onClick={() => handleStatusChange('en_route')}
-              className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
-            >
-              🚗 Simulate: En Route
-            </button>
-          )}
-          {currentStatus === 'en_route' && (
-            <button
-              onClick={() => handleStatusChange('delivered')}
-              className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
-            >
-              ✅ Simulate: Deliver
-            </button>
-          )}
-        </div>
+        {isRunner && (
+          <div className="flex gap-4 mb-6">
+            {currentStatus === 'accepted' && (
+              <button
+                onClick={() => handleStatusChange('picked_up')}
+                className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
+              >
+                📦 Mark as Picked Up
+              </button>
+            )}
+            {currentStatus === 'picked_up' && (
+              <button
+                onClick={() => handleStatusChange('en_route')}
+                className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
+              >
+                🚗 Mark as En Route
+              </button>
+            )}
+            {currentStatus === 'en_route' && (
+              <button
+                onClick={() => handleStatusChange('delivered')}
+                className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
+              >
+                ✅ Mark as Delivered
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Report Problem Button */}
         {runner && !['confirmed', 'cancelled'].includes(currentStatus) && (

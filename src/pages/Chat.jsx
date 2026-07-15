@@ -109,9 +109,7 @@ export default function Chat() {
     await sendMsg(id, currentUserId, text);
     setSending(false);
 
-    // Simulate typing response after a short delay
-    setIsTyping(true);
-    setTimeout(() => setIsTyping(false), 2500);
+
   };
 
   if (loading) {
