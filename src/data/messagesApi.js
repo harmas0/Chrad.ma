@@ -9,6 +9,7 @@ function rowToConversation(row, profile) {
     participantId: row.participant_id,
     participantName: profile?.name || 'Unknown',
     participantInitials: profile?.initials || '??',
+    participantPhone: profile?.phone || '',
     lastMessage: row.last_message,
     lastMessageTime: row.last_message_time,
     unread: row.unread,

@@ -36,6 +36,21 @@ export default function ActiveTask() {
           if (!cancelled) setRunner(u);
         }
       }
+      
+      // Load last known location from db
+      try {
+        const { data: locData } = await supabase
+          .from('runner_locations')
+          .select('*')
+          .eq('task_id', id)
+          .maybeSingle();
+        if (!cancelled && locData) {
+          setRunnerPos({ lat: Number(locData.lat), lng: Number(locData.lng) });
+        }
+      } catch (e) {
+        console.error('Failed to load last known runner location:', e);
+      }
+
       if (!cancelled) setLoading(false);
     }
     load();
@@ -220,12 +235,23 @@ export default function ActiveTask() {
               >
                 <MessageCircle size={20} strokeWidth={2.5} />
               </button>
-              <button
-                className="w-12 h-12 rounded-xl bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-all active:scale-95"
-                aria-label="Call runner"
-              >
-                <Phone size={20} />
-              </button>
+              {runner.phone ? (
+                <a
+                  href={`tel:${runner.phone}`}
+                  className="w-12 h-12 rounded-xl bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-all active:scale-95"
+                  aria-label="Call runner"
+                >
+                  <Phone size={20} />
+                </a>
+              ) : (
+                <button
+                  onClick={() => alert('Runner has not provided a phone number.')}
+                  className="w-12 h-12 rounded-xl bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-all active:scale-95 opacity-50 cursor-not-allowed"
+                  aria-label="Call runner"
+                >
+                  <Phone size={20} />
+                </button>
+              )}
             </div>
           </div>
         )}

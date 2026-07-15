@@ -161,9 +161,23 @@ export default function Chat() {
           </div>
 
           <div className="flex items-center gap-1">
-            <button className="w-9 h-9 rounded-full flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-accent transition-colors">
-              <Phone size={18} />
-            </button>
+            {conversation.participantPhone ? (
+              <a
+                href={`tel:${conversation.participantPhone}`}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-accent transition-colors"
+                aria-label="Call participant"
+              >
+                <Phone size={18} />
+              </a>
+            ) : (
+              <button
+                onClick={() => alert('User has not provided a phone number.')}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-accent transition-colors opacity-50 cursor-not-allowed"
+                aria-label="Call participant"
+              >
+                <Phone size={18} />
+              </button>
+            )}
             <button className="w-9 h-9 rounded-full flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-white transition-colors">
               <MoreVertical size={18} />
             </button>

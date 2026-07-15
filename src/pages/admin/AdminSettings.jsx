@@ -3,23 +3,35 @@ import { Settings, Globe, Bell, Shield, Database, Palette, Save, Check, Info } f
 
 export default function AdminSettings() {
   const [saved, setSaved] = useState(false);
-  const [settings, setSettings] = useState({
-    platformName: 'Chrad',
-    supportEmail: 'support@chrad.ma',
-    maxBidPrice: 5000,
-    minBidPrice: 10,
-    platformFeePercent: 10,
-    requireKYCForRunners: true,
-    allowGuestBrowsing: false,
-    maxPhotosPerTask: 5,
-    maxDisputeEvidencePhotos: 3,
-    maintenanceMode: false,
-    enablePushNotifications: true,
-    enableEmailNotifications: true,
-    autoApproveKYC: false,
-    kycExpiryDays: 365,
-    defaultCurrency: 'MAD',
-    defaultCity: 'Casablanca',
+  const [settings, setSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('chrad_admin_settings');
+      if (savedSettings) {
+        try {
+          return JSON.parse(savedSettings);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return {
+      platformName: 'Chrad',
+      supportEmail: 'support@chrad.ma',
+      maxBidPrice: 5000,
+      minBidPrice: 10,
+      platformFeePercent: 10,
+      requireKYCForRunners: true,
+      allowGuestBrowsing: false,
+      maxPhotosPerTask: 5,
+      maxDisputeEvidencePhotos: 3,
+      maintenanceMode: false,
+      enablePushNotifications: true,
+      enableEmailNotifications: true,
+      autoApproveKYC: false,
+      kycExpiryDays: 365,
+      defaultCurrency: 'MAD',
+      defaultCity: 'Casablanca',
+    };
   });
 
   const updateSetting = (key, value) => {
@@ -28,7 +40,7 @@ export default function AdminSettings() {
   };
 
   const handleSave = () => {
-    // In production, this would persist to a settings table in Supabase
+    localStorage.setItem('chrad_admin_settings', JSON.stringify(settings));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

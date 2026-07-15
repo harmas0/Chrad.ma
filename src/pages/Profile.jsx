@@ -71,6 +71,23 @@ export default function Profile() {
       alert('Failed to update profile: ' + err.message);
     }
   };
+  const handleModeToggle = async (mode) => {
+    if (!userProfile) return;
+    setIsRunner(mode);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_runner: mode })
+        .eq('id', userProfile.id);
+
+      if (error) throw error;
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+    } catch (err) {
+      console.error('Failed to toggle runner mode:', err);
+    }
+  };
 
   if (loading || !userProfile) {
     return (
@@ -178,7 +195,7 @@ export default function Profile() {
           {/* Mode Toggle */}
           <div className="bg-dark p-1.5 rounded-2xl flex mb-5 border border-border relative z-10">
             <button
-              onClick={() => setIsRunner(false)}
+              onClick={() => handleModeToggle(false)}
               className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-all duration-300
                 ${!isRunner ? 'bg-accent text-dark shadow-[0_0_10px_rgba(0,255,135,0.4)]' : 'text-charcoal-light hover:text-white'}`}
               id="mode-client"
@@ -186,7 +203,7 @@ export default function Profile() {
               🙋 Client
             </button>
             <button
-              onClick={() => setIsRunner(true)}
+              onClick={() => handleModeToggle(true)}
               className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-all duration-300
                 ${isRunner ? 'bg-accent text-dark shadow-[0_0_10px_rgba(0,255,135,0.4)]' : 'text-charcoal-light hover:text-white'}`}
               id="mode-runner"

@@ -123,7 +123,10 @@ export default function AdminKYC() {
 
               {/* Document previews */}
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img">
+                <div
+                  onClick={(e) => { e.stopPropagation(); if (app.kyc_id_url) openDocViewer(app.kyc_id_url); }}
+                  className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img"
+                >
                   {app.kyc_id_url ? (
                     <>
                       <img src={app.kyc_id_url} alt="ID Document" className="w-full h-full object-cover" />
@@ -136,7 +139,10 @@ export default function AdminKYC() {
                   )}
                   <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">ID Card</div>
                 </div>
-                <div className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img">
+                <div
+                  onClick={(e) => { e.stopPropagation(); if (app.kyc_selfie_url) openDocViewer(app.kyc_selfie_url); }}
+                  className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img"
+                >
                   {app.kyc_selfie_url ? (
                     <>
                       <img src={app.kyc_selfie_url} alt="Selfie" className="w-full h-full object-cover" />
