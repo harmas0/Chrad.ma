@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard } from 'lucide-react';
+import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard, Globe } from 'lucide-react';
 import { fetchCurrentUser } from '../data/usersApi';
 import { fetchTasks } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
+import { useI18n, LANGUAGES, CURRENCIES } from '../utils/i18n';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', phone: '', bio: '' });
+  const { lang, setLang, currency, setCurrency, t, formatPrice } = useI18n();
+  const [showLangModal, setShowLangModal] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -89,10 +93,28 @@ export default function Profile() {
     }
   };
 
-  if (loading || !userProfile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(0,255,135,0.5)]" />
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-6 text-center">
+        <span className="text-5xl mb-4">⚠️</span>
+        <h2 className="text-[20px] font-black text-white mb-2">Profile Load Error</h2>
+        <p className="text-charcoal-light text-[14px] mb-6 max-w-xs">We couldn't retrieve your profile data. Please try again or log out and log back in.</p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button onClick={loadData} className="w-full btn-accent py-4 rounded-xl font-bold">
+            Retry Connection
+          </button>
+          <button onClick={signOut} className="w-full py-4 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors font-bold uppercase tracking-wider text-[13px]">
+            Log Out
+          </button>
+        </div>
       </div>
     );
   }
@@ -102,22 +124,22 @@ export default function Profile() {
 
   const stats = isRunner
     ? [
-        { label: 'Completed', value: userProfile.completed_tasks?.toString() || '0', icon: TrendingUp, color: 'text-accent' },
-        { label: 'Rating', value: userProfile.rating?.toString() || '0', icon: Star, color: 'text-warning' },
-        { label: 'Earned', value: userProfile.earnings?.toString() || '0', suffix: 'MAD', icon: Award, color: 'text-accent' },
+        { label: t('completed'), value: userProfile.completed_tasks?.toString() || '0', icon: TrendingUp, color: 'text-accent' },
+        { label: t('rating'), value: userProfile.rating?.toString() || '0', icon: Star, color: 'text-warning' },
+        { label: t('earned'), value: formatPrice(userProfile.earnings || 0), icon: Award, color: 'text-accent' },
       ]
     : [
-        { label: 'Posted', value: myTasks.filter(t => t.clientId === userProfile.id).length.toString(), icon: TrendingUp, color: 'text-accent' },
-        { label: 'Active', value: activeTasks.length.toString(), icon: Star, color: 'text-warning' },
-        { label: 'Spent', value: userProfile.spent?.toString() || '0', suffix: 'MAD', icon: Award, color: 'text-accent' },
+        { label: t('posted'), value: myTasks.filter(t => t.clientId === userProfile.id).length.toString(), icon: TrendingUp, color: 'text-accent' },
+        { label: t('active'), value: activeTasks.length.toString(), icon: Star, color: 'text-warning' },
+        { label: t('spent'), value: formatPrice(userProfile.spent || 0), icon: Award, color: 'text-accent' },
       ];
 
   const menuItems = [
-    { icon: CreditCard, label: 'Payment Methods', desc: 'Manage cards & wallets', accent: false },
-    { icon: Bell, label: 'Notifications', desc: 'Push & in-app alerts', accent: false },
-    { icon: Shield, label: 'Verification', desc: userProfile.verified ? 'Verified ✓' : 'Verify your identity', accent: userProfile.verified, onClick: () => navigate('/kyc-upload') },
-    { icon: HelpCircle, label: 'Help & Support', desc: 'FAQ, contact us', accent: false },
-    ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Panel', desc: 'Manage platform', accent: true, onClick: () => navigate('/admin') }] : []),
+    { icon: Globe, label: t('language'), desc: LANGUAGES.find(l => l.code === lang)?.label || 'English', accent: false, onClick: () => setShowLangModal(true) },
+    { icon: CreditCard, label: t('currency'), desc: currency, accent: false, onClick: () => setShowCurrencyModal(true) },
+    { icon: Shield, label: t('verification'), desc: userProfile.verified ? t('verified') : t('verify_identity'), accent: userProfile.verified, onClick: () => navigate('/kyc-upload') },
+    { icon: HelpCircle, label: t('support'), desc: 'FAQ, contact us', accent: false },
+    ...(isAdmin ? [{ icon: LayoutDashboard, label: t('admin_panel'), desc: 'Manage platform', accent: true, onClick: () => navigate('/admin') }] : []),
   ];
 
   return (
@@ -200,7 +222,7 @@ export default function Profile() {
                 ${!isRunner ? 'bg-accent text-dark shadow-[0_0_10px_rgba(0,255,135,0.4)]' : 'text-charcoal-light hover:text-white'}`}
               id="mode-client"
             >
-              🙋 Client
+              🙋 {t('client')}
             </button>
             <button
               onClick={() => handleModeToggle(true)}
@@ -208,7 +230,7 @@ export default function Profile() {
                 ${isRunner ? 'bg-accent text-dark shadow-[0_0_10px_rgba(0,255,135,0.4)]' : 'text-charcoal-light hover:text-white'}`}
               id="mode-runner"
             >
-              🏃 Runner
+              🏃 {t('runner')}
             </button>
           </div>
 
@@ -388,6 +410,86 @@ export default function Profile() {
               <Save size={18} strokeWidth={2.5} />
               Save Changes
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Language Selector Modal */}
+      {showLangModal && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setShowLangModal(false)}>
+          <div
+            className="w-full max-w-lg bg-dark-surface border-t border-x border-border-light rounded-t-3xl p-6 animate-slide-up shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[18px] font-extrabold text-white">{t('language')}</h3>
+              <button
+                onClick={() => setShowLangModal(false)}
+                className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 mb-6">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => {
+                    setLang(l.code);
+                    setShowLangModal(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border text-[15px] font-bold transition-all
+                    ${lang === l.code
+                      ? 'bg-accent/10 border-accent text-accent'
+                      : 'bg-dark border-border text-white hover:border-border-light'
+                    }`}
+                >
+                  <span>{l.label}</span>
+                  {lang === l.code && <CheckCircle size={16} className="text-accent" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Currency Selector Modal */}
+      {showCurrencyModal && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setShowCurrencyModal(false)}>
+          <div
+            className="w-full max-w-lg bg-dark-surface border-t border-x border-border-light rounded-t-3xl p-6 animate-slide-up shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[18px] font-extrabold text-white">{t('currency')}</h3>
+              <button
+                onClick={() => setShowCurrencyModal(false)}
+                className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 mb-6">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => {
+                    setCurrency(c.code);
+                    setShowCurrencyModal(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border text-[15px] font-bold transition-all
+                    ${currency === c.code
+                      ? 'bg-accent/10 border-accent text-accent'
+                      : 'bg-dark border-border text-white hover:border-border-light'
+                    }`}
+                >
+                  <span>{c.code} ({c.symbol})</span>
+                  {currency === c.code && <CheckCircle size={16} className="text-accent" />}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

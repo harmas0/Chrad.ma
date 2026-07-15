@@ -123,3 +123,12 @@ export async function fetchOrCreateConversation(taskId, participantId) {
   }
   return newConv;
 }
+
+// Mark conversation as read (clear unread count)
+export async function markConversationAsRead(conversationId) {
+  const { error } = await supabase
+    .from('conversations')
+    .update({ unread: 0 })
+    .eq('id', conversationId);
+  if (error) console.error('markConversationAsRead error:', error);
+}

@@ -1,5 +1,6 @@
 import { MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '../utils/i18n';
 
 const categoryIcons = {
   delivery: '📦',
@@ -31,6 +32,7 @@ function timeAgo(dateString) {
 
 export default function TaskCard({ task, className = '' }) {
   const navigate = useNavigate();
+  const { formatPrice } = useI18n();
   const status = statusStyles[task.status] || statusStyles.open;
 
   return (
@@ -67,9 +69,8 @@ export default function TaskCard({ task, className = '' }) {
         </div>
 
         {/* Price badge */}
-        <div className="flex-shrink-0 bg-accent/10 border border-accent/20 rounded-xl px-3 py-1.5 text-center min-w-[70px]">
-          <span className="text-[20px] font-extrabold text-accent block leading-tight tracking-tight">{task.offeredPrice}</span>
-          <span className="text-[10px] text-accent/80 font-bold uppercase tracking-widest">MAD</span>
+        <div className="flex-shrink-0 bg-accent/10 border border-accent/20 rounded-xl px-3.5 py-2.5 text-center min-w-[75px]">
+          <span className="text-[15px] font-black text-accent block leading-none tracking-tight whitespace-nowrap">{formatPrice(task.offeredPrice)}</span>
         </div>
       </div>
 
@@ -92,7 +93,7 @@ export default function TaskCard({ task, className = '' }) {
         </span>
         {task.itemBudget && (
           <span className="inline-flex items-center gap-1.5 text-warning font-semibold ml-auto">
-            <span className="text-[14px]">🛍️</span> {task.itemBudget} MAD
+            <span className="text-[14px]">🛍️</span> {formatPrice(task.itemBudget)}
           </span>
         )}
       </div>

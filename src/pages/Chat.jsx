@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Image, MoreVertical, Phone, MapPin } from 'lucide-react';
-import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg } from '../data/messagesApi';
+import { fetchConversationById, fetchMessagesForConversation, sendMessage as sendMsg, markConversationAsRead } from '../data/messagesApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 
@@ -46,6 +46,8 @@ export default function Chat() {
         setConversation(conv);
         setMessages(msgs);
         setLoading(false);
+        // Clear unread count on mount
+        markConversationAsRead(id);
       }
     }
     load();
@@ -64,6 +66,9 @@ export default function Chat() {
         filter: `conversation_id=eq.${id}`,
       }, (payload) => {
         const newMsg = payload.new;
+        if (newMsg.sender_id !== currentUserId) {
+          markConversationAsRead(id);
+        }
         // Don't duplicate if we already optimistically added it
         setMessages(prev => {
           const exists = prev.some(m => m.id === newMsg.id);
@@ -82,7 +87,7 @@ export default function Chat() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id]);
+  }, [id, currentUserId]);
 
   // Auto-scroll to bottom
   useEffect(() => {

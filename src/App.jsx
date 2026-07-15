@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import BannedScreen from './pages/BannedScreen';
 import KYCUpload from './pages/KYCUpload';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './utils/i18n';
 
 // Admin pages
 import AdminGuard from './components/AdminGuard';
@@ -76,9 +77,11 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <HashRouter>
-        <AppContent />
-      </HashRouter>
+      <LanguageProvider>
+        <HashRouter>
+          <AppContent />
+        </HashRouter>
+      </LanguageProvider>
     </AuthProvider>
   );
 }
