@@ -1,20 +1,59 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, PlusCircle, MessageCircle, User, Compass } from 'lucide-react';
-
-const navItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/explore', icon: Compass, label: 'Explore' },
-  { to: '/create', icon: PlusCircle, label: 'Post', isCreate: true },
-  { to: '/messages', icon: MessageCircle, label: 'Messages', badge: 3 },
-  { to: '/profile', icon: User, label: 'Profile' },
-];
+import { fetchConversations } from '../data/messagesApi';
+import { supabase } from '../utils/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 export default function BottomNav() {
   const location = useLocation();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  async function loadUnread() {
+    if (!user) return;
+    try {
+      const convs = await fetchConversations();
+      const totalUnread = convs.reduce((sum, c) => sum + (c.unread || 0), 0);
+      setUnreadCount(totalUnread);
+    } catch (e) {
+      console.error('Failed to load unread count:', e);
+    }
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    
+    loadUnread();
+
+    // Listen for updates on conversations table to update badge in real-time
+    const channel = supabase
+      .channel('bottom-nav-unread')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'conversations',
+      }, () => {
+        loadUnread();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
   
   // Hide bottom nav on detail, chat, task creation, and active tracking screens
   const hiddenRoutes = ['/chat', '/create', '/active', '/task'];
   if (hiddenRoutes.some(r => location.pathname.startsWith(r))) return null;
+
+  const navItems = [
+    { to: '/', icon: Home, label: 'Home' },
+    { to: '/explore', icon: Compass, label: 'Explore' },
+    { to: '/create', icon: PlusCircle, label: 'Post', isCreate: true },
+    { to: '/messages', icon: MessageCircle, label: 'Messages', badge: unreadCount },
+    { to: '/profile', icon: User, label: 'Profile' },
+  ];
 
   return (
     <nav 

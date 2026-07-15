@@ -22,20 +22,25 @@ export default function Profile() {
 
   async function loadData() {
     setLoading(true);
-    const activeProfile = authProfile || await fetchCurrentUser();
-    const tasks = await fetchTasks();
-    if (activeProfile) {
-      setUserProfile(activeProfile);
-      setIsRunner(activeProfile.is_runner);
-      const filtered = tasks.filter(t => t.clientId === activeProfile.id || t.acceptedRunnerId === activeProfile.id);
-      setMyTasks(filtered);
-      setEditForm({
-        name: activeProfile.name || '',
-        phone: activeProfile.phone || '',
-        bio: activeProfile.bio || '',
-      });
+    try {
+      const activeProfile = authProfile || await fetchCurrentUser();
+      const tasks = await fetchTasks();
+      if (activeProfile) {
+        setUserProfile(activeProfile);
+        setIsRunner(activeProfile.is_runner);
+        const filtered = tasks.filter(t => t.clientId === activeProfile.id || t.acceptedRunnerId === activeProfile.id);
+        setMyTasks(filtered);
+        setEditForm({
+          name: activeProfile.name || '',
+          phone: activeProfile.phone || '',
+          bio: activeProfile.bio || '',
+        });
+      }
+    } catch (err) {
+      console.error('[Profile] Error loading data:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
