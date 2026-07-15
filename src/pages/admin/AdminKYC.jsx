@@ -122,7 +122,7 @@ export default function AdminKYC() {
               </div>
 
               {/* Document previews */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-3 gap-3 mb-4">
                 <div
                   onClick={(e) => { e.stopPropagation(); if (app.kyc_id_url) openDocViewer(app.kyc_id_url); }}
                   className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img"
@@ -154,6 +154,22 @@ export default function AdminKYC() {
                     <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">No Selfie</div>
                   )}
                   <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">Selfie</div>
+                </div>
+                <div
+                  onClick={(e) => { e.stopPropagation(); if (app.kyc_vehicle_url) openDocViewer(app.kyc_vehicle_url); }}
+                  className="aspect-[4/3] rounded-xl bg-dark border border-border overflow-hidden relative group/img"
+                >
+                  {app.kyc_vehicle_url ? (
+                    <>
+                      <img src={app.kyc_vehicle_url} alt="Vehicle Docs" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                        <ZoomIn size={24} className="text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">No Vehicle</div>
+                  )}
+                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">Vehicle</div>
                 </div>
               </div>
 

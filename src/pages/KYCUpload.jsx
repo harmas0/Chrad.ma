@@ -4,7 +4,7 @@ import { ArrowLeft, Upload, Camera, Check, Shield, AlertCircle, Clock, X, Chevro
 import { useAuth } from '../context/AuthContext';
 import { uploadKYCDocument, submitKYC } from '../data/adminApi';
 
-const STEPS = ['ID Document', 'Selfie', 'Review'];
+const STEPS = ['ID Document', 'Selfie', 'Vehicle Docs', 'Review'];
 
 export default function KYCUpload() {
   const navigate = useNavigate();
@@ -14,11 +14,14 @@ export default function KYCUpload() {
   const [idPreview, setIdPreview] = useState(null);
   const [selfieFile, setSelfieFile] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
+  const [vehicleFile, setVehicleFile] = useState(null);
+  const [vehiclePreview, setVehiclePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const idInputRef = useRef(null);
   const selfieInputRef = useRef(null);
+  const vehicleInputRef = useRef(null);
 
   // If already submitted or approved
   if (profile?.kyc_status === 'pending' || profile?.kyc_status === 'approved') {
@@ -76,28 +79,32 @@ export default function KYCUpload() {
       if (type === 'id') {
         setIdFile(file);
         setIdPreview(reader.result);
-      } else {
+      } else if (type === 'selfie') {
         setSelfieFile(file);
         setSelfiePreview(reader.result);
+      } else if (type === 'vehicle') {
+        setVehicleFile(file);
+        setVehiclePreview(reader.result);
       }
     };
     reader.readAsDataURL(file);
   };
 
   const handleSubmit = async () => {
-    if (!idFile || !selfieFile) return;
+    if (!idFile || !selfieFile || !vehicleFile) return;
     setUploading(true);
     setError(null);
 
     try {
-      const [idUrl, selfieUrl] = await Promise.all([
+      const [idUrl, selfieUrl, vehicleUrl] = await Promise.all([
         uploadKYCDocument(user.id, idFile, 'id'),
         uploadKYCDocument(user.id, selfieFile, 'selfie'),
+        uploadKYCDocument(user.id, vehicleFile, 'vehicle'),
       ]);
 
-      if (!idUrl || !selfieUrl) throw new Error('Failed to upload documents');
+      if (!idUrl || !selfieUrl || !vehicleUrl) throw new Error('Failed to upload documents');
 
-      const success = await submitKYC(user.id, idUrl, selfieUrl);
+      const success = await submitKYC(user.id, idUrl, selfieUrl, vehicleUrl);
       if (!success) throw new Error('Failed to submit KYC');
 
       setSubmitted(true);
@@ -305,31 +312,97 @@ export default function KYCUpload() {
               disabled={!selfieFile}
               className="flex-1 btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Review <ChevronRight size={18} strokeWidth={3} />
+              Continue <ChevronRight size={18} strokeWidth={3} />
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 2: Review & Submit */}
+      {/* Step 2: Vehicle Docs */}
       {step === 2 && (
+        <div className="animate-fade-in-up">
+          <h2 className="text-[22px] font-black text-white mb-2">Vehicle Documents</h2>
+          <p className="text-[14px] text-charcoal-light font-medium mb-6">
+            Upload a clear photo of your motorcycle / vehicle registration, permit, or insurance.
+          </p>
+
+          <input
+            ref={vehicleInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleFileChange(e, 'vehicle')}
+            className="hidden"
+          />
+
+          {vehiclePreview ? (
+            <div className="relative mb-6">
+              <img src={vehiclePreview} alt="Vehicle Docs Preview" className="w-full aspect-[16/10] object-cover rounded-2xl border border-border-light shadow-lg" />
+              <button
+                onClick={() => { setVehicleFile(null); setVehiclePreview(null); }}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-dark/80 backdrop-blur-sm border border-border flex items-center justify-center text-white hover:text-danger transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => vehicleInputRef.current?.click()}
+              className="w-full aspect-[16/10] rounded-2xl border-2 border-dashed border-border hover:border-accent/50 bg-dark-surface flex flex-col items-center justify-center gap-4 transition-all group mb-6"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                <Camera size={28} />
+              </div>
+              <div className="text-center">
+                <p className="text-[14px] font-bold text-white mb-1">Tap to capture or upload</p>
+                <p className="text-[12px] text-charcoal-light">Registration, Insurance or Permit</p>
+              </div>
+            </button>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStep(1)}
+              className="flex-1 py-4 rounded-2xl border border-border text-charcoal-light font-bold text-[15px] hover:text-white hover:border-border-light transition-colors"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => setStep(3)}
+              disabled={!vehicleFile}
+              className="flex-1 btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              Continue <ChevronRight size={18} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Review & Submit */}
+      {step === 3 && (
         <div className="animate-fade-in-up">
           <h2 className="text-[22px] font-black text-white mb-2">Review & Submit</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
-            Make sure both photos are clear and readable before submitting.
+            Make sure all uploaded document photos are clear and legible before submitting.
           </p>
 
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-3 mb-8">
             <div>
-              <p className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-2">ID Document</p>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">ID Document</p>
               <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
                 <img src={idPreview} alt="ID" className="w-full h-full object-cover" />
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Selfie</p>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Selfie</p>
               <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
                 <img src={selfiePreview} alt="Selfie" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Vehicle Docs</p>
+              <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
+                <img src={vehiclePreview} alt="Vehicle Docs" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
@@ -342,7 +415,7 @@ export default function KYCUpload() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => setStep(1)}
+              onClick={() => setStep(2)}
               className="flex-1 py-4 rounded-2xl border border-border text-charcoal-light font-bold text-[15px] hover:text-white hover:border-border-light transition-colors"
             >
               Back

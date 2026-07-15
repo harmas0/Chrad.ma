@@ -19,6 +19,7 @@ export default function Profile() {
   const { lang, setLang, currency, setCurrency, t, formatPrice } = useI18n();
   const [showLangModal, setShowLangModal] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [showRunnerStepsModal, setShowRunnerStepsModal] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -82,6 +83,10 @@ export default function Profile() {
   };
   const handleModeToggle = async (mode) => {
     if (!userProfile) return;
+    if (mode === true && !userProfile.verified) {
+      setShowRunnerStepsModal(true);
+      return;
+    }
     setIsRunner(mode);
     try {
       const { error } = await supabase
@@ -494,6 +499,94 @@ export default function Profile() {
                   {currency === c.code && <CheckCircle size={16} className="text-accent" />}
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Become a Runner / Verification Steps Modal */}
+      {showRunnerStepsModal && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setShowRunnerStepsModal(false)}>
+          <div
+            className="w-full max-w-lg bg-dark-surface border-t border-x border-border-light rounded-t-3xl p-6 animate-slide-up shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[20px] font-black text-white">Become a Runner</h3>
+              <button
+                onClick={() => setShowRunnerStepsModal(false)}
+                className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-[14px] text-charcoal-light mb-5 font-medium leading-relaxed">
+                To start accepting tasks, earning money, and bidding on runs, you must verify your profile by completing these simple steps:
+              </p>
+
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[12px] font-bold shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">Identity Verification</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">Upload your CIN, Passport, or Driver's license.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[12px] font-bold shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">Profile Selfie</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">Take a photo holding your identity card next to your face.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[12px] font-bold shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">Vehicle Documents</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">Provide registration papers for your motorcycle or vehicle.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {userProfile.kyc_status === 'pending' ? (
+              <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 mb-6 text-center">
+                <p className="text-[13px] font-bold text-warning">Your verification is currently pending review.</p>
+                <p className="text-[11px] text-charcoal-light mt-1">We will notify you within 24 hours.</p>
+              </div>
+            ) : userProfile.kyc_status === 'rejected' ? (
+              <div className="bg-danger/10 border border-danger/30 rounded-xl p-4 mb-6">
+                <p className="text-[13px] font-bold text-danger">Verification rejected</p>
+                <p className="text-[12px] text-charcoal-light mt-1">{userProfile.kyc_rejection_reason || 'Please submit updated documents.'}</p>
+              </div>
+            ) : null}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRunnerStepsModal(false)}
+                className="flex-1 py-4 rounded-2xl border border-border text-charcoal-light font-bold text-[14px] hover:text-white transition-colors"
+              >
+                Maybe Later
+              </button>
+              {userProfile.kyc_status !== 'pending' && (
+                <button
+                  onClick={() => {
+                    setShowRunnerStepsModal(false);
+                    navigate('/kyc-upload');
+                  }}
+                  className="flex-1 btn-accent py-4 rounded-2xl text-[14px] font-extrabold uppercase tracking-wider text-center"
+                >
+                  {userProfile.kyc_status === 'rejected' ? 'Resubmit Docs' : 'Verify Now'}
+                </button>
+              )}
             </div>
           </div>
         </div>

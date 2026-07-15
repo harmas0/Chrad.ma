@@ -171,11 +171,12 @@ export async function uploadKYCDocument(userId, file, docType) {
 }
 
 // Submit KYC application
-export async function submitKYC(userId, idUrl, selfieUrl) {
+export async function submitKYC(userId, idUrl, selfieUrl, vehicleUrl) {
   const { error } = await supabase.from('profiles').update({
     kyc_status: 'pending',
     kyc_id_url: idUrl,
     kyc_selfie_url: selfieUrl,
+    kyc_vehicle_url: vehicleUrl || null,
     kyc_submitted_at: new Date().toISOString(),
   }).eq('id', userId);
 

@@ -127,20 +127,7 @@ export default function Login() {
             />
           </div>
 
-          {!isLogin && (
-            <div className="mb-6 flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="isRunner"
-                checked={isRunner}
-                onChange={(e) => setIsRunner(e.target.checked)}
-                className="w-5 h-5 rounded border-border bg-dark text-accent focus:ring-accent focus:ring-offset-dark"
-              />
-              <label htmlFor="isRunner" className="text-sm font-medium text-white">
-                I want to be a Runner (Earn money)
-              </label>
-            </div>
-          )}
+
 
           <button
             type="submit"
