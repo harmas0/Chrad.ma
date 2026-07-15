@@ -121,7 +121,7 @@ export async function fetchCompletedTasks() {
 
 // Create a new task
 export async function createTask(taskData) {
-  const id = `task-${Date.now()}`;
+  const id = taskData.id || `task-${Date.now()}`;
   const row = {
     id,
     client_id: taskData.clientId,

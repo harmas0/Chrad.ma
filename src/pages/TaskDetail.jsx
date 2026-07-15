@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send } from 'lucide-reac
 import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/tasksApi';
 import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/bidsApi';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabaseClient';
 import BidCard from '../components/BidCard';
 import MapView from '../components/MapView';
 import Modal from '../components/Modal';
@@ -62,7 +63,31 @@ export default function TaskDetail() {
       }
     }
     load();
-    return () => { cancelled = true; };
+
+    const bidsChannel = supabase
+      .channel(`task-${id}-detail-updates`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'bids',
+        filter: `task_id=eq.${id}`,
+      }, () => {
+        load();
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'tasks',
+        filter: `id=eq.${id}`,
+      }, () => {
+        load();
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(bidsChannel);
+    };
   }, [id]);
 
   if (loading) {

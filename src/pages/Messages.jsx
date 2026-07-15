@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
+import { supabase } from '../utils/supabaseClient';
 
 function timeAgo(dateString) {
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -25,7 +26,22 @@ export default function Messages() {
       if (!cancelled) { setConversations(data); setLoading(false); }
     }
     load();
-    return () => { cancelled = true; };
+
+    const channel = supabase
+      .channel('messages-conversations-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'conversations',
+      }, () => {
+        load();
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (

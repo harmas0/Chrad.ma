@@ -7,6 +7,7 @@ import PhotoUpload from '../components/PhotoUpload';
 import MapView from '../components/MapView';
 import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabaseClient';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];
 
@@ -28,6 +29,7 @@ export default function CreateTask() {
     itemBudget: 0,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [activeTab, setActiveTab] = useState('pickup');
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,22 +136,55 @@ export default function CreateTask() {
       alert('You must be logged in to post a task.');
       return;
     }
-    const result = await createTask({
-      clientId,
-      category: form.category,
-      title: form.title,
-      description: form.description,
-      photos: form.photos,
-      pickup: form.pickup,
-      destination: form.destination,
-      price: form.price,
-      itemBudget: form.itemBudget,
-    });
-    if (result) {
-      setSubmitted(true);
-      setTimeout(() => navigate('/'), 2000);
-    } else {
-      alert('Failed to post task. Please try again.');
+    setSubmitting(true);
+    try {
+      const taskId = `task-${Date.now()}`;
+      const uploadedUrls = [];
+
+      for (let i = 0; i < form.photos.length; i++) {
+        const item = form.photos[i];
+        if (item.file) {
+          const fileExt = item.file.name.split('.').pop();
+          const filePath = `${taskId}/photo-${i}-${Date.now()}.${fileExt}`;
+          const { error } = await supabase.storage
+            .from('task-photos')
+            .upload(filePath, item.file, { upsert: true });
+
+          if (!error) {
+            const { data: urlData } = supabase.storage
+              .from('task-photos')
+              .getPublicUrl(filePath);
+
+            if (urlData?.publicUrl) {
+              uploadedUrls.push(urlData.publicUrl);
+            }
+          }
+        }
+      }
+
+      const result = await createTask({
+        id: taskId,
+        clientId,
+        category: form.category,
+        title: form.title,
+        description: form.description,
+        photos: uploadedUrls,
+        pickup: form.pickup,
+        destination: form.destination,
+        price: form.price,
+        itemBudget: form.itemBudget,
+      });
+
+      if (result) {
+        setSubmitted(true);
+        setTimeout(() => navigate('/'), 2000);
+      } else {
+        alert('Failed to post task. Please try again.');
+      }
+    } catch (err) {
+      alert('Error uploading photos: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -504,11 +539,18 @@ export default function CreateTask() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="w-full py-4 rounded-2xl btn-accent font-extrabold text-[16px] flex items-center justify-center gap-3 animate-pulse-glow"
+              disabled={submitting}
+              className="w-full py-4 rounded-2xl btn-accent font-extrabold text-[16px] flex items-center justify-center gap-3 disabled:opacity-50"
               id="create-submit"
             >
-              <Check size={20} strokeWidth={3} />
-              Post Task — {form.price} MAD
+              {submitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Check size={20} strokeWidth={3} />
+                  Post Task — {form.price} MAD
+                </>
+              )}
             </button>
           )}
         </div>

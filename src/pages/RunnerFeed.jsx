@@ -4,6 +4,7 @@ import { Map, List, Filter, Search } from 'lucide-react';
 import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import TaskCard from '../components/TaskCard';
 import MapView from '../components/MapView';
+import { supabase } from '../utils/supabaseClient';
 
 export default function RunnerFeed() {
   const navigate = useNavigate();
@@ -20,7 +21,22 @@ export default function RunnerFeed() {
       if (!cancelled) { setAllTasks(tasks); setLoading(false); }
     }
     load();
-    return () => { cancelled = true; };
+
+    const channel = supabase
+      .channel('runner-feed-tasks')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'tasks',
+      }, () => {
+        load();
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const filteredTasks = allTasks.filter((task) => {
