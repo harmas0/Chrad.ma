@@ -4,36 +4,38 @@ import { ArrowRight, Zap, Star, TrendingUp } from 'lucide-react';
 import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
+import { useI18n } from '../utils/i18n';
 
 const howItWorks = [
   {
     step: 1,
     icon: '📝',
-    title: 'Post Your Task',
-    description: 'Describe what you need done, set a starting price, and pin the location.',
+    titleKey: 'step_1_title',
+    descKey: 'step_1_desc',
   },
   {
     step: 2,
     icon: '💬',
-    title: 'Get Bids',
-    description: 'Nearby runners send offers. Compare prices, ratings, and ETAs.',
+    titleKey: 'step_2_title',
+    descKey: 'step_2_desc',
   },
   {
     step: 3,
     icon: '✅',
-    title: 'Done & Verified',
-    description: 'Runner completes the task. You confirm with a photo. Payment released.',
+    titleKey: 'step_3_title',
+    descKey: 'step_3_desc',
   },
 ];
 
 const stats = [
-  { value: '2,450+', label: 'Completed', icon: TrendingUp },
-  { value: '4.8', label: 'Avg Rating', icon: Star },
-  { value: '< 3m', label: 'Bid Time', icon: Zap },
+  { value: '2,450+', labelKey: 'completed_stat', icon: TrendingUp },
+  { value: '4.8', labelKey: 'avg_rating_stat', icon: Star },
+  { value: '< 3m', labelKey: 'bid_time_stat', icon: Zap },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [recentTasks, setRecentTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -93,11 +95,10 @@ export default function Home() {
           {/* Hero text */}
           <div className="animate-fade-in-up mb-6">
             <h2 className="text-[30px] font-extrabold text-white leading-[1.15] mb-3 tracking-tight">
-              What do you need<br />
-              <span className="gradient-text-accent">done today?</span>
+              {t('welcome')}
             </h2>
             <p className="text-[15px] text-charcoal-light leading-relaxed">
-              Name your price. A nearby runner bids, negotiates, and gets it done — fast.
+              {t('hero_desc')}
             </p>
           </div>
 
@@ -108,7 +109,7 @@ export default function Home() {
             style={{ animationDelay: '0.15s' }}
             id="hero-cta"
           >
-            Post a Task
+            {t('post_task')}
             <ArrowRight size={18} strokeWidth={2.5} />
           </button>
         </section>
@@ -125,7 +126,7 @@ export default function Home() {
                 id={`quick-${cat.id}`}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <span className="text-[11px] font-bold text-charcoal leading-tight text-center">{cat.label}</span>
+                <span className="text-[11px] font-bold text-charcoal leading-tight text-center">{t(cat.id)}</span>
               </button>
             ))}
           </div>
@@ -138,7 +139,7 @@ export default function Home() {
               <div key={i} className="text-center flex flex-col items-center">
                 <stat.icon size={20} className="text-accent mb-1.5" />
                 <div className="text-[20px] font-extrabold text-white leading-none mb-0.5">{stat.value}</div>
-                <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider">{stat.label}</div>
+                <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider">{t(stat.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -148,7 +149,7 @@ export default function Home() {
         <section className="px-6 mt-8">
           <h3 className="text-[16px] font-bold text-white mb-5 flex items-center gap-2">
             <Zap size={18} className="text-accent" />
-            How Chrad Works
+            {t('how_it_works')}
           </h3>
           <div>
             {howItWorks.map((item, i) => (
@@ -164,9 +165,9 @@ export default function Home() {
                     <span className="bg-accent text-dark text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0">
                       {item.step}
                     </span>
-                    {item.title}
+                    {t(item.titleKey)}
                   </h4>
-                  <p className="text-[13px] text-charcoal-light leading-snug">{item.description}</p>
+                  <p className="text-[13px] text-charcoal-light leading-snug">{t(item.descKey)}</p>
                 </div>
               </div>
             ))}
@@ -176,38 +177,38 @@ export default function Home() {
         {/* ── Live Tasks Nearby ── */}
         <section className="px-6 mt-8">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-[16px] font-bold text-white">Live Tasks Nearby</h3>
+            <h3 className="text-[16px] font-bold text-white">{t('nearby_tasks')}</h3>
             <button
               onClick={() => navigate('/explore')}
               className="text-[13px] text-accent font-bold flex items-center gap-1"
               id="see-all-tasks"
             >
-              See all <ArrowRight size={14} />
+              {t('see_all')} <ArrowRight size={14} />
             </button>
           </div>
           <div className="pb-28">
             {loading ? (
               <div className="glass-panel rounded-2xl p-8 text-center border border-border">
                 <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-[13px] text-charcoal-light font-medium">Loading nearby tasks...</p>
+                <p className="text-[13px] text-charcoal-light font-medium">{t('loading_tasks')}</p>
               </div>
             ) : fetchError ? (
               <div className="glass-panel rounded-2xl p-6 text-center border border-danger/30">
                 <span className="text-3xl block mb-2">⚠️</span>
-                <p className="text-[14px] text-white font-bold mb-1">Connection Error</p>
+                <p className="text-[14px] text-white font-bold mb-1">{t('connection_error')}</p>
                 <p className="text-[12px] text-charcoal-light mb-3">{fetchError}</p>
                 <button
                   onClick={() => window.location.reload()}
                   className="btn-accent text-[13px] px-5 py-2 rounded-xl font-bold"
                 >
-                  Retry
+                  {t('retry')}
                 </button>
               </div>
             ) : recentTasks.length === 0 ? (
               <div className="glass-panel rounded-2xl p-6 text-center border border-border">
                 <span className="text-3xl block mb-2">📡</span>
-                <p className="text-[14px] text-white font-bold mb-1">No open tasks right now</p>
-                <p className="text-[12px] text-charcoal-light">Be the first to post a task!</p>
+                <p className="text-[14px] text-white font-bold mb-1">{t('no_tasks')}</p>
+                <p className="text-[12px] text-charcoal-light">{t('be_first')}</p>
               </div>
             ) : (
               recentTasks.map((task, i) => (

@@ -70,6 +70,25 @@ const translations = {
     confirm_release: 'Confirm & Release Payment',
     back_home: 'Back to Home',
     task_complete: 'Task Complete!',
+    // Categories
+    delivery: 'Delivery',
+    shopping: 'Shopping',
+    cleaning: 'Cleaning',
+    custom: 'Custom Task',
+    // How it works
+    how_it_works: 'How Chrad Works',
+    step_1_title: 'Post Your Task',
+    step_1_desc: 'Describe what you need done, set a starting price, and pin the location.',
+    step_2_title: 'Get Bids',
+    step_2_desc: 'Nearby runners send offers. Compare prices, ratings, and ETAs.',
+    step_3_title: 'Done & Verified',
+    step_3_desc: 'Runner completes the task. You confirm with a photo. Payment released.',
+    // Stats
+    completed_stat: 'Completed',
+    avg_rating_stat: 'Avg Rating',
+    bid_time_stat: 'Bid Time',
+    connection_error: 'Connection Error',
+    retry: 'Retry',
   },
   fr: {
     welcome: 'Qu’avez-vous besoin de faire aujourd’hui ?',
@@ -125,6 +144,25 @@ const translations = {
     confirm_release: 'Confirmer & Libérer le paiement',
     back_home: 'Retour à l’accueil',
     task_complete: 'Tâche terminée !',
+    // Categories
+    delivery: 'Livraison',
+    shopping: 'Courses',
+    cleaning: 'Ménage',
+    custom: 'Sur mesure',
+    // How it works
+    how_it_works: 'Comment ça marche',
+    step_1_title: 'Publier une tâche',
+    step_1_desc: 'Décrivez vos besoins, fixez un prix de départ et épinglez le lieu.',
+    step_2_title: 'Recevoir des offres',
+    step_2_desc: 'Les coursiers proches envoient des offres. Comparez les prix et délais.',
+    step_3_title: 'Terminé & Vérifié',
+    step_3_desc: 'Le coursier termine la tâche. Vous confirmez. Paiement libéré.',
+    // Stats
+    completed_stat: 'Terminés',
+    avg_rating_stat: 'Note Moyenne',
+    bid_time_stat: 'Temps de réponse',
+    connection_error: 'Erreur de connexion',
+    retry: 'Réessayer',
   },
   ar: {
     welcome: 'ما الذي تريد إنجازه اليوم؟',
@@ -176,10 +214,29 @@ const translations = {
     runner_active: 'المندوب نشط حالياً',
     mark_picked: 'تأكيد الاستلام',
     mark_route: 'تأكيد بدء التوصيل',
-    mark_delivered: 'تأكيد الوصول والوصول',
+    mark_delivered: 'تأكيد الوصول والتسليم',
     confirm_release: 'تأكيد التسليم وتحرير الدفع',
     back_home: 'العودة للرئيسية',
     task_complete: 'اكتملت المهمة بنجاح!',
+    // Categories
+    delivery: 'توصيل',
+    shopping: 'تسوق',
+    cleaning: 'تنظيف',
+    custom: 'مهمة خاصة',
+    // How it works
+    how_it_works: 'كيف يعمل شراض',
+    step_1_title: 'انشر مهمة',
+    step_1_desc: 'صف ما تريد إنجازه، حدد سعراً أولياً، وعيّن الموقع.',
+    step_2_title: 'تلقى العروض',
+    step_2_desc: 'يرسل المناديب القريبون عروضاً. قارن الأسعار والتقييمات والأوقات.',
+    step_3_title: 'مكتمل وموثق',
+    step_3_desc: 'يندب المندوب لإكمال المهمة. تؤكد بصورة وسيتم تحرير الدفع.',
+    // Stats
+    completed_stat: 'مكتملة',
+    avg_rating_stat: 'متوسط التقييم',
+    bid_time_stat: 'وقت العرض',
+    connection_error: 'خطأ في الاتصال',
+    retry: 'إعادة المحاولة',
   }
 };
 
@@ -215,9 +272,6 @@ export const LanguageProvider = ({ children }) => {
     // Clean trailing .0
     const cleanNum = converted.endsWith('.0') ? converted.slice(0, -2) : converted;
     
-    if (lang === 'ar') {
-      return `${cleanNum} ${selectedCur.symbol}`;
-    }
     return `${cleanNum} ${selectedCur.symbol}`;
   };
 
