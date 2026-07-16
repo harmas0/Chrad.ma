@@ -148,12 +148,17 @@ export async function createTask(taskData) {
 
 // Update task status
 export async function updateTaskStatus(taskId, status, extra = {}) {
-  const { data, error } = await supabase
+  let query = supabase
     .from('tasks')
     .update({ status, ...extra })
-    .eq('id', taskId)
-    .select()
-    .single();
+    .eq('id', taskId);
+
+  // Concurrency check: if assigning a runner, guarantee it's not already assigned
+  if (status === 'accepted') {
+    query = query.is('accepted_runner_id', null);
+  }
+
+  const { data, error } = await query.select().single();
   if (error) { console.error('updateTaskStatus error:', error); return null; }
   return rowToTask(data);
 }

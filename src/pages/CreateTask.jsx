@@ -9,6 +9,7 @@ import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
+import { compressImage } from '../utils/imageCompressor';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];
 
@@ -146,11 +147,11 @@ export default function CreateTask() {
       for (let i = 0; i < form.photos.length; i++) {
         const item = form.photos[i];
         if (item.file) {
-          const fileExt = item.file.name.split('.').pop();
-          const filePath = `${taskId}/photo-${i}-${Date.now()}.${fileExt}`;
+          const finalFile = await compressImage(item.file);
+          const filePath = `${taskId}/photo-${i}-${Date.now()}.jpg`;
           const { error } = await supabase.storage
             .from('task-photos')
-            .upload(filePath, item.file, { upsert: true });
+            .upload(filePath, finalFile, { upsert: true });
 
           if (!error) {
             const { data: urlData } = supabase.storage

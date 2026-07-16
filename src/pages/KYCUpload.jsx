@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Camera, Check, Shield, AlertCircle, Clock, X, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { uploadKYCDocument, submitKYC } from '../data/adminApi';
+import { compressImage } from '../utils/imageCompressor';
 
 const STEPS = ['ID Document', 'Selfie', 'Vehicle Docs', 'Review'];
 
@@ -96,10 +97,16 @@ export default function KYCUpload() {
     setError(null);
 
     try {
+      const [compId, compSelfie, compVehicle] = await Promise.all([
+        compressImage(idFile),
+        compressImage(selfieFile),
+        compressImage(vehicleFile),
+      ]);
+
       const [idUrl, selfieUrl, vehicleUrl] = await Promise.all([
-        uploadKYCDocument(user.id, idFile, 'id'),
-        uploadKYCDocument(user.id, selfieFile, 'selfie'),
-        uploadKYCDocument(user.id, vehicleFile, 'vehicle'),
+        uploadKYCDocument(user.id, compId, 'id'),
+        uploadKYCDocument(user.id, compSelfie, 'selfie'),
+        uploadKYCDocument(user.id, compVehicle, 'vehicle'),
       ]);
 
       if (!idUrl || !selfieUrl || !vehicleUrl) throw new Error('Failed to upload documents');

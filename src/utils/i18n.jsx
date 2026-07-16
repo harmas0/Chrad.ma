@@ -162,6 +162,8 @@ const translations = {
     picked_up: 'Picked Up',
     en_route: 'En Route',
     delivered: 'Delivered',
+    connection_lost: 'Connection Lost',
+    reconnecting: 'Reconnecting to Chrad servers...',
   },
   fr: {
     welcome: 'Qu’avez-vous besoin de faire aujourd’hui ?',
@@ -309,6 +311,8 @@ const translations = {
     picked_up: 'Récupérée',
     en_route: 'En route',
     delivered: 'Livrée',
+    connection_lost: 'Connexion Perdue',
+    reconnecting: 'Reconnexion aux serveurs Chrad...',
   },
   ar: {
     welcome: 'ما الذي تريد إنجازه اليوم؟',
@@ -456,6 +460,8 @@ const translations = {
     picked_up: 'تم الاستلام',
     en_route: 'في الطريق',
     delivered: 'تم التوصيل',
+    connection_lost: 'انقطع الاتصال',
+    reconnecting: 'جاري إعادة الاتصال بخوادم شراض...',
   }
 };
 

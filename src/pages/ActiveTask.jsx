@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Camera, Check, Phone, Clock, AlertTriangle } from 'lucide-react';
 import { fetchTaskById, updateTaskStatus } from '../data/tasksApi';
@@ -24,6 +24,7 @@ export default function ActiveTask() {
   const [routeInfo, setRouteInfo] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('accepted');
+  const lastDbWriteRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,16 +79,20 @@ export default function ActiveTask() {
           event: 'location',
           payload: newPos,
         });
-        // Persist to lightweight table
-        try {
-          await supabase.from('runner_locations').upsert({
-            task_id: id,
-            runner_id: user.id,
-            lat: newPos.lat,
-            lng: newPos.lng,
-          }, { onConflict: 'task_id' });
-        } catch (e) {
-          console.error('Failed to persist runner location:', e);
+        // Persist to lightweight table with throttling (max once every 30s)
+        const now = Date.now();
+        if (now - lastDbWriteRef.current >= 30000) {
+          lastDbWriteRef.current = now;
+          try {
+            await supabase.from('runner_locations').upsert({
+              task_id: id,
+              runner_id: user.id,
+              lat: newPos.lat,
+              lng: newPos.lng,
+            }, { onConflict: 'task_id' });
+          } catch (e) {
+            console.error('Failed to persist runner location:', e);
+          }
         }
       };
 

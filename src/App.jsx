@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
@@ -12,7 +13,8 @@ import Login from './pages/Login';
 import BannedScreen from './pages/BannedScreen';
 import KYCUpload from './pages/KYCUpload';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LanguageProvider } from './utils/i18n';
+import { LanguageProvider, useI18n } from './utils/i18n';
+import { supabase } from './utils/supabaseClient';
 
 // Admin pages
 import AdminGuard from './components/AdminGuard';
@@ -37,13 +39,48 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppContent = () => {
-  const { user, isBanned, isAdmin } = useAuth();
+  const { user, isBanned } = useAuth();
+  const { t } = useI18n();
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      try {
+        const channels = supabase.getChannels();
+        channels.forEach((ch) => {
+          ch.unsubscribe();
+          ch.subscribe();
+        });
+      } catch (err) {
+        console.error('Failed to reconnect Supabase channels:', err);
+      }
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Check if on an admin route
   const isAdminRoute = window.location.hash?.startsWith('#/admin');
 
   return (
     <div className={`${isAdminRoute ? '' : 'app-container'} bg-dark min-h-screen relative`}>
+      {isOffline && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-[400px] bg-danger/90 backdrop-blur-md border border-danger/30 rounded-2xl px-5 py-3.5 flex items-center gap-3.5 shadow-[0_8px_32px_rgba(255,51,102,0.3)] animate-bounce-in text-left">
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-[13px] font-black text-white leading-tight">{t('connection_lost')}</p>
+            <p className="text-[11px] text-white/80 font-medium">{t('reconnecting')}</p>
+          </div>
+        </div>
+      )}
       <Routes>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
 
