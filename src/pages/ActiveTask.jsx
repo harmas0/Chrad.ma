@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import ReportDispute from '../components/ReportDispute';
 import { useI18n } from '../utils/i18n';
+import { submitReview } from '../data/reviewsApi';
 
 export default function ActiveTask() {
   const { user } = useAuth();
@@ -25,6 +26,11 @@ export default function ActiveTask() {
   const [showReport, setShowReport] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('accepted');
   const lastDbWriteRef = useRef(0);
+
+  const [rating, setRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -345,16 +351,69 @@ export default function ActiveTask() {
 
         {/* Confirmed state */}
         {currentStatus === 'confirmed' && (
-          <div className="text-center py-10 animate-bounce-in glass-panel rounded-3xl border border-border-light">
+          <div className="text-center py-8 animate-bounce-in glass-panel rounded-3xl border border-border-light px-6">
             <span className="text-7xl block mb-5 drop-shadow-[0_0_20px_rgba(0,255,135,0.4)]">🎉</span>
-            <h3 className="text-[24px] font-extrabold text-white mb-3">{t('task_complete')}</h3>
-            <p className="text-[15px] text-charcoal-light font-medium mb-8 px-6">{t('payment_released_to_runner')}</p>
-            <button
-              onClick={() => navigate('/')}
-              className="btn-accent text-[15px] font-bold px-8 py-4 rounded-xl shadow-lg uppercase tracking-wider"
-            >
-              {t('back_home')}
-            </button>
+            <h3 className="text-[24px] font-extrabold text-white mb-2">{t('task_complete')}</h3>
+            <p className="text-[14px] text-charcoal-light font-medium mb-6">{t('payment_released_to_runner')}</p>
+
+            {isClient && !reviewSubmitted ? (
+              <div className="border-t border-border pt-6 mt-4 text-left">
+                <h4 className="text-[16px] font-bold text-white mb-2 text-center">Rate the Runner</h4>
+                <p className="text-[12px] text-charcoal-light text-center mb-4">Share your feedback to help the community.</p>
+                
+                {/* Star selection */}
+                <div className="flex justify-center gap-3 mb-5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className={`text-3xl transition-transform active:scale-90 ${star <= rating ? 'text-warning' : 'text-charcoal-light opacity-40'}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Leave a comment about the service (optional)..."
+                  rows={3}
+                  className="input-field w-full px-4 py-3 rounded-xl text-[14px] font-medium resize-none mb-5"
+                />
+
+                <button
+                  onClick={async () => {
+                    setSubmittingReview(true);
+                    await submitReview({
+                      taskId: task.id,
+                      reviewerId: user.id,
+                      revieweeId: task.acceptedRunnerId,
+                      rating,
+                      comment: reviewComment,
+                    });
+                    setReviewSubmitted(true);
+                    setSubmittingReview(false);
+                  }}
+                  disabled={submittingReview}
+                  className="w-full btn-accent py-3.5 rounded-xl font-bold uppercase tracking-wider text-[14px] flex items-center justify-center gap-2"
+                >
+                  {submittingReview ? (
+                    <div className="w-5 h-5 border-2 border-dark border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    'Submit Feedback'
+                  )}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/')}
+                className="w-full btn-accent py-4 rounded-xl text-[15px] font-bold uppercase tracking-wider shadow-lg"
+              >
+                {t('back_home')}
+              </button>
+            )}
           </div>
         )}
       </div>

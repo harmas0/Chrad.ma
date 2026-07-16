@@ -20,6 +20,10 @@ export default function Profile() {
   const [showLangModal, setShowLangModal] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [showRunnerStepsModal, setShowRunnerStepsModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [submittingSupport, setSubmittingSupport] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -148,7 +152,7 @@ export default function Profile() {
     { icon: Globe, label: t('language'), desc: LANGUAGES.find(l => l.code === lang)?.label || 'English', accent: false, onClick: () => setShowLangModal(true) },
     { icon: CreditCard, label: t('currency'), desc: currency, accent: false, onClick: () => setShowCurrencyModal(true) },
     { icon: Shield, label: t('verification'), desc: userProfile.verified ? t('verified') : t('verify_identity'), accent: userProfile.verified, onClick: () => navigate('/kyc-upload') },
-    { icon: HelpCircle, label: t('support'), desc: 'FAQ, contact us', accent: false },
+    { icon: HelpCircle, label: t('support'), desc: 'FAQ, contact us', accent: false, onClick: () => setShowSupportModal(true) },
     ...(isAdmin ? [{ icon: LayoutDashboard, label: t('admin_panel'), desc: 'Manage platform', accent: true, onClick: () => navigate('/admin') }] : []),
   ];
 
@@ -588,6 +592,74 @@ export default function Profile() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      {/* Support Ticket Modal */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setShowSupportModal(false)}>
+          <div
+            className="w-full max-w-lg bg-dark-surface border-t border-x border-border-light rounded-t-3xl p-6 animate-slide-up shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[18px] font-extrabold text-white">Help & Support</h3>
+              <button
+                onClick={() => setShowSupportModal(false)}
+                className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 mb-6">
+              <div>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Subject</label>
+                <input
+                  type="text"
+                  value={supportSubject}
+                  onChange={(e) => setSupportSubject(e.target.value)}
+                  className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-semibold"
+                  placeholder="e.g. KYC verification, Payment issue"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Message</label>
+                <textarea
+                  value={supportMessage}
+                  onChange={(e) => setSupportMessage(e.target.value)}
+                  className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-medium resize-none"
+                  rows={4}
+                  placeholder="Describe your issue or question in detail..."
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={async () => {
+                if (!supportSubject.trim() || !supportMessage.trim()) return;
+                setSubmittingSupport(true);
+                const { submitSupportTicket } = await import('../data/reviewsApi');
+                await submitSupportTicket({
+                  userId: userProfile.id,
+                  subject: supportSubject,
+                  message: supportMessage,
+                });
+                setSubmittingSupport(false);
+                setShowSupportModal(false);
+                setSupportSubject('');
+                setSupportMessage('');
+                alert('Support request submitted. Our team will contact you shortly.');
+              }}
+              disabled={submittingSupport || !supportSubject.trim() || !supportMessage.trim()}
+              className="w-full btn-accent py-4 rounded-2xl font-bold uppercase tracking-wider text-[15px] flex items-center justify-center gap-2"
+            >
+              {submittingSupport ? (
+                <div className="w-5 h-5 border-2 border-dark border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Submit Ticket'
+              )}
+            </button>
           </div>
         </div>
       )}
