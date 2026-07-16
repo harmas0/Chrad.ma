@@ -15,6 +15,7 @@ import KYCUpload from './pages/KYCUpload';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useI18n } from './utils/i18n';
 import { supabase } from './utils/supabaseClient';
+import { fetchPlatformSettings } from './data/settingsApi';
 
 // Admin pages
 import AdminGuard from './components/AdminGuard';
@@ -39,11 +40,20 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppContent = () => {
-  const { user, isBanned } = useAuth();
+  const { user, isBanned, isAdmin } = useAuth();
   const { t } = useI18n();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   useEffect(() => {
+    async function checkMaintenance() {
+      const data = await fetchPlatformSettings();
+      if (data) {
+        setMaintenanceMode(data.maintenanceMode);
+      }
+    }
+    checkMaintenance();
+
     const handleOnline = () => {
       setIsOffline(false);
       try {
@@ -69,6 +79,29 @@ const AppContent = () => {
 
   // Check if on an admin route
   const isAdminRoute = window.location.hash?.startsWith('#/admin');
+
+  if (maintenanceMode && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-dark flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-20 h-20 rounded-full bg-accent/10 border-2 border-accent mx-auto mb-6 flex items-center justify-center shadow-[0_0_35px_rgba(0,255,135,0.15)] animate-pulse-glow">
+          <Settings size={36} className="text-accent animate-spin" style={{ animationDuration: '8s' }} />
+        </div>
+        <h1 className="text-[26px] font-black text-white mb-3">Under Maintenance</h1>
+        <p className="text-[14px] text-charcoal-light max-w-sm mb-8 leading-relaxed font-medium">
+          Chrad.ma is undergoing scheduled system upgrades. We will be back online shortly. Thank you for your patience!
+        </p>
+        <button
+          onClick={async () => {
+            const data = await fetchPlatformSettings();
+            if (data) setMaintenanceMode(data.maintenanceMode);
+          }}
+          className="btn-accent px-6 py-3.5 rounded-xl text-[14px] font-bold uppercase tracking-wider shadow-md"
+        >
+          Check Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`${isAdminRoute ? '' : 'app-container'} bg-dark min-h-screen relative`}>

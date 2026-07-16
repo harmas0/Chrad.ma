@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, MapPin, Check, Search, Loader2, Crosshair } from 'lucide-react';
 import CategoryCard from '../components/CategoryCard';
@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 import { compressImage } from '../utils/imageCompressor';
+import { fetchPlatformSettings } from '../data/settingsApi';
 
 const STEPS = ['Category', 'Details', 'Location', 'Price', 'Review'];
 
@@ -33,6 +34,17 @@ export default function CreateTask() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [feePercent, setFeePercent] = useState(10);
+
+  useEffect(() => {
+    async function load() {
+      const data = await fetchPlatformSettings();
+      if (data) {
+        setFeePercent(data.platformFeePercent);
+      }
+    }
+    load();
+  }, []);
 
   const [activeTab, setActiveTab] = useState('pickup');
   const [searchQuery, setSearchQuery] = useState('');
@@ -424,7 +436,7 @@ export default function CreateTask() {
               <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('pricing_desc')}</p>
             </div>
 
-            <div className="stagger-item mb-8" style={{ animationDelay: '0.1s' }}>
+            <div className="stagger-item mb-6" style={{ animationDelay: '0.1s' }}>
               <label className="text-[13px] font-bold text-charcoal-light block mb-2.5 uppercase tracking-wider">
                 {t('how_much_pay')}
               </label>
@@ -437,7 +449,7 @@ export default function CreateTask() {
             </div>
 
             {form.category === 'shopping' && (
-              <div className="stagger-item animate-scale-in" style={{ animationDelay: '0.2s' }}>
+              <div className="stagger-item animate-scale-in mb-6" style={{ animationDelay: '0.2s' }}>
                 <div className="bg-dark-surface rounded-2xl p-5 border border-border">
                   <div className="mb-4">
                     <label className="text-[14px] font-bold text-white block mb-1">
@@ -457,6 +469,26 @@ export default function CreateTask() {
                 </div>
               </div>
             )}
+
+            {/* Fee Breakdown */}
+            <div className="bg-dark-surface rounded-2xl p-5 border border-border stagger-item" style={{ animationDelay: '0.3s' }}>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Task Payment</span>
+                <span className="text-[15px] font-bold text-white">{formatPrice(form.price)}</span>
+              </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Service Fee ({feePercent}%)</span>
+                <span className={`text-[15px] font-bold ${feePercent === 0 ? 'text-accent' : 'text-white'}`}>
+                  {feePercent === 0 ? 'Free' : formatPrice(Math.round(form.price * feePercent / 100))}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-border/40">
+                <span className="text-[13px] text-white font-extrabold uppercase tracking-wider">Total Cost</span>
+                <span className="text-[18px] font-black text-accent">
+                  {formatPrice(form.price + (feePercent === 0 ? 0 : Math.round(form.price * feePercent / 100)))}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -505,15 +537,27 @@ export default function CreateTask() {
               </div>
 
               {/* Price */}
-              <div className="pt-4 border-t border-border relative z-10">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">{t('your_offer')}</span>
-                  <span className="text-[28px] font-black text-accent tracking-tighter">{formatPrice(form.price)}</span>
+              <div className="pt-4 border-t border-border relative z-10 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Task Payment</span>
+                  <span className="text-[18px] font-bold text-white">{formatPrice(form.price)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Service Fee ({feePercent}%)</span>
+                  <span className={`text-[14px] font-bold ${feePercent === 0 ? 'text-accent' : 'text-white'}`}>
+                    {feePercent === 0 ? 'Free' : formatPrice(Math.round(form.price * feePercent / 100))}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                  <span className="text-[14px] text-white font-extrabold uppercase tracking-wider">Total to Pay</span>
+                  <span className="text-[26px] font-black text-accent tracking-tighter">
+                    {formatPrice(form.price + (feePercent === 0 ? 0 : Math.round(form.price * feePercent / 100)))}
+                  </span>
                 </div>
                 {form.category === 'shopping' && form.itemBudget > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-[14px] text-charcoal-light font-bold uppercase tracking-wider">{t('item_budget')}</span>
-                    <span className="text-[20px] font-bold text-warning">{formatPrice(form.itemBudget)}</span>
+                  <div className="flex items-center justify-between pt-2 border-t border-dashed border-border/40">
+                    <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">{t('item_budget')}</span>
+                    <span className="text-[18px] font-bold text-warning">{formatPrice(form.itemBudget)}</span>
                   </div>
                 )}
               </div>

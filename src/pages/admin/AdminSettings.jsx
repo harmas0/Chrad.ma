@@ -1,48 +1,53 @@
-import { useState } from 'react';
-import { Settings, Globe, Bell, Shield, Database, Palette, Save, Check, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Globe, Bell, Shield, Database, Save, Check, Info, Loader2 } from 'lucide-react';
+import { fetchPlatformSettings, updatePlatformSettings } from '../../data/settingsApi';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminSettings() {
+  const { user } = useAuth();
   const [saved, setSaved] = useState(false);
-  const [settings, setSettings] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('chrad_admin_settings');
-      if (savedSettings) {
-        try {
-          return JSON.parse(savedSettings);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-    return {
-      platformName: 'Chrad',
-      supportEmail: 'support@chrad.ma',
-      maxBidPrice: 5000,
-      minBidPrice: 10,
-      platformFeePercent: 10,
-      requireKYCForRunners: true,
-      allowGuestBrowsing: false,
-      maxPhotosPerTask: 5,
-      maxDisputeEvidencePhotos: 3,
-      maintenanceMode: false,
-      enablePushNotifications: true,
-      enableEmailNotifications: true,
-      autoApproveKYC: false,
-      kycExpiryDays: 365,
-      defaultCurrency: 'MAD',
-      defaultCity: 'Casablanca',
-    };
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState({
+    platformName: 'Chrad',
+    supportEmail: 'support@chrad.ma',
+    maxBidPrice: 5000,
+    minBidPrice: 10,
+    platformFeePercent: 10,
+    requireKYCForRunners: true,
+    allowGuestBrowsing: false,
+    maxPhotosPerTask: 5,
+    maintenanceMode: false,
+    enablePushNotifications: true,
+    enableEmailNotifications: true,
+    autoApproveKYC: false,
   });
+
+  useEffect(() => {
+    async function load() {
+      const data = await fetchPlatformSettings();
+      setSettings(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
 
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
     setSaved(false);
   };
 
-  const handleSave = () => {
-    localStorage.setItem('chrad_admin_settings', JSON.stringify(settings));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    const success = await updatePlatformSettings(settings, user.id);
+    setSaving(false);
+    if (success) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      alert('Failed to save settings.');
+    }
   };
 
   const sections = [
@@ -52,17 +57,15 @@ export default function AdminSettings() {
       fields: [
         { key: 'platformName', label: 'Platform Name', type: 'text' },
         { key: 'supportEmail', label: 'Support Email', type: 'text' },
-        { key: 'defaultCurrency', label: 'Default Currency', type: 'text' },
-        { key: 'defaultCity', label: 'Default City', type: 'text' },
       ],
     },
     {
-      title: 'Pricing & Fees',
+      title: 'Pricing & Fees (Paying Features Toggle)',
       icon: Settings,
       fields: [
         { key: 'minBidPrice', label: 'Minimum Bid Price (MAD)', type: 'number' },
         { key: 'maxBidPrice', label: 'Maximum Bid Price (MAD)', type: 'number' },
-        { key: 'platformFeePercent', label: 'Platform Fee (%)', type: 'number' },
+        { key: 'platformFeePercent', label: 'Platform Service Fee (%) — Set to 0 to make app free', type: 'number' },
       ],
     },
     {
@@ -71,7 +74,6 @@ export default function AdminSettings() {
       fields: [
         { key: 'requireKYCForRunners', label: 'Require KYC for Runners', type: 'toggle' },
         { key: 'autoApproveKYC', label: 'Auto-Approve KYC (dev only)', type: 'toggle' },
-        { key: 'kycExpiryDays', label: 'KYC Validity (days)', type: 'number' },
       ],
     },
     {
@@ -79,7 +81,6 @@ export default function AdminSettings() {
       icon: Database,
       fields: [
         { key: 'maxPhotosPerTask', label: 'Max Photos per Task', type: 'number' },
-        { key: 'maxDisputeEvidencePhotos', label: 'Max Dispute Evidence Photos', type: 'number' },
       ],
     },
     {
@@ -91,17 +92,25 @@ export default function AdminSettings() {
       ],
     },
     {
-      title: 'Maintenance',
+      title: 'Maintenance Mode',
       icon: Settings,
       fields: [
-        { key: 'maintenanceMode', label: 'Maintenance Mode', type: 'toggle', danger: true },
+        { key: 'maintenanceMode', label: 'Lock App (Maintenance Mode)', type: 'toggle', danger: true },
         { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing', type: 'toggle' },
       ],
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -110,13 +119,20 @@ export default function AdminSettings() {
         </div>
         <button
           onClick={handleSave}
+          disabled={saving}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider transition-all
             ${saved
               ? 'bg-accent/10 border border-accent/30 text-accent'
-              : 'bg-accent text-dark hover:bg-accent-hover shadow-[0_4px_15px_rgba(0,255,135,0.3)]'
+              : 'bg-accent text-dark hover:bg-accent-hover shadow-[0_4px_15px_rgba(0,255,135,0.3)] disabled:opacity-50'
             }`}
         >
-          {saved ? <><Check size={16} /> Saved!</> : <><Save size={16} /> Save Changes</>}
+          {saving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : saved ? (
+            <><Check size={16} /> Saved!</>
+          ) : (
+            <><Save size={16} /> Save Changes</>
+          )}
         </button>
       </div>
 
@@ -124,7 +140,7 @@ export default function AdminSettings() {
       <div className="bg-info/5 border border-info/20 rounded-xl p-4 mb-8 flex items-start gap-3">
         <Info size={18} className="text-info shrink-0 mt-0.5" />
         <p className="text-[13px] text-charcoal-light">
-          Settings are stored locally for this MVP. In production, these would be persisted in a <code className="text-info font-mono text-[12px]">platform_settings</code> table in Supabase.
+          Platform configurations are stored securely inside the database and sync instantly with all active clients and runners.
         </p>
       </div>
 
@@ -174,7 +190,7 @@ export default function AdminSettings() {
                     <input
                       id={`setting-${field.key}`}
                       type="text"
-                      value={settings[field.key]}
+                      value={settings[field.key] || ''}
                       onChange={(e) => updateSetting(field.key, e.target.value)}
                       className="input-field w-48 px-3 py-2 rounded-xl text-[14px] font-medium"
                     />
