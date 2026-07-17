@@ -140,6 +140,7 @@ export async function createTask(taskData) {
     offered_price: taskData.price,
     item_budget: taskData.itemBudget || null,
     status: 'open',
+    distance: taskData.distance || null,
   };
   const { data, error } = await supabase.from('tasks').insert(row).select().single();
   if (error) { console.error('createTask error:', error); return null; }

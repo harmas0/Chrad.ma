@@ -184,6 +184,7 @@ export default function TaskDetail() {
             destCoords={task.category !== 'custom' ? task.destination : null}
             height="100%"
             darkMode
+            showRouteInfo={true}
           />
         </div>
 

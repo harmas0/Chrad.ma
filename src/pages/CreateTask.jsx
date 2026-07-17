@@ -35,6 +35,8 @@ export default function CreateTask() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feePercent, setFeePercent] = useState(10);
+  const [routeStats, setRouteStats] = useState(null);
+  const [calculatingRoute, setCalculatingRoute] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -45,6 +47,29 @@ export default function CreateTask() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    if (step === 2 && form.pickup && form.destination && form.category !== 'custom') {
+      let cancelled = false;
+      async function calc() {
+        setCalculatingRoute(true);
+        const { calculateRouteDistance } = await import('../utils/routing');
+        const stats = await calculateRouteDistance(form.pickup, form.destination);
+        if (cancelled) return;
+        setRouteStats(stats);
+        setCalculatingRoute(false);
+        if (stats) {
+          // Suggested base price: 15 MAD base + 5 MAD/km, rounded to nearest 5 MAD
+          const suggested = Math.max(20, Math.round((15 + stats.distanceKm * 5) / 5) * 5);
+          update('price', suggested);
+        }
+      }
+      calc();
+      return () => { cancelled = true; };
+    } else {
+      setRouteStats(null);
+    }
+  }, [step, form.pickup?.lat, form.pickup?.lng, form.destination?.lat, form.destination?.lng, form.category]);
 
   const [activeTab, setActiveTab] = useState('pickup');
   const [searchQuery, setSearchQuery] = useState('');
@@ -188,6 +213,7 @@ export default function CreateTask() {
         destination: form.destination,
         price: form.price,
         itemBudget: form.itemBudget,
+        distance: routeStats?.distanceKm || null,
       });
 
       if (result) {
@@ -435,6 +461,18 @@ export default function CreateTask() {
               <h2 className="text-[24px] font-extrabold text-white mb-2">{t('pricing_label')}</h2>
               <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('pricing_desc')}</p>
             </div>
+
+            {routeStats && (
+              <div className="bg-accent/5 border border-accent/20 rounded-2xl p-4 mb-6 flex items-start gap-3 stagger-item animate-scale-in" style={{ animationDelay: '0.05s' }}>
+                <span className="text-xl">💡</span>
+                <div>
+                  <p className="text-[13px] font-bold text-accent mb-0.5">Suggested Offer</p>
+                  <p className="text-[12px] text-charcoal-light leading-relaxed">
+                    Based on the road distance of <strong className="text-white">{routeStats.distanceKm} km</strong> (~{routeStats.durationMin} mins travel time), we recommend offering a price of <strong className="text-white">{Math.max(20, Math.round((15 + routeStats.distanceKm * 5) / 5) * 5)} MAD</strong>.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="stagger-item mb-6" style={{ animationDelay: '0.1s' }}>
               <label className="text-[13px] font-bold text-charcoal-light block mb-2.5 uppercase tracking-wider">

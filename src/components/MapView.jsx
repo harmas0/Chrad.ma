@@ -151,9 +151,12 @@ function formatDuration(seconds) {
 }
 
 export default function MapView({
-  pickup,
-  destination,
-  runnerPosition,
+  pickup: propsPickup,
+  pickupCoords,
+  destination: propsDestination,
+  destCoords,
+  runnerPosition: propsRunnerPosition,
+  runnerCoords,
   taskMarkers,
   center = [33.5731, -7.6322], // Casablanca center
   zoom = 13,
@@ -165,6 +168,10 @@ export default function MapView({
   showRouteInfo = false,
   darkMode = true,
 }) {
+  const pickup = pickupCoords || propsPickup;
+  const destination = destCoords || propsDestination;
+  const runnerPosition = runnerCoords || propsRunnerPosition;
+
   const [routeCoords, setRouteCoords] = useState([]);
   const [routeInfo, setRouteInfo] = useState(null);
   const [userLocation, setUserLocation] = useState(null);

@@ -207,6 +207,7 @@ export default function ActiveTask() {
           height="100%"
           darkMode
           showUserLocation
+          showRouteInfo={true}
         />
       </div>
 
