@@ -16,6 +16,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useI18n } from './utils/i18n';
 import { supabase } from './utils/supabaseClient';
 import { fetchPlatformSettings } from './data/settingsApi';
+import { Settings } from 'lucide-react';
 
 // Admin pages
 import AdminGuard from './components/AdminGuard';

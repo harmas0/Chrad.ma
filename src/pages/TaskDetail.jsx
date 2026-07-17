@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send, Check } from 'lucide-react';
 import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/tasksApi';
 import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/bidsApi';
 import { useAuth } from '../context/AuthContext';
