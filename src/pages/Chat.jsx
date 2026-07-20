@@ -5,6 +5,7 @@ import { fetchConversationById, fetchMessagesForConversation, sendMessage as sen
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
+import { compressImage } from '../utils/imageCompressor';
 
 function formatTime(dateString) {
   return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -23,8 +24,10 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sending, setSending] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   function formatDate(dateString) {
     const d = new Date(dateString);
@@ -78,9 +81,9 @@ export default function Chat() {
           return [...prev, {
             id: newMsg.id,
             senderId: newMsg.sender_id,
-            text: newMsg.content,
+            text: newMsg.text,
             timestamp: newMsg.created_at,
-            type: 'text',
+            type: newMsg.type || 'text',
           }];
         });
       })
@@ -115,6 +118,46 @@ export default function Chat() {
     // Persist to Supabase
     await sendMsg(id, currentUserId, text);
     setSending(false);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+
+    try {
+      const compressed = await compressImage(file);
+      const filePath = `chat-attachments/${id}/${Date.now()}-${file.name}`;
+      
+      const { error: uploadErr } = await supabase.storage
+        .from('task-photos')
+        .upload(filePath, compressed, { upsert: true });
+
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage
+        .from('task-photos')
+        .getPublicUrl(filePath);
+
+      if (urlData?.publicUrl) {
+        // Optimistic UI update
+        const optimistic = {
+          id: `msg-new-${Date.now()}`,
+          senderId: currentUserId,
+          text: urlData.publicUrl,
+          timestamp: new Date().toISOString(),
+          type: 'image',
+        };
+        setMessages(prev => [...prev, optimistic]);
+
+        // Persist message
+        await sendMsg(id, currentUserId, urlData.publicUrl, 'image');
+      }
+    } catch (err) {
+      alert('Failed to upload image: ' + err.message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   if (loading) {
@@ -240,7 +283,11 @@ export default function Chat() {
                       : 'bg-dark-surface text-white rounded-3xl rounded-bl-md border border-border-light'
                     }`}
                 >
-                  {msg.text}
+                  {msg.type === 'image' ? (
+                    <img src={msg.text} alt="Attachment" className="max-w-full rounded-2xl border border-border shadow-sm max-h-60 object-cover" />
+                  ) : (
+                    msg.text
+                  )}
                   <div className={`text-[9px] mt-1.5 font-medium ${isMine ? 'text-dark/50 text-right' : 'text-charcoal-light/60'}`}>
                     {formatTime(msg.timestamp)}
                     {isMine && ' ✓✓'}
@@ -276,8 +323,23 @@ export default function Chat() {
         style={{ paddingBottom: 'calc(16px + var(--safe-area-bottom, 0px))' }}
       >
         <div className="flex items-center gap-3">
-          <button className="w-11 h-11 rounded-full bg-dark-surface border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors flex-shrink-0">
-            <Image size={20} />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingImage}
+            className="w-11 h-11 rounded-full bg-dark-surface border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors flex-shrink-0 disabled:opacity-50"
+          >
+            {uploadingImage ? (
+              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Image size={20} />
+            )}
           </button>
 
           <div className="flex-1 relative">

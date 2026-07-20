@@ -90,3 +90,13 @@ export async function countBidsForTask(taskId) {
   if (error) { console.error('countBidsForTask error:', error); return 0; }
   return count || 0;
 }
+
+// Delete / withdraw a bid
+export async function deleteBid(bidId) {
+  const { error } = await supabase
+    .from('bids')
+    .delete()
+    .eq('id', bidId);
+  if (error) { console.error('deleteBid error:', error); return false; }
+  return true;
+}

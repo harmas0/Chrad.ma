@@ -37,3 +37,13 @@ export async function submitSupportTicket({ userId, subject, message }) {
   }
   return data;
 }
+
+export async function fetchReviewsForUser(userId) {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*, profiles:reviewer_id(*)')
+    .eq('reviewee_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('fetchReviewsForUser error:', error); return []; }
+  return data;
+}

@@ -10,6 +10,24 @@ import { supabase } from '../utils/supabaseClient';
 import ReportDispute from '../components/ReportDispute';
 import { useI18n } from '../utils/i18n';
 import { submitReview } from '../data/reviewsApi';
+import { compressImage } from '../utils/imageCompressor';
+
+// Helper to compute distance in meters between two lat/lng coordinates
+function getHaversineDistance(coords1, coords2) {
+  if (!coords1 || !coords2) return null;
+  const R = 6371e3; // metres
+  const phi1 = (coords1.lat * Math.PI) / 180;
+  const phi2 = (coords2.lat * Math.PI) / 180;
+  const deltaPhi = ((coords2.lat - coords1.lat) * Math.PI) / 180;
+  const deltaLambda = ((coords2.lng - coords1.lng) * Math.PI) / 180;
+
+  const a =
+    Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // in metres
+}
 
 export default function ActiveTask() {
   const { user } = useAuth();
@@ -25,12 +43,100 @@ export default function ActiveTask() {
   const [routeInfo, setRouteInfo] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('accepted');
+  const isRunner = user && task && user.id === task.acceptedRunnerId;
+  const isClient = user && task && user.id === task.clientId;
   const lastDbWriteRef = useRef(0);
+
+  // Geofencing states
+  const [geofenceInfo, setGeofenceInfo] = useState(null);
+
+  // Dev simulation states
+  const [simRoute, setSimRoute] = useState([]);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  // Simulate movement along OSRM route in Dev mode
+  useEffect(() => {
+    const isRunner = user?.id === task?.acceptedRunnerId;
+    if (!isSimulating || simRoute.length === 0 || !isRunner) return;
+
+    let currentStep = 0;
+    const trackingChannel = supabase.channel(`task-${id}-tracking`);
+
+    const interval = setInterval(async () => {
+      if (currentStep >= simRoute.length) {
+        setIsSimulating(false);
+        clearInterval(interval);
+        return;
+      }
+
+      const nextPos = { lat: simRoute[currentStep][0], lng: simRoute[currentStep][1] };
+      setRunnerPos(nextPos);
+
+      // Broadcast simulated position to client
+      trackingChannel.send({
+        type: 'broadcast',
+        event: 'location',
+        payload: nextPos,
+      });
+
+      // Throttled database persist
+      const now = Date.now();
+      if (now - lastDbWriteRef.current >= 15000) { // faster database writes during simulation
+        lastDbWriteRef.current = now;
+        try {
+          await supabase.from('runner_locations').upsert({
+            task_id: id,
+            runner_id: user.id,
+            lat: nextPos.lat,
+            lng: nextPos.lng,
+          }, { onConflict: 'task_id' });
+        } catch (e) {
+          console.error('Simulation: Failed to persist location:', e);
+        }
+      }
+
+      currentStep++;
+    }, 450); // fast simulation step tick
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isSimulating, simRoute, task?.acceptedRunnerId, id, user?.id]);
+
+  // Compute geofence proximity alert
+  useEffect(() => {
+    if (!task || !runnerPos) {
+      setGeofenceInfo(null);
+      return;
+    }
+
+    const targetCoords = (currentStatus === 'accepted' || !task.destination) ? task.pickup : task.destination;
+    if (!targetCoords) {
+      setGeofenceInfo(null);
+      return;
+    }
+
+    const dist = getHaversineDistance(runnerPos, targetCoords);
+    if (dist !== null && dist <= 150) {
+      setGeofenceInfo({
+        distance: dist,
+        type: (currentStatus === 'accepted' || !task.destination) ? 'pickup' : 'destination',
+      });
+    } else {
+      setGeofenceInfo(null);
+    }
+  }, [runnerPos?.lat, runnerPos?.lng, task?.id, currentStatus]);
 
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  const [deliveryPhotoFile, setDeliveryPhotoFile] = useState(null);
+  const [deliveryPhotoPreview, setDeliveryPhotoPreview] = useState(null);
+  const [uploadingDeliveryPhoto, setUploadingDeliveryPhoto] = useState(false);
+  const [showDeliveryUpload, setShowDeliveryUpload] = useState(false);
+  const deliveryInputRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,8 +174,6 @@ export default function ActiveTask() {
 
   useEffect(() => {
     if (!task || !user) return;
-    const isClient = user.id === task.clientId;
-    const isRunner = user.id === task.acceptedRunnerId;
 
     const channel = supabase.channel(`task-${id}-tracking`);
 
@@ -77,6 +181,7 @@ export default function ActiveTask() {
       // Runner: Watch GPS, broadcast location, and persist to DB
       let watchId;
       const handlePosition = async (pos) => {
+        if (isSimulating) return; // skip if simulating
         const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setRunnerPos(newPos);
         // Broadcast to client
@@ -107,7 +212,7 @@ export default function ActiveTask() {
       };
 
       channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED' && !isSimulating) {
           if (navigator.geolocation) {
             watchId = navigator.geolocation.watchPosition(handlePosition, handleError, {
               enableHighAccuracy: true,
@@ -149,7 +254,7 @@ export default function ActiveTask() {
         supabase.removeChannel(channel);
       };
     }
-  }, [task, user, id]);
+  }, [task, user, id, isSimulating]);
 
   const handleStatusChange = async (newStatus) => {
     setCurrentStatus(newStatus);
@@ -177,25 +282,41 @@ export default function ActiveTask() {
     );
   }
 
-  const isClient = user?.id === task.clientId;
-  const isRunner = user?.id === task.acceptedRunnerId;
   const canConfirm = isClient && currentStatus === 'delivered';
+  const reportedUserId = isRunner ? task.clientId : task.acceptedRunnerId;
+  const canReport = runner && !['confirmed', 'cancelled'].includes(currentStatus) && (isClient || isRunner);
 
   return (
     <div className="min-h-screen bg-dark flex flex-col pt-safe">
       {/* Header */}
-      <div className="sticky top-0 z-40 glass border-b border-border px-5 py-4 flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-colors"
-          id="active-back"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-[18px] font-bold text-white tracking-tight">{t('live_tracking')}</h1>
-          <p className="text-[11px] text-accent font-bold uppercase tracking-wider">{t('runner_active')}</p>
+      <div className="sticky top-0 z-40 glass border-b border-border px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-colors"
+            id="active-back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-[18px] font-bold text-white tracking-tight">{t('live_tracking')}</h1>
+            <p className="text-[11px] text-accent font-bold uppercase tracking-wider">{t('runner_active')}</p>
+          </div>
         </div>
+
+        {/* Dev Mode Simulation Controller */}
+        {window.location.hostname === 'localhost' && isRunner && simRoute.length > 0 && (
+          <button
+            onClick={() => setIsSimulating(!isSimulating)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border z-[1000]
+              ${isSimulating 
+                ? 'bg-danger/20 border-danger text-danger animate-pulse'
+                : 'bg-accent/10 border-accent/30 text-accent hover:bg-accent/20'
+              }`}
+          >
+            {isSimulating ? 'Stop Sim' : 'Simulate Trip'}
+          </button>
+        )}
       </div>
 
       {/* Map Area */}
@@ -203,16 +324,42 @@ export default function ActiveTask() {
         <MapView
           pickupCoords={task.pickup}
           destCoords={task.category !== 'custom' ? task.destination : null}
+          waypoints={task.waypoints || []}
           runnerCoords={runnerPos}
           height="100%"
           darkMode
           showUserLocation
           showRouteInfo={true}
+          onRouteCalculated={(stats) => {
+            if (stats?.coordinates) {
+              setSimRoute(stats.coordinates);
+            }
+          }}
         />
       </div>
 
       {/* Bottom Panel */}
       <div className="px-5 py-8 animate-slide-up relative z-10 -mt-6">
+        {/* Geofence Proximity Alert Banner */}
+        {geofenceInfo && (
+          <div className="glass-panel border-2 border-accent/40 bg-accent/5 rounded-3xl p-5 flex items-center gap-3.5 shadow-[0_8px_32px_rgba(0,255,135,0.15)] animate-bounce-in mb-6">
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-[20px] flex-shrink-0 animate-pulse">
+              🔔
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-[14px] font-black text-white leading-tight">
+                {isRunner ? 'You have arrived!' : 'Runner is on-site!'}
+              </h4>
+              <p className="text-[11px] text-charcoal-light font-medium mt-1 leading-snug">
+                {isRunner 
+                  ? `You are within ${Math.round(geofenceInfo.distance)}m of the ${geofenceInfo.type === 'pickup' ? 'pickup point' : 'destination'}.`
+                  : `The runner is ${Math.round(geofenceInfo.distance)}m from the ${geofenceInfo.type === 'pickup' ? 'pickup point' : 'destination'}.`
+                }
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Status Timeline */}
         <div className="glass-panel rounded-3xl p-6 border border-border-light mb-6">
           <StatusTimeline currentStatus={currentStatus} />
@@ -282,7 +429,7 @@ export default function ActiveTask() {
 
         {/* Status action buttons */}
         {isRunner && (
-          <div className="flex gap-4 mb-6">
+          <div className="flex gap-4 mb-6 w-full">
             {currentStatus === 'accepted' && (
               <button
                 onClick={() => handleStatusChange('picked_up')}
@@ -300,18 +447,144 @@ export default function ActiveTask() {
               </button>
             )}
             {currentStatus === 'en_route' && (
-              <button
-                onClick={() => handleStatusChange('delivered')}
-                className="flex-1 py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
-              >
-                ✅ {t('mark_delivered')}
-              </button>
+              <div className="w-full flex flex-col gap-3">
+                {showDeliveryUpload ? (
+                  <div className="glass-panel border border-accent/30 rounded-3xl p-5 text-center relative overflow-hidden w-full">
+                    <h4 className="text-[15px] font-extrabold text-white mb-2">Upload Delivery Proof</h4>
+                    <p className="text-[12px] text-charcoal-light mb-4">Please take or upload a photo of the delivered item / location.</p>
+                    
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      ref={deliveryInputRef}
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setDeliveryPhotoFile(file);
+                          const reader = new FileReader();
+                          reader.onloadend = () => setDeliveryPhotoPreview(reader.result);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+
+                    {deliveryPhotoPreview ? (
+                      <div className="relative mb-4 w-full aspect-[4/3] rounded-2xl overflow-hidden border border-border">
+                        <img src={deliveryPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => {
+                            setDeliveryPhotoFile(null);
+                            setDeliveryPhotoPreview(null);
+                          }}
+                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-dark/80 flex items-center justify-center text-white"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => deliveryInputRef.current?.click()}
+                        className="w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-border hover:border-accent/50 bg-dark flex flex-col items-center justify-center gap-2 mb-4"
+                      >
+                        <Camera className="text-charcoal-light" size={28} />
+                        <span className="text-[12px] text-charcoal-light font-bold">Take Delivery Photo</span>
+                      </button>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setShowDeliveryUpload(false);
+                          setDeliveryPhotoFile(null);
+                          setDeliveryPhotoPreview(null);
+                        }}
+                        className="flex-1 py-3 rounded-xl border border-border text-charcoal-light font-bold text-[13px]"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!deliveryPhotoFile) return;
+                          setUploadingDeliveryPhoto(true);
+                          try {
+                            const compFile = await compressImage(deliveryPhotoFile);
+                            const filePath = `delivery-proof/${task.id}-${Date.now()}.jpg`;
+                            const { error: uploadErr } = await supabase.storage
+                              .from('task-photos')
+                              .upload(filePath, compFile, { upsert: true });
+                            if (uploadErr) throw uploadErr;
+
+                            const { data: urlData } = supabase.storage
+                              .from('task-photos')
+                              .getPublicUrl(filePath);
+
+                            if (urlData?.publicUrl) {
+                              const success = await updateTaskStatus(task.id, 'delivered', {
+                                delivery_photo_url: urlData.publicUrl,
+                              });
+                              if (success) {
+                                setCurrentStatus('delivered');
+                                setTask(prev => ({ ...prev, status: 'delivered', deliveryPhotoUrl: urlData.publicUrl }));
+                                setShowDeliveryUpload(false);
+                              } else {
+                                alert('Failed to mark task as delivered');
+                              }
+                            }
+                          } catch (err) {
+                            alert('Upload failed: ' + err.message);
+                          } finally {
+                            setUploadingDeliveryPhoto(false);
+                          }
+                        }}
+                        disabled={!deliveryPhotoFile || uploadingDeliveryPhoto}
+                        className="flex-1 btn-accent py-3 rounded-xl text-[13px] font-bold flex items-center justify-center gap-1.5"
+                      >
+                        {uploadingDeliveryPhoto ? (
+                          <div className="w-4 h-4 border-2 border-dark border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          'Submit & Deliver'
+                        )}
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setUploadingDeliveryPhoto(true);
+                        try {
+                          const success = await updateTaskStatus(task.id, 'delivered');
+                          if (success) {
+                            setCurrentStatus('delivered');
+                            setTask(prev => ({ ...prev, status: 'delivered' }));
+                            setShowDeliveryUpload(false);
+                          }
+                        } catch (err) {
+                          alert('Failed to mark delivered: ' + err.message);
+                        } finally {
+                          setUploadingDeliveryPhoto(false);
+                        }
+                      }}
+                      className="text-[11px] text-charcoal-light font-bold hover:text-white mt-3 block mx-auto underline"
+                    >
+                      Skip photo & mark delivered
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowDeliveryUpload(true)}
+                    className="w-full py-4 rounded-xl bg-dark-surface text-charcoal-light font-bold text-[14px] border border-border hover:bg-surface hover:text-white transition-all uppercase tracking-wider shadow-sm"
+                  >
+                    ✅ {t('mark_delivered')}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
 
         {/* Report Problem Button */}
-        {runner && !['confirmed', 'cancelled'].includes(currentStatus) && (
+        {canReport && (
           <button
             onClick={() => setShowReport(true)}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[13px] font-bold uppercase tracking-wider mb-6"
@@ -328,14 +601,26 @@ export default function ActiveTask() {
               <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
               <span className="text-5xl block mb-3 drop-shadow-lg relative z-10">📸</span>
               <h4 className="text-[18px] font-extrabold text-white mb-2 relative z-10">{t('delivery_photo')}</h4>
-              <p className="text-[14px] text-charcoal-light font-medium mb-5 relative z-10">{t('runner_uploaded_photo')}</p>
+              <p className="text-[14px] text-charcoal-light font-medium mb-5 relative z-10">
+                {task.deliveryPhotoUrl ? 'Runner uploaded delivery proof.' : t('runner_uploaded_photo')}
+              </p>
 
-              {/* Placeholder photo area */}
-              <div className="w-full h-48 bg-dark border-2 border-dashed border-border-light rounded-2xl flex items-center justify-center mb-5 relative z-10">
-                <div className="text-center">
-                  <Camera size={40} className="text-muted mx-auto mb-2 opacity-50" />
-                  <span className="text-[13px] text-muted font-medium">{t('verification_photo')}</span>
-                </div>
+              {/* Proof of delivery photo area */}
+              <div className="w-full mb-5 relative z-10">
+                {task.deliveryPhotoUrl ? (
+                  <img
+                    src={task.deliveryPhotoUrl}
+                    alt="Delivery Proof"
+                    className="w-full h-56 object-cover rounded-2xl border border-border-light shadow-lg"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-dark border-2 border-dashed border-border-light rounded-2xl flex items-center justify-center">
+                    <div className="text-center">
+                      <Camera size={40} className="text-muted mx-auto mb-2 opacity-50" />
+                      <span className="text-[13px] text-muted font-medium">{t('verification_photo')}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -420,10 +705,10 @@ export default function ActiveTask() {
       </div>
 
       {/* Report Dispute Modal */}
-      {showReport && task && runner && (
+      {showReport && task && reportedUserId && (
         <ReportDispute
           taskId={task.id}
-          reportedUserId={runner.id}
+          reportedUserId={reportedUserId}
           onClose={() => setShowReport(false)}
           onSubmitted={() => {
             setShowReport(false);

@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { fetchPlatformSettings } from './settingsApi';
 
 // =============================================
 // DASHBOARD STATS
@@ -172,8 +173,13 @@ export async function uploadKYCDocument(userId, file, docType) {
 
 // Submit KYC application
 export async function submitKYC(userId, idUrl, selfieUrl, vehicleUrl) {
+  const settings = await fetchPlatformSettings();
+  const isAutoApprove = settings?.autoApproveKYC;
+
   const { error } = await supabase.from('profiles').update({
-    kyc_status: 'pending',
+    kyc_status: isAutoApprove ? 'approved' : 'pending',
+    verified: isAutoApprove ? true : false,
+    kyc_reviewed_at: isAutoApprove ? new Date().toISOString() : null,
     kyc_id_url: idUrl,
     kyc_selfie_url: selfieUrl,
     kyc_vehicle_url: vehicleUrl || null,

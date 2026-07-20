@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, MessageCircle, Star, Send, Check } from 'lucide-react';
 import { fetchTaskById, updateTaskStatus, TASK_CATEGORIES } from '../data/tasksApi';
-import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid } from '../data/bidsApi';
+import { fetchBidsForTask, updateBidStatus, updateBidPriceAndMessage, createBid, deleteBid } from '../data/bidsApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import BidCard from '../components/BidCard';
@@ -161,6 +161,32 @@ export default function TaskDetail() {
     setPlacingBid(false);
   };
 
+  const handleCancelBid = async () => {
+    if (!runnerBid) return;
+    const confirmed = window.confirm('Are you sure you want to withdraw your bid?');
+    if (!confirmed) return;
+    const success = await deleteBid(runnerBid.id);
+    if (success) {
+      const bVal = await fetchBidsForTask(id);
+      setBids(bVal);
+      alert('Bid withdrawn successfully.');
+    } else {
+      alert('Failed to withdraw bid.');
+    }
+  };
+
+  const handleCancelTask = async () => {
+    const confirmed = window.confirm('Are you sure you want to cancel this task?');
+    if (!confirmed) return;
+    const success = await updateTaskStatus(task.id, 'cancelled');
+    if (success) {
+      setTask(prev => ({ ...prev, status: 'cancelled' }));
+      alert('Task cancelled successfully.');
+    } else {
+      alert('Failed to cancel task.');
+    }
+  };
+
   return (
     <div className="pb-28 min-h-screen bg-dark pt-safe">
       {/* Top bar */}
@@ -182,6 +208,7 @@ export default function TaskDetail() {
           <MapView
             pickupCoords={task.pickup}
             destCoords={task.category !== 'custom' ? task.destination : null}
+            waypoints={task.waypoints || []}
             height="100%"
             darkMode
             showRouteInfo={true}
@@ -337,7 +364,10 @@ export default function TaskDetail() {
                     </div>
                     <p className="text-[16px] font-bold text-white mb-1">{t('proposed_offer_label')}</p>
                     <p className="text-[20px] font-black text-accent mb-4">{formatPrice(runnerBid.proposedPrice)}</p>
-                    <button className="py-3 px-6 rounded-xl border border-border text-charcoal hover:text-white transition-colors text-[13px] font-bold">
+                    <button
+                      onClick={handleCancelBid}
+                      className="py-3 px-6 rounded-xl border border-border text-charcoal hover:text-white transition-colors text-[13px] font-bold"
+                    >
                       {t('cancel_bid_btn')}
                     </button>
                   </div>
@@ -389,6 +419,15 @@ export default function TaskDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {isOwner && (task.status === 'open' || task.status === 'bidding') && (
+          <button
+            onClick={handleCancelTask}
+            className="w-full mt-6 py-4 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[14px] font-bold uppercase tracking-wider"
+          >
+            Cancel Task
+          </button>
         )}
       </div>
 

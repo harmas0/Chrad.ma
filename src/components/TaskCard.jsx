@@ -30,14 +30,22 @@ function timeAgo(dateString) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-export default function TaskCard({ task, className = '' }) {
+export default function TaskCard({ task, className = '', onClick }) {
   const navigate = useNavigate();
   const { formatPrice } = useI18n();
   const status = statusStyles[task.status] || statusStyles.open;
 
+  const handleClick = (e) => {
+    if (onClick) {
+      onClick(e);
+    } else {
+      navigate(`/task/${task.id}`);
+    }
+  };
+
   return (
     <button
-      onClick={() => navigate(`/task/${task.id}`)}
+      onClick={handleClick}
       className={`w-full text-left glass-panel rounded-3xl p-6 card-hover cursor-pointer border border-border-light relative overflow-hidden ${className}`}
       id={`task-card-${task.id}`}
     >

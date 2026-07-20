@@ -12,6 +12,24 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/([a-z])\.basemaps\.cartocdn\.com\/(.*)/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cartodb-map-tiles',
+              expiration: {
+                maxEntries: 1000,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'Ghrad — غرض',
         short_name: 'Ghrad',
@@ -43,4 +61,13 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      external: [
+        '@capacitor/push-notifications',
+        'firebase/app',
+        'firebase/messaging',
+      ],
+    },
+  },
 })

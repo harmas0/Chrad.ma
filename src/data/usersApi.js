@@ -31,3 +31,15 @@ export async function fetchCurrentUser() {
   return null;
 }
 
+// Update the FCM token for a user profile
+export async function updateFcmToken(userId, fcmToken) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ fcm_token: fcmToken })
+    .eq('id', userId);
+  if (error) {
+    console.error('updateFcmToken error:', error);
+    return false;
+  }
+  return true;
+}

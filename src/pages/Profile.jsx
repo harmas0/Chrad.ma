@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard, Globe } from 'lucide-react';
 import { fetchCurrentUser } from '../data/usersApi';
 import { fetchTasks } from '../data/tasksApi';
+import { fetchReviewsForUser } from '../data/reviewsApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n, LANGUAGES, CURRENCIES } from '../utils/i18n';
@@ -24,6 +25,8 @@ export default function Profile() {
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
   const [submittingSupport, setSubmittingSupport] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   async function loadData() {
     setLoading(true);
@@ -40,9 +43,15 @@ export default function Profile() {
           phone: activeProfile.phone || '',
           bio: activeProfile.bio || '',
         });
+
+        setLoadingReviews(true);
+        const userReviews = await fetchReviewsForUser(activeProfile.id);
+        setReviews(userReviews);
+        setLoadingReviews(false);
       }
     } catch (err) {
       console.error('[Profile] Error loading data:', err);
+      setLoadingReviews(false);
     } finally {
       setLoading(false);
     }
@@ -327,6 +336,43 @@ export default function Profile() {
                   <CheckCircle size={14} className="text-accent" />
                   <span className="text-[14px] font-bold text-accent">{task.offeredPrice} MAD</span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recent Reviews & Feedback */}
+      {!loadingReviews && reviews.length > 0 && (
+        <section className="px-5 mb-8">
+          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">Recent Reviews</h3>
+          <div className="glass-panel rounded-3xl p-5 border border-border-light flex flex-col gap-4">
+            {reviews.slice(0, 5).map((rev) => (
+              <div key={rev.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-dark-surface border border-border flex items-center justify-center text-[11px] font-black text-accent uppercase">
+                      {rev.profiles?.initials || rev.profiles?.name?.slice(0, 2) || '??'}
+                    </div>
+                    <div>
+                      <span className="text-[13px] font-bold text-white block leading-tight">
+                        {rev.profiles?.name || 'Anonymous User'}
+                      </span>
+                      <span className="text-[10px] text-charcoal-light font-medium">
+                        {new Date(rev.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 bg-warning/10 px-2 py-0.5 rounded-lg border border-warning/20">
+                    <Star size={11} className="text-warning fill-warning" />
+                    <span className="text-[11px] font-bold text-warning">{Number(rev.rating).toFixed(1)}</span>
+                  </div>
+                </div>
+                {rev.comment && (
+                  <p className="text-[12px] text-charcoal-light font-medium leading-relaxed pl-10 italic">
+                    "{rev.comment}"
+                  </p>
+                )}
               </div>
             ))}
           </div>

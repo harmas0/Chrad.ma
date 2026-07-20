@@ -5,13 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:admin": "vite --config vite.admin.config.js",
     "build": "vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "build:admin": "vite build --config vite.admin.config.js",
+    "preview": "vite preview",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.2",
+    "@capacitor/push-notifications": "^8.0.0",
     "@supabase/supabase-js": "^2.110.3",
+    "firebase": "^10.8.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",

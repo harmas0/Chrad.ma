@@ -46,6 +46,17 @@ const AppContent = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+  // Register push notifications (FCM) dynamically upon login
+  useEffect(() => {
+    if (user?.id) {
+      import('./utils/notifications').then(({ initializePushNotifications }) => {
+        initializePushNotifications(user.id);
+      }).catch((err) => {
+        console.error('Failed to load notifications coordinator:', err);
+      });
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     async function checkMaintenance() {
       const data = await fetchPlatformSettings();

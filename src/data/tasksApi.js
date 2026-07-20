@@ -60,6 +60,8 @@ function rowToTask(row) {
     acceptedBid: row.accepted_bid,
     acceptedRunnerId: row.accepted_runner_id,
     distance: row.distance ? Number(row.distance) : null,
+    deliveryPhotoUrl: row.delivery_photo_url,
+    waypoints: row.waypoints || [],
     // bids will be fetched separately
     bids: [],
   };
@@ -137,6 +139,7 @@ export async function createTask(taskData) {
     destination_address: taskData.destination?.address || null,
     destination_lat: taskData.destination?.lat || null,
     destination_lng: taskData.destination?.lng || null,
+    waypoints: taskData.waypoints || [],
     offered_price: taskData.price,
     item_budget: taskData.itemBudget || null,
     status: 'open',

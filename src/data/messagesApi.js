@@ -65,7 +65,7 @@ export async function fetchMessagesForConversation(conversationId) {
 }
 
 // Send a new message
-export async function sendMessage(conversationId, senderId, text) {
+export async function sendMessage(conversationId, senderId, text, type = 'text') {
   const id = `msg-${Date.now()}`;
   const now = new Date().toISOString();
 
@@ -76,17 +76,20 @@ export async function sendMessage(conversationId, senderId, text) {
     sender_id: senderId,
     text,
     timestamp: now,
-    type: 'text',
+    type,
   });
   if (msgError) { console.error('sendMessage error:', msgError); return null; }
 
   // Update conversation's last message
   await supabase
     .from('conversations')
-    .update({ last_message: text, last_message_time: now })
+    .update({ 
+      last_message: type === 'image' ? '📷 Photo' : text, 
+      last_message_time: now 
+    })
     .eq('id', conversationId);
 
-  return { id, senderId, text, timestamp: now, type: 'text' };
+  return { id, senderId, text, timestamp: now, type };
 }
 
 // Fetch or create conversation between client and runner for a task

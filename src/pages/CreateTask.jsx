@@ -29,6 +29,7 @@ export default function CreateTask() {
     photos: [],
     pickup: LOCATIONS.maarif,
     destination: LOCATIONS.anfa,
+    waypoints: [],
     price: 50,
     itemBudget: 0,
   });
@@ -48,47 +49,46 @@ export default function CreateTask() {
     load();
   }, []);
 
-  useEffect(() => {
-    if (step === 2 && form.pickup && form.destination && form.category !== 'custom') {
-      let cancelled = false;
-      async function calc() {
-        setCalculatingRoute(true);
-        const { calculateRouteDistance } = await import('../utils/routing');
-        const stats = await calculateRouteDistance(form.pickup, form.destination);
-        if (cancelled) return;
-        setRouteStats(stats);
-        setCalculatingRoute(false);
-        if (stats) {
-          // Suggested base price: 15 MAD base + 5 MAD/km, rounded to nearest 5 MAD
-          const suggested = Math.max(20, Math.round((15 + stats.distanceKm * 5) / 5) * 5);
-          update('price', suggested);
-        }
-      }
-      calc();
-      return () => { cancelled = true; };
-    } else {
-      setRouteStats(null);
-    }
-  }, [step, form.pickup?.lat, form.pickup?.lng, form.destination?.lat, form.destination?.lng, form.category]);
-
   const [activeTab, setActiveTab] = useState('pickup');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [locatingGPS, setLocatingGPS] = useState(false);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  // Debounced Search Autocomplete Effect
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
     setSearching(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}+Morocco&limit=5`);
-      const data = await res.json();
-      setSearchResults(data);
-    } catch (err) {
-      console.error('Search error:', err);
-    } finally {
-      setSearching(false);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}+Morocco&limit=5`);
+        const data = await res.json();
+        setSearchResults(data);
+      } catch (err) {
+        console.error('Search error:', err);
+      } finally {
+        setSearching(false);
+      }
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSearch = (e) => {
+    e.preventDefault(); // Autocomplete handles search automatically
+  };
+
+  const updateLocation = (typeOrTab, loc) => {
+    if (typeOrTab.startsWith('waypoint-')) {
+      const idx = parseInt(typeOrTab.split('-')[1], 10);
+      const newWps = [...form.waypoints];
+      newWps[idx] = { ...newWps[idx], ...loc };
+      update('waypoints', newWps);
+    } else {
+      update(typeOrTab, loc);
     }
   };
 
@@ -99,7 +99,7 @@ export default function CreateTask() {
       name: result.display_name.split(',')[0],
       address: result.display_name,
     };
-    update(activeTab, loc);
+    updateLocation(activeTab, loc);
     setSearchResults([]);
     setSearchQuery('');
   };
@@ -112,13 +112,12 @@ export default function CreateTask() {
       name: 'Custom Location',
       address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
     };
-    update(activeTab, loc);
-    // Reverse geocode asynchronously to get a readable address
+    updateLocation(activeTab, loc);
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       const data = await res.json();
       if (data && data.display_name) {
-        update(activeTab, {
+        updateLocation(activeTab, {
           lat,
           lng,
           name: data.name || data.display_name.split(',')[0],
@@ -141,12 +140,12 @@ export default function CreateTask() {
           name: 'My Location',
           address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
         };
-        update(activeTab, loc);
+        updateLocation(activeTab, loc);
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           if (data?.display_name) {
-            update(activeTab, {
+            updateLocation(activeTab, {
               lat, lng,
               name: data.name || data.display_name.split(',')[0],
               address: data.display_name,
@@ -161,6 +160,42 @@ export default function CreateTask() {
       () => setLocatingGPS(false),
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleMarkerDrag = async ({ type, latlng }) => {
+    const { lat, lng } = latlng;
+    const loc = {
+      lat,
+      lng,
+      name: 'Custom Location',
+      address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+    };
+    updateLocation(type, loc);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      if (data && data.display_name) {
+        updateLocation(type, {
+          lat,
+          lng,
+          name: data.name || data.display_name.split(',')[0],
+          address: data.display_name,
+        });
+      }
+    } catch (err) {
+      console.error('Reverse geocode error:', err);
+    }
+  };
+
+  const handleRouteCalculated = (stats) => {
+    if (stats) {
+      setRouteStats(stats);
+      // Suggested base price: 15 MAD base + 5 MAD/km, rounded to nearest 5 MAD
+      const suggested = Math.max(20, Math.round((15 + stats.distanceKm * 5) / 5) * 5);
+      update('price', suggested);
+    } else {
+      setRouteStats(null);
+    }
   };
 
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -211,6 +246,7 @@ export default function CreateTask() {
         photos: uploadedUrls,
         pickup: form.pickup,
         destination: form.destination,
+        waypoints: form.waypoints,
         price: form.price,
         itemBudget: form.itemBudget,
         distance: routeStats?.distanceKm || null,
@@ -350,29 +386,80 @@ export default function CreateTask() {
 
             {/* Tab selection */}
             {form.category !== 'custom' && (
-              <div className="grid grid-cols-2 gap-3 mb-5 bg-dark-surface p-1.5 rounded-2xl border border-border">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('pickup')}
-                  className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
-                    ${activeTab === 'pickup'
-                      ? 'bg-accent text-dark shadow-[0_0_15px_rgba(0,255,135,0.3)]'
-                      : 'text-charcoal-light hover:text-white'
-                    }`}
-                >
-                  📍 {t('pickup_label')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('destination')}
-                  className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
-                    ${activeTab === 'destination'
-                      ? 'bg-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                      : 'text-charcoal-light hover:text-white'
-                    }`}
-                >
-                  🏁 {t('destination_label')}
-                </button>
+              <div className="flex flex-col gap-4 mb-5">
+                <div className="grid grid-cols-2 gap-3 bg-dark-surface p-1.5 rounded-2xl border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pickup')}
+                    className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
+                      ${activeTab === 'pickup'
+                        ? 'bg-accent text-dark shadow-[0_0_15px_rgba(0,255,135,0.3)]'
+                        : 'text-charcoal-light hover:text-white'
+                      }`}
+                  >
+                    📍 {t('pickup_label')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('destination')}
+                    className={`py-3 px-4 rounded-xl text-[14px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2
+                      ${activeTab === 'destination'
+                        ? 'bg-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                        : 'text-charcoal-light hover:text-white'
+                      }`}
+                  >
+                    🏁 {t('destination_label')}
+                  </button>
+                </div>
+
+                {/* Waypoints / Stops list UI */}
+                <div className="bg-dark-surface rounded-2xl p-4 border border-border">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[12px] text-charcoal-light font-black uppercase tracking-wider">Stops/Waypoints ({form.waypoints.length})</span>
+                    {form.waypoints.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newWps = [...form.waypoints, { lat: 33.5750, lng: -7.6250, name: 'Intermediate Stop', address: 'Bourgogne, Casablanca' }];
+                          update('waypoints', newWps);
+                          setActiveTab(`waypoint-${newWps.length - 1}`);
+                        }}
+                        className="text-[11px] text-accent font-black uppercase tracking-wider bg-accent/10 px-3 py-1.5 rounded-lg border border-accent/20 transition-all hover:bg-accent/20 active:scale-95"
+                      >
+                        + Add Stop
+                      </button>
+                    )}
+                  </div>
+                  {form.waypoints.length === 0 ? (
+                    <p className="text-[12px] text-charcoal-light font-medium italic">No extra stops added yet.</p>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {form.waypoints.map((wp, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-dark p-3 rounded-xl border border-border">
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab(`waypoint-${idx}`)}
+                            className={`flex-1 text-left min-w-0 text-[13px] font-bold uppercase tracking-wide truncate
+                              ${activeTab === `waypoint-${idx}` ? 'text-accent' : 'text-white'}`}
+                          >
+                            📍 Stop {idx + 1}: {wp.name || wp.address.split(',')[0]}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newWps = form.waypoints.filter((_, i) => i !== idx);
+                              update('waypoints', newWps);
+                              setActiveTab('pickup');
+                            }}
+                            className="text-danger hover:text-white px-2 font-black text-[18px] transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -431,12 +518,19 @@ export default function CreateTask() {
               <MapView
                 pickupCoords={form.pickup}
                 destCoords={form.category !== 'custom' ? form.destination : null}
+                waypoints={form.category !== 'custom' ? form.waypoints : []}
                 height="100%"
                 darkMode
-                onClick={handleMapClick}
+                onMapClick={handleMapClick}
+                draggablePickup={form.category !== 'custom' ? activeTab === 'pickup' : true}
+                draggableDestination={form.category !== 'custom' ? activeTab === 'destination' : false}
+                onMarkerDrag={handleMarkerDrag}
+                onRouteCalculated={handleRouteCalculated}
               />
               <div className="absolute bottom-3 left-3 bg-dark/95 border border-border px-3 py-1.5 rounded-lg backdrop-blur-sm z-30 text-[11px] font-bold text-white">
-                {activeTab === 'pickup' ? '📍 Drag to Set Pickup' : '🏁 Drag to Set Destination'}
+                {activeTab === 'pickup' && '📍 Drag green pin to move pickup'}
+                {activeTab === 'destination' && '🏁 Drag red flag to move destination'}
+                {activeTab.startsWith('waypoint-') && '📍 Drag yellow pin to move stop'}
               </div>
             </div>
 
@@ -444,10 +538,14 @@ export default function CreateTask() {
               <div className="text-xl">🗺️</div>
               <div className="min-w-0">
                 <p className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                  {activeTab === 'pickup' ? 'Selected Pickup' : 'Selected Destination'}
+                  {activeTab === 'pickup' && 'Selected Pickup'}
+                  {activeTab === 'destination' && 'Selected Destination'}
+                  {activeTab.startsWith('waypoint-') && `Selected Stop ${parseInt(activeTab.split('-')[1], 10) + 1}`}
                 </p>
                 <p className="text-[14px] text-white font-medium truncate">
-                  {activeTab === 'pickup' ? form.pickup.address : form.destination?.address || 'Not set'}
+                  {activeTab === 'pickup' && form.pickup.address}
+                  {activeTab === 'destination' && (form.destination?.address || 'Not set')}
+                  {activeTab.startsWith('waypoint-') && (form.waypoints[parseInt(activeTab.split('-')[1], 10)]?.address || 'Not set')}
                 </p>
               </div>
             </div>

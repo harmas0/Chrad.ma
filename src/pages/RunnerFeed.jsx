@@ -15,6 +15,33 @@ export default function RunnerFeed() {
   const [searchQuery, setSearchQuery] = useState('');
   const [allTasks, setAllTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  const filteredTasks = allTasks.filter((task) => {
+    if (activeFilter !== 'all' && task.category !== activeFilter) return false;
+    if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  // Auto-select first filtered task when opening Map view
+  useEffect(() => {
+    if (viewMode === 'map' && filteredTasks.length > 0) {
+      if (!selectedTask || !filteredTasks.some(t => t.id === selectedTask.id)) {
+        setSelectedTask(filteredTasks[0]);
+      }
+    }
+  }, [viewMode, filteredTasks.length]);
+
+  // Smooth scroll carousel to selected task card
+  useEffect(() => {
+    if (viewMode === 'map' && selectedTask) {
+      const el = document.getElementById(`carousel-card-${selectedTask.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [selectedTask, viewMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,12 +67,6 @@ export default function RunnerFeed() {
       supabase.removeChannel(channel);
     };
   }, []);
-
-  const filteredTasks = allTasks.filter((task) => {
-    if (activeFilter !== 'all' && task.category !== activeFilter) return false;
-    if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
 
   return (
     <div className="pb-safe min-h-screen bg-dark">
@@ -123,14 +144,65 @@ export default function RunnerFeed() {
       {/* Content */}
       <div className="animate-fade-in pt-4">
         {viewMode === 'map' ? (
-          <div className="px-0">
+          <div className="px-0 relative w-full" style={{ height: 'calc(100dvh - 280px)' }}>
             <MapView
               taskMarkers={filteredTasks}
-              height="calc(100dvh - 280px)"
+              pickupCoords={selectedTask?.pickup}
+              destCoords={selectedTask?.destination}
+              showHeatmap={showHeatmap}
+              height="100%"
               className="rounded-none border-0"
               darkMode
               showUserLocation
+              showRouteInfo={true}
+              onTaskMarkerClick={(task) => setSelectedTask(task)}
             />
+
+            {/* Heatmap overlay toggle */}
+            <div className="absolute top-4 right-4 z-[1000]">
+              <button
+                onClick={() => setShowHeatmap(!showHeatmap)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center border shadow-lg transition-all active:scale-95 text-[16px]
+                  ${showHeatmap 
+                    ? 'bg-danger border-danger text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' 
+                    : 'glass-panel border-border-light text-charcoal-light hover:text-white'
+                  }`}
+                title="Toggle Task Hotspots Heatmap"
+                id="heatmap-toggle"
+              >
+                🔥
+              </button>
+            </div>
+
+            {/* Sync Carousel overlay at the bottom of the map */}
+            {filteredTasks.length > 0 && (
+              <div className="absolute bottom-6 left-0 right-0 z-[1000] px-4 pointer-events-none">
+                <div className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory pointer-events-auto pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  {filteredTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      id={`carousel-card-${task.id}`}
+                      className={`snap-center shrink-0 w-[290px] transition-all duration-300 transform
+                        ${selectedTask?.id === task.id
+                          ? 'opacity-100 scale-100 shadow-[0_8px_32px_rgba(0,255,135,0.25)]'
+                          : 'opacity-50 scale-95 hover:opacity-80'
+                        }`}
+                    >
+                      <TaskCard
+                        task={task}
+                        onClick={() => {
+                          if (selectedTask?.id === task.id) {
+                            navigate(`/task/${task.id}`);
+                          } else {
+                            setSelectedTask(task);
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="px-5 pt-4 pb-28">
