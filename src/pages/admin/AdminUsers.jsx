@@ -331,12 +331,22 @@ export default function AdminUsers() {
                       </span>
                     </td>
                     <td>
-                      <button
-                        onClick={() => handleOpenUserDetail(u)}
-                        className="text-[11px] font-bold text-charcoal-light hover:text-accent bg-dark border border-border px-3 py-1.5 rounded-lg hover:border-accent/30 transition-colors flex items-center gap-1"
-                      >
-                        Details <ChevronRight size={14} />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenUserDetail(u)}
+                          className="text-[11px] font-bold text-charcoal-light hover:text-accent bg-dark border border-border px-3 py-1.5 rounded-lg hover:border-accent/30 transition-colors flex items-center gap-1"
+                        >
+                          Details <ChevronRight size={14} />
+                        </button>
+                        {!u.is_banned && u.role !== 'admin' && (
+                          <button
+                            onClick={() => { setSelectedUser(u); setShowBanModal(true); }}
+                            className="text-[11px] font-bold text-danger hover:text-white bg-dark border border-border hover:bg-danger hover:border-danger px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            Ban
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
