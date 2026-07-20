@@ -101,7 +101,7 @@ export default function AdminUsers() {
         </div>
       ) : (
         <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="admin-table-wrapper">
             <table className="admin-table">
               <thead>
                 <tr>

@@ -124,7 +124,7 @@ export default function AdminKYC() {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
           {/* Left Panel: Queue */}
-          <div className="xl:col-span-3">
+          <div className="xl:col-span-3 lg:col-span-4">
             <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
               <div className="p-4 border-b border-border">
                 <h3 className="text-[14px] font-bold text-white">Queue ({applications.length})</h3>
@@ -155,7 +155,7 @@ export default function AdminKYC() {
           </div>
 
           {/* Center Panel: Document Viewer */}
-          <div className="xl:col-span-5">
+          <div className="xl:col-span-5 lg:col-span-8">
             {selectedApp ? (
               <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
                 <div className="p-4 border-b border-border flex items-center justify-between">
@@ -186,7 +186,7 @@ export default function AdminKYC() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <div
                       onClick={() => selectedApp.kyc_id_url && openDocViewer(selectedApp.kyc_id_url)}
                       className={`aspect-[16/10] rounded-xl bg-dark border border-border overflow-hidden relative group/img cursor-pointer ${
@@ -258,7 +258,7 @@ export default function AdminKYC() {
           </div>
 
           {/* Right Panel: Actions */}
-          <div className="xl:col-span-4">
+          <div className="xl:col-span-4 lg:col-span-12">
             {selectedApp ? (
               <div className="glass-panel rounded-2xl border border-border-light p-6">
                 <h3 className="text-[16px] font-bold text-white mb-4">Applicant Details</h3>
