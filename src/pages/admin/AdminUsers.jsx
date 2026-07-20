@@ -166,7 +166,7 @@ export default function AdminUsers() {
       u.role || 'user',
       u.kyc_status || 'none',
       u.is_banned ? 'Yes' : 'No',
-      u.created_at ? new Date(u.created_at).toLocaleDateString() : ''
+      u.joined_date || u.created_at ? new Date(u.joined_date || u.created_at).toLocaleDateString() : ''
     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -327,7 +327,7 @@ export default function AdminUsers() {
                     </td>
                     <td>
                       <span className="text-[12px] text-charcoal-light font-medium">
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                        {u.joined_date || u.created_at ? new Date(u.joined_date || u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </span>
                     </td>
                     <td>

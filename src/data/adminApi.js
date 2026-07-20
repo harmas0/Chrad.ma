@@ -37,7 +37,7 @@ export async function fetchDashboardStats() {
 // =============================================
 
 export async function fetchAllUsers(search = '', filter = {}) {
-  let query = supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  let query = supabase.from('profiles').select('*').order('joined_date', { ascending: false });
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);

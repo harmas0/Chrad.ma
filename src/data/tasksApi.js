@@ -62,6 +62,8 @@ function rowToTask(row) {
     distance: row.distance ? Number(row.distance) : null,
     deliveryPhotoUrl: row.delivery_photo_url,
     waypoints: row.waypoints || [],
+    runner_paid: row.runner_paid,
+    runner_payout_at: row.runner_payout_at,
     // bids will be fetched separately
     bids: [],
   };

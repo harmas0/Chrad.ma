@@ -12,6 +12,8 @@ import Profile from './pages/Profile';
 import Login from './pages/Login';
 import BannedScreen from './pages/BannedScreen';
 import KYCUpload from './pages/KYCUpload';
+import Onboarding from './pages/Onboarding';
+import ResetPassword from './pages/ResetPassword';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useI18n } from './utils/i18n';
 import { supabase } from './utils/supabaseClient';
@@ -37,7 +39,12 @@ import AdminSettings from './pages/admin/AdminSettings';
 
 const ProtectedRoute = ({ children }) => {
   const { user, isBanned } = useAuth();
+  const onboarded = localStorage.getItem('onboarded') === 'true';
+
   if (!user) {
+    if (!onboarded) {
+      return <Navigate to="/onboarding" replace />;
+    }
     return <Navigate to="/login" replace />;
   }
   if (isBanned) {
@@ -133,7 +140,9 @@ const AppContent = () => {
         </div>
       )}
       <Routes>
+        <Route path="/onboarding" element={!user ? <Onboarding /> : <Navigate to="/" replace />} />
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Main app routes */}
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
