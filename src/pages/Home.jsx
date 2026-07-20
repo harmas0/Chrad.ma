@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Star, TrendingUp } from 'lucide-react';
-import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
+import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
 import { useI18n } from '../utils/i18n';
@@ -37,6 +37,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [recentTasks, setRecentTasks] = useState([]);
+  const [categories, setCategories] = useState(TASK_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
 
@@ -44,8 +45,16 @@ export default function Home() {
     let cancelled = false;
     async function load() {
       try {
-        const tasks = await fetchOpenTasks();
+        const [tasks, cats] = await Promise.all([
+          fetchOpenTasks(),
+          fetchActiveCategories()
+        ]);
         if (cancelled) return;
+        
+        // Filter featured categories or all if none are featured
+        const featuredCats = cats.filter(c => c.isFeatured);
+        setCategories(featuredCats.length > 0 ? featuredCats : cats);
+
         const withBids = await Promise.all(
           tasks.slice(0, 3).map(async (t) => {
             const count = await countBidsForTask(t.id);
@@ -117,7 +126,7 @@ export default function Home() {
         {/* ── Category Quick Actions ── */}
         <section className="px-6 mt-8">
           <div className="grid grid-cols-4 gap-2.5">
-            {TASK_CATEGORIES.map((cat, i) => (
+            {categories.map((cat, i) => (
               <button
                 key={cat.id}
                 onClick={() => navigate('/create', { state: { category: cat.id } })}
@@ -126,7 +135,9 @@ export default function Home() {
                 id={`quick-${cat.id}`}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <span className="text-[11px] font-bold text-charcoal leading-tight text-center">{t(cat.id)}</span>
+                <span className="text-[11px] font-bold text-charcoal leading-tight text-center">
+                  {t(cat.id) !== cat.id ? t(cat.id) : (cat.nameEn || cat.label)}
+                </span>
               </button>
             ))}
           </div>

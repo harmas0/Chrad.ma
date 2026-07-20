@@ -300,3 +300,437 @@ export async function logAdminAction(adminId, action, targetType, targetId, deta
 
   if (error) { console.error('logAdminAction error:', error); }
 }
+
+// =============================================
+// FINANCIAL STATS & PAYOUTS
+// =============================================
+
+export async function fetchFinancialStats() {
+  // Fetch tasks, categories, and disputes
+  const [
+    { data: tasks, error: tasksErr },
+    { data: categories, error: catsErr },
+    { data: disputes, error: dispErr },
+    settings
+  ] = await Promise.all([
+    supabase.from('tasks').select('*'),
+    supabase.from('task_categories').select('*'),
+    supabase.from('disputes').select('*').eq('status', 'open'),
+    fetchPlatformSettings(),
+  ]);
+
+  if (tasksErr) { console.error('fetchFinancialStats tasks error:', tasksErr); return null; }
+
+  const catCommissionMap = {};
+  (categories || []).forEach(cat => {
+    catCommissionMap[cat.id] = Number(cat.commission_rate || 10);
+  });
+
+  const getCommissionRate = (category) => {
+    return catCommissionMap[category] !== undefined ? catCommissionMap[category] : Number(settings?.platformFeePercent || 10);
+  };
+
+  let totalGMV = 0;
+  let totalCommissions = 0;
+  let escrowHoldings = 0;
+  let disputedFunds = 0;
+  const payoutQueue = [];
+
+  const disputeTaskIds = new Set((disputes || []).map(d => d.task_id));
+
+  (tasks || []).forEach(task => {
+    const price = Number(task.offered_price || 0);
+    const budget = Number(task.item_budget || 0);
+    const rate = getCommissionRate(task.category);
+
+    const taskGMV = price + budget;
+    const taskCommission = price * (rate / 100);
+
+    if (['delivered', 'confirmed', 'completed'].includes(task.status)) {
+      totalGMV += taskGMV;
+      totalCommissions += taskCommission;
+
+      if (!task.runner_paid && task.accepted_runner_id) {
+        payoutQueue.push({
+          id: task.id,
+          title: task.title,
+          runnerId: task.accepted_runner_id,
+          amount: price - taskCommission,
+          createdAt: task.created_at,
+          status: task.status,
+        });
+      }
+    } else if (['accepted', 'picked_up', 'en_route'].includes(task.status)) {
+      escrowHoldings += taskGMV;
+
+      if (disputeTaskIds.has(task.id)) {
+        disputedFunds += taskGMV;
+      }
+    }
+  });
+
+  // Build chart data (grouped by date)
+  const dailyRevenue = {};
+  (tasks || []).forEach(task => {
+    if (['delivered', 'confirmed', 'completed'].includes(task.status) && task.created_at) {
+      const dateStr = new Date(task.created_at).toISOString().split('T')[0];
+      const price = Number(task.offered_price || 0);
+      const rate = getCommissionRate(task.category);
+      const commission = price * (rate / 100);
+
+      dailyRevenue[dateStr] = (dailyRevenue[dateStr] || 0) + commission;
+    }
+  });
+
+  const chartData = Object.keys(dailyRevenue)
+    .sort()
+    .slice(-14) // Last 14 days
+    .map(date => ({
+      date,
+      revenue: Math.round(dailyRevenue[date] * 100) / 100,
+    }));
+
+  return {
+    totalGMV,
+    totalCommissions,
+    escrowHoldings,
+    disputedFunds,
+    payoutQueue,
+    chartData,
+  };
+}
+
+export async function updatePayoutStatus(taskId, paid, adminId) {
+  const { error } = await supabase
+    .from('tasks')
+    .update({
+      runner_paid: paid,
+      runner_payout_at: paid ? new Date().toISOString() : null,
+    })
+    .eq('id', taskId);
+
+  if (error) { console.error('updatePayoutStatus error:', error); return false; }
+
+  await logAdminAction(adminId, paid ? 'PAYOUT_RELEASED' : 'PAYOUT_REVOKED', 'task', taskId, {});
+  return true;
+}
+
+// =============================================
+// USER DETAILS EXTENSION
+// =============================================
+
+export async function fetchUserFullProfile(userId) {
+  const [
+    { data: profile, error: profErr },
+    { data: tasksCreated, error: tcErr },
+    { data: tasksRun, error: trErr },
+    { data: disputes, error: dispErr },
+    { data: auditLogs, error: auditErr },
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).single(),
+    supabase.from('tasks').select('*').eq('client_id', userId),
+    supabase.from('tasks').select('*').eq('accepted_runner_id', userId),
+    supabase.from('disputes').select('*').or(`reporter_id.eq.${userId},reported_user_id.eq.${userId}`),
+    supabase.from('admin_audit_log').select('*').eq('target_id', userId).order('created_at', { ascending: false }),
+  ]);
+
+  if (profErr) { console.error('fetchUserFullProfile error:', profErr); return null; }
+
+  return {
+    profile,
+    tasksCreated: tasksCreated || [],
+    tasksRun: tasksRun || [],
+    disputes: disputes || [],
+    auditLogs: auditLogs || [],
+  };
+}
+
+export async function resendKYCRequest(userId, reason, adminId) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      kyc_status: 'none',
+      verified: false,
+      kyc_rejection_reason: reason,
+      kyc_submitted_at: null,
+    })
+    .eq('id', userId);
+
+  if (error) { console.error('resendKYCRequest error:', error); return false; }
+
+  await logAdminAction(adminId, 'RESEND_KYC_REQUEST', 'user', userId, { reason });
+  return true;
+}
+
+// =============================================
+// CHAT TRANSCRIPT FOR TASK
+// =============================================
+
+export async function fetchTaskChatTranscript(taskId) {
+  const { data: conv, error: convErr } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('task_id', taskId)
+    .maybeSingle();
+
+  if (convErr) { console.error('fetchTaskChatTranscript conv error:', convErr); return []; }
+  if (!conv) return [];
+
+  const { data: messages, error: msgErr } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conv.id)
+    .order('timestamp', { ascending: true });
+
+  if (msgErr) { console.error('fetchTaskChatTranscript msg error:', msgErr); return []; }
+  return messages || [];
+}
+
+// =============================================
+// RUNNER ONBOARDING QUEUE
+// =============================================
+
+export async function fetchRunnerQueue() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('is_runner', true)
+    .eq('kyc_status', 'pending')
+    .order('kyc_submitted_at', { ascending: true });
+
+  if (error) { console.error('fetchRunnerQueue error:', error); return []; }
+  return data || [];
+}
+
+export async function verifyRunnerTier(userId, tier, notes, adminId) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      runner_tier: tier,
+      runner_notes: notes,
+      kyc_status: 'approved',
+      verified: true,
+      kyc_reviewed_at: new Date().toISOString(),
+      kyc_reviewer_id: adminId,
+    })
+    .eq('id', userId);
+
+  if (error) { console.error('verifyRunnerTier error:', error); return false; }
+
+  await logAdminAction(adminId, 'APPROVE_RUNNER_TIER', 'user', userId, { tier, notes });
+  return true;
+}
+
+// =============================================
+// BULK ACTIONS
+// =============================================
+
+export async function bulkBanUsers(userIds, reason, adminId) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      is_banned: true,
+      ban_reason: reason,
+      banned_at: new Date().toISOString(),
+      banned_by: adminId,
+    })
+    .in('id', userIds);
+
+  if (error) { console.error('bulkBanUsers error:', error); return false; }
+
+  await logAdminAction(adminId, 'BULK_BAN_USERS', 'user', userIds.join(','), { reason, count: userIds.length });
+  return true;
+}
+
+export async function bulkUnbanUsers(userIds, adminId) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      is_banned: false,
+      ban_reason: null,
+      banned_at: null,
+      banned_by: null,
+    })
+    .in('id', userIds);
+
+  if (error) { console.error('bulkUnbanUsers error:', error); return false; }
+
+  await logAdminAction(adminId, 'BULK_UNBAN_USERS', 'user', userIds.join(','), { count: userIds.length });
+  return true;
+}
+
+export async function bulkApproveKYC(userIds, adminId) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      kyc_status: 'approved',
+      verified: true,
+      kyc_reviewed_at: new Date().toISOString(),
+      kyc_reviewer_id: adminId,
+    })
+    .in('id', userIds);
+
+  if (error) { console.error('bulkApproveKYC error:', error); return false; }
+
+  await logAdminAction(adminId, 'BULK_APPROVE_KYC', 'user', userIds.join(','), { count: userIds.length });
+  return true;
+}
+
+export async function bulkUpdateTaskStatus(taskIds, status, adminId) {
+  const { error } = await supabase
+    .from('tasks')
+    .update({ status })
+    .in('id', taskIds);
+
+  if (error) { console.error('bulkUpdateTaskStatus error:', error); return false; }
+
+  await logAdminAction(adminId, 'BULK_UPDATE_TASK_STATUS', 'task', taskIds.join(','), { status, count: taskIds.length });
+  return true;
+}
+
+// =============================================
+// CATEGORIES MANAGEMENT
+// =============================================
+
+export async function fetchCategories() {
+  const { data, error } = await supabase
+    .from('task_categories')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) { console.error('fetchCategories error:', error); return []; }
+  return data || [];
+}
+
+export async function createCategory(cat, adminId) {
+  const { data, error } = await supabase
+    .from('task_categories')
+    .insert({
+      id: cat.id,
+      name_en: cat.nameEn,
+      name_fr: cat.nameFr,
+      name_ar: cat.nameAr,
+      icon: cat.icon,
+      description: cat.description,
+      commission_rate: Number(cat.commissionRate || 10),
+      is_featured: Boolean(cat.isFeatured),
+    })
+    .select()
+    .single();
+
+  if (error) { console.error('createCategory error:', error); return null; }
+
+  await logAdminAction(adminId, 'CREATE_CATEGORY', 'category', cat.id, cat);
+  return data;
+}
+
+export async function updateCategory(cat, adminId) {
+  const { data, error } = await supabase
+    .from('task_categories')
+    .update({
+      name_en: cat.nameEn,
+      name_fr: cat.nameFr,
+      name_ar: cat.nameAr,
+      icon: cat.icon,
+      description: cat.description,
+      commission_rate: Number(cat.commissionRate || 10),
+      is_featured: Boolean(cat.isFeatured),
+    })
+    .eq('id', cat.id)
+    .select()
+    .single();
+
+  if (error) { console.error('updateCategory error:', error); return null; }
+
+  await logAdminAction(adminId, 'UPDATE_CATEGORY', 'category', cat.id, cat);
+  return data;
+}
+
+export async function deleteCategory(id, adminId) {
+  const { error } = await supabase
+    .from('task_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) { console.error('deleteCategory error:', error); return false; }
+
+  await logAdminAction(adminId, 'DELETE_CATEGORY', 'category', id, {});
+  return true;
+}
+
+// =============================================
+// ANNOUNCEMENTS
+// =============================================
+
+export async function fetchAnnouncements() {
+  const { data, error } = await supabase
+    .from('announcements')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('fetchAnnouncements error:', error); return []; }
+  return data || [];
+}
+
+export async function createAnnouncement(ann, adminId) {
+  const { data, error } = await supabase
+    .from('announcements')
+    .insert({
+      title: ann.title,
+      message: ann.message,
+      target_segment: ann.targetSegment,
+      is_active: true,
+      expires_at: ann.expiresAt || null,
+    })
+    .select()
+    .single();
+
+  if (error) { console.error('createAnnouncement error:', error); return null; }
+
+  await logAdminAction(adminId, 'CREATE_ANNOUNCEMENT', 'announcement', data.id, ann);
+  return data;
+}
+
+export async function deleteAnnouncement(id, adminId) {
+  const { error } = await supabase
+    .from('announcements')
+    .delete()
+    .eq('id', id);
+
+  if (error) { console.error('deleteAnnouncement error:', error); return false; }
+
+  await logAdminAction(adminId, 'DELETE_ANNOUNCEMENT', 'announcement', id, {});
+  return true;
+}
+
+// =============================================
+// SUPPORT TICKETS
+// =============================================
+
+export async function fetchSupportTickets() {
+  const { data, error } = await supabase
+    .from('support_tickets')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('fetchSupportTickets error:', error); return []; }
+  return data || [];
+}
+
+export async function replySupportTicket(ticketId, reply, adminId) {
+  const { error } = await supabase
+    .from('support_tickets')
+    .update({
+      admin_reply: reply,
+      replied_at: new Date().toISOString(),
+      replied_by: adminId,
+      status: 'resolved',
+    })
+    .eq('id', ticketId);
+
+  if (error) { console.error('replySupportTicket error:', error); return false; }
+
+  await logAdminAction(adminId, 'REPLY_SUPPORT_TICKET', 'ticket', ticketId, { reply });
+  return true;
+}
+

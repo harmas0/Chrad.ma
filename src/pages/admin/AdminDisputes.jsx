@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, XCircle, Eye, Clock, Search, MessageCircle, X, User } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Eye, Clock, Search, MessageCircle, X, User, ShieldCheck, DollarSign, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchDisputes, resolveDispute, dismissDispute, updateDisputeStatus } from '../../data/adminApi';
 import { fetchProfileById } from '../../data/usersApi';
+import { fetchTaskById, updateTaskStatus } from '../../data/tasksApi';
 
 const REASON_LABELS = {
   'didnt_deliver': "Didn't deliver",
@@ -24,12 +25,18 @@ export default function AdminDisputes() {
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('open');
+  
+  // Selected dispute state
   const [selectedDispute, setSelectedDispute] = useState(null);
   const [reporterProfile, setReporterProfile] = useState(null);
   const [reportedProfile, setReportedProfile] = useState(null);
+  const [taskDetails, setTaskDetails] = useState(null);
   const [resolution, setResolution] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Evidence Gallery Slider index
+  const [sliderIndex, setSliderIndex] = useState(0);
 
   async function loadDisputes() {
     setLoading(true);
@@ -46,12 +53,17 @@ export default function AdminDisputes() {
     setSelectedDispute(dispute);
     setResolution('');
     setAdminNotes('');
-    const [reporter, reported] = await Promise.all([
+    setSliderIndex(0);
+    setTaskDetails(null);
+
+    const [reporter, reported, task] = await Promise.all([
       fetchProfileById(dispute.reporter_id),
       fetchProfileById(dispute.reported_user_id),
+      fetchTaskById(dispute.task_id)
     ]);
     setReporterProfile(reporter);
     setReportedProfile(reported);
+    setTaskDetails(task);
   };
 
   const handleResolve = async () => {
@@ -79,12 +91,51 @@ export default function AdminDisputes() {
     setActionLoading(false);
   };
 
+  // Quick Resolve Room Actions
+  const handleQuickReleaseToRunner = async () => {
+    if (!selectedDispute || !taskDetails) return;
+    if (!window.confirm('Release Escrow Funds to Runner? This will set the task to CONFIRMED and close this dispute as resolved.')) return;
+    setActionLoading(true);
+
+    const resolveNotes = "Resolved via Admin Room: Escrow funds fully released to runner.";
+    const disputeSuccess = await resolveDispute(selectedDispute.id, resolveNotes, "Admin forced payout release to runner.", user.id);
+    const taskSuccess = await updateTaskStatus(selectedDispute.task_id, 'confirmed');
+
+    if (disputeSuccess && taskSuccess) {
+      alert('Escrow released and dispute resolved.');
+      setSelectedDispute(null);
+      await loadDisputes();
+    } else {
+      alert('Failed to execute resolution.');
+    }
+    setActionLoading(false);
+  };
+
+  const handleQuickRefundToClient = async () => {
+    if (!selectedDispute || !taskDetails) return;
+    if (!window.confirm('Refund Client? This will cancel the task, suspend runner payout, and close the dispute.')) return;
+    setActionLoading(true);
+
+    const resolveNotes = "Resolved via Admin Room: Escrow funds fully refunded back to client.";
+    const disputeSuccess = await resolveDispute(selectedDispute.id, resolveNotes, "Admin cancelled task and refunded client.", user.id);
+    const taskSuccess = await updateTaskStatus(selectedDispute.task_id, 'cancelled');
+
+    if (disputeSuccess && taskSuccess) {
+      alert('Escrow refunded and task marked as cancelled.');
+      setSelectedDispute(null);
+      await loadDisputes();
+    } else {
+      alert('Failed to execute resolution.');
+    }
+    setActionLoading(false);
+  };
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Disputes</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Manage user reports and conflicts</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Disputes & Conflict Resolution</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">Manage user reports, verify completion proofs, and arbitrate escrows</p>
       </div>
 
       {/* Status Tabs */}
@@ -160,28 +211,21 @@ export default function AdminDisputes() {
                     </button>
                   )}
                 </div>
-
-                {d.evidence_urls?.length > 0 && (
-                  <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-none">
-                    {d.evidence_urls.map((url, i) => (
-                      <div key={i} className="w-16 h-16 rounded-lg bg-dark border border-border overflow-hidden shrink-0">
-                        <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Detail / Resolution Modal */}
+      {/* Detail / Arbitrate Modal */}
       {selectedDispute && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedDispute(null)}>
-          <div className="w-full max-w-lg bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-extrabold text-white">Dispute Details</h3>
+          <div className="w-full max-w-3xl bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
+              <h3 className="text-[18px] font-extrabold text-white flex items-center gap-1.5">
+                <AlertTriangle size={18} className="text-warning" />
+                Dispute Arbitration Room
+              </h3>
               <button onClick={() => setSelectedDispute(null)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
               </button>
@@ -193,8 +237,79 @@ export default function AdminDisputes() {
                 <span className={`badge ${(STATUS_CONFIG[selectedDispute.status] || STATUS_CONFIG.open).badge}`}>{selectedDispute.status}</span>
                 <span className="text-[13px] font-bold text-white">{REASON_LABELS[selectedDispute.reason] || selectedDispute.reason}</span>
               </div>
-              <p className="text-[14px] text-charcoal-light leading-relaxed">{selectedDispute.description || 'No description provided'}</p>
+              <p className="text-[13px] text-charcoal-light bg-dark rounded-xl p-3 border border-border leading-relaxed">
+                <strong>Dispute Claim:</strong> {selectedDispute.description || 'No description provided'}
+              </p>
             </div>
+
+            {/* Evidence Photo Gallery Slider */}
+            {selectedDispute.evidence_urls && selectedDispute.evidence_urls.length > 0 && (
+              <div className="mb-6">
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Submitted Claim Evidence Gallery</p>
+                <div className="relative aspect-[21/9] rounded-xl overflow-hidden border border-border bg-dark flex items-center justify-center">
+                  <img
+                    src={selectedDispute.evidence_urls[sliderIndex]}
+                    alt={`Evidence page ${sliderIndex + 1}`}
+                    className="h-full w-full object-contain"
+                  />
+                  {selectedDispute.evidence_urls.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setSliderIndex(prev => (prev > 0 ? prev - 1 : selectedDispute.evidence_urls.length - 1))}
+                        className="absolute left-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/85"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        onClick={() => setSliderIndex(prev => (prev < selectedDispute.evidence_urls.length - 1 ? prev + 1 : 0))}
+                        className="absolute right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/85"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </>
+                  )}
+                  <span className="absolute bottom-2 right-2 text-[9px] bg-black/65 px-2 py-0.5 rounded text-white font-bold">
+                    {sliderIndex + 1} / {selectedDispute.evidence_urls.length} Photos
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Proof Comparison Room */}
+            {taskDetails && (
+              <div className="mb-6">
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Proof Verification Room</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left: Requirements */}
+                  <div className="bg-dark rounded-xl p-4 border border-border flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-[12px] font-bold text-white mb-2">Original Task Details</h4>
+                      <p className="text-[13px] text-white font-medium mb-1">{taskDetails.title}</p>
+                      <p className="text-[12px] text-charcoal-light mb-3">{taskDetails.description || 'No instruction notes.'}</p>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-border/50 pt-2 text-[12px] font-bold">
+                      <span className="text-charcoal-light">Escrow Budget:</span>
+                      <span className="text-accent">{taskDetails.offeredPrice + (taskDetails.itemBudget || 0)} MAD</span>
+                    </div>
+                  </div>
+
+                  {/* Right: Runner Completion Proof Photo */}
+                  <div className="bg-dark rounded-xl p-4 border border-border flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-[12px] font-bold text-white mb-2">Runner Completion Proof Photo</h4>
+                      {taskDetails.delivery_photo_url ? (
+                        <a href={taskDetails.delivery_photo_url} target="_blank" rel="noreferrer" className="aspect-[16/9] rounded-lg border border-border overflow-hidden bg-black block relative group">
+                          <img src={taskDetails.delivery_photo_url} alt="Runner proof" className="w-full h-full object-cover" />
+                          <span className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold">Zoom image</span>
+                        </a>
+                      ) : (
+                        <p className="text-[11px] text-charcoal-light italic py-4 text-center">No completion proof photo uploaded by runner.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Parties */}
             <div className="grid grid-cols-2 gap-3 mb-5">
@@ -218,76 +333,74 @@ export default function AdminDisputes() {
               </div>
             </div>
 
-            {/* Evidence */}
-            {selectedDispute.evidence_urls?.length > 0 && (
-              <div className="mb-5">
-                <p className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-3">Evidence</p>
-                <div className="flex gap-3 overflow-x-auto scrollbar-none">
-                  {selectedDispute.evidence_urls.map((url, i) => (
-                    <div key={i} className="w-24 h-24 rounded-xl bg-dark border border-border overflow-hidden shrink-0">
-                      <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
+            {/* Arbitration Controls */}
+            {['open', 'investigating'].includes(selectedDispute.status) && (
+              <div className="border-t border-border pt-4">
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-3">Escrow Arbitrage Actions</p>
+                
+                {/* Fast Action Buttons */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <button
+                    onClick={handleQuickRefundToClient}
+                    disabled={actionLoading || !taskDetails}
+                    className="py-3 rounded-xl border border-danger/30 bg-danger/5 hover:bg-danger/10 text-danger font-bold text-[12px] flex items-center justify-center gap-1.5"
+                  >
+                    <DollarSign size={14} /> Refund Escrow back to Client
+                  </button>
+                  <button
+                    onClick={handleQuickReleaseToRunner}
+                    disabled={actionLoading || !taskDetails}
+                    className="py-3 rounded-xl bg-accent text-dark font-bold text-[12px] flex items-center justify-center gap-1.5"
+                  >
+                    <Award size={14} /> Release Escrow to Runner
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Internal Audit Notes</label>
+                  <textarea
+                    value={adminNotes}
+                    onChange={(e) => setAdminNotes(e.target.value)}
+                    className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
+                    rows={2}
+                    placeholder="Internal moderator logs..."
+                  />
+                </div>
+                <div className="mb-6">
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Resolution Summary (visible to both parties)</label>
+                  <textarea
+                    value={resolution}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
+                    rows={2}
+                    placeholder="Provide final explanation..."
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDismiss}
+                    disabled={actionLoading}
+                    className="flex-1 py-3 rounded-xl border border-border text-charcoal font-bold text-[13px]"
+                  >
+                    Dismiss Dispute
+                  </button>
+                  <button
+                    onClick={handleResolve}
+                    disabled={actionLoading || !resolution.trim()}
+                    className="flex-1 btn-accent py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider"
+                  >
+                    Resolve Dispute
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Resolution form — only for open/investigating */}
-            {['open', 'investigating'].includes(selectedDispute.status) && (
-              <>
-                <div className="mb-4">
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Admin Notes</label>
-                  <textarea
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    className="input-field w-full px-4 py-3 rounded-xl text-[14px] font-medium resize-none"
-                    rows={2}
-                    placeholder="Internal notes about this dispute..."
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Resolution (visible to both parties)</label>
-                  <textarea
-                    value={resolution}
-                    onChange={(e) => setResolution(e.target.value)}
-                    className="input-field w-full px-4 py-3 rounded-xl text-[14px] font-medium resize-none"
-                    rows={2}
-                    placeholder="Describe the resolution..."
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleDismiss}
-                    disabled={actionLoading}
-                    className="flex-1 py-3.5 rounded-xl border border-border text-charcoal-light font-bold text-[14px] hover:text-white hover:border-border-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <XCircle size={16} />
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={handleResolve}
-                    disabled={actionLoading}
-                    className="flex-1 py-3.5 rounded-xl bg-accent text-dark font-bold text-[14px] hover:bg-accent-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-dark border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <CheckCircle size={16} />
-                        Resolve
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Already resolved */}
+            {/* Resolved information */}
             {selectedDispute.status === 'resolved' && selectedDispute.resolution && (
               <div className="p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-[11px] text-accent font-bold mb-1">Resolution</p>
-                <p className="text-[13px] text-charcoal">{selectedDispute.resolution}</p>
+                <p className="text-[11px] text-accent font-bold mb-1">Resolution Summary</p>
+                <p className="text-[13px] text-charcoal-light leading-relaxed">{selectedDispute.resolution}</p>
               </div>
             )}
           </div>

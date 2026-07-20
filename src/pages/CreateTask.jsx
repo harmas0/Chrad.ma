@@ -5,7 +5,7 @@ import CategoryCard from '../components/CategoryCard';
 import PriceInput from '../components/PriceInput';
 import PhotoUpload from '../components/PhotoUpload';
 import MapView from '../components/MapView';
-import { TASK_CATEGORIES, LOCATIONS, createTask } from '../data/tasksApi';
+import { TASK_CATEGORIES, LOCATIONS, createTask, fetchActiveCategories } from '../data/tasksApi';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
@@ -33,6 +33,7 @@ export default function CreateTask() {
     price: 50,
     itemBudget: 0,
   });
+  const [categories, setCategories] = useState(TASK_CATEGORIES);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feePercent, setFeePercent] = useState(10);
@@ -41,9 +42,15 @@ export default function CreateTask() {
 
   useEffect(() => {
     async function load() {
-      const data = await fetchPlatformSettings();
-      if (data) {
-        setFeePercent(data.platformFeePercent);
+      const [settingsData, activeCats] = await Promise.all([
+        fetchPlatformSettings(),
+        fetchActiveCategories()
+      ]);
+      if (settingsData) {
+        setFeePercent(settingsData.platformFeePercent);
+      }
+      if (activeCats) {
+        setCategories(activeCats);
       }
     }
     load();
@@ -279,7 +286,7 @@ export default function CreateTask() {
     );
   }
 
-  const selectedCategory = TASK_CATEGORIES.find(c => c.id === form.category);
+  const selectedCategory = categories.find(c => c.id === form.category);
 
   return (
     <div className="pb-action-bar min-h-screen bg-dark">
@@ -319,12 +326,12 @@ export default function CreateTask() {
             <p className="text-charcoal-light text-[15px] mb-8 font-medium">{t('category_desc')}</p>
 
             <div className="grid grid-cols-2 gap-5">
-              {TASK_CATEGORIES.map((cat, i) => (
+              {categories.map((cat, i) => (
                 <div key={cat.id} className="stagger-item" style={{ animationDelay: `${i * 0.05}s` }}>
                   <CategoryCard
                     category={{
                       ...cat,
-                      label: t(cat.id),
+                      label: t(cat.id) !== cat.id ? t(cat.id) : (cat.nameEn || cat.label),
                     }}
                     isSelected={form.category === cat.id}
                     onClick={(id) => update('category', id)}

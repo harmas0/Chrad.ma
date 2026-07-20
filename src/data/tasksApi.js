@@ -166,3 +166,27 @@ export async function updateTaskStatus(taskId, status, extra = {}) {
   if (error) { console.error('updateTaskStatus error:', error); return null; }
   return rowToTask(data);
 }
+
+// Fetch active categories dynamically from database
+export async function fetchActiveCategories() {
+  const { data, error } = await supabase
+    .from('task_categories')
+    .select('*')
+    .order('created_at', { ascending: true });
+  
+  if (error || !data || data.length === 0) {
+    return TASK_CATEGORIES;
+  }
+  
+  return data.map(cat => ({
+    id: cat.id,
+    label: cat.name_en, // default
+    nameEn: cat.name_en,
+    nameFr: cat.name_fr,
+    nameAr: cat.name_ar,
+    icon: cat.icon || '📦',
+    description: cat.description || '',
+    commissionRate: cat.commission_rate || 10,
+    isFeatured: cat.is_featured,
+  }));
+}

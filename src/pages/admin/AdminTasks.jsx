@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, Filter } from 'lucide-react';
-import { fetchTasks } from '../../data/tasksApi';
+import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, X, CheckCircle, RefreshCw, MessageSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { fetchTasks, updateTaskStatus } from '../../data/tasksApi';
 import { fetchProfileById } from '../../data/usersApi';
+import { fetchTaskChatTranscript, bulkUpdateTaskStatus, updatePayoutStatus } from '../../data/adminApi';
+import MapView from '../../components/MapView';
 
 const STATUS_OPTIONS = [
   { key: '', label: 'All' },
@@ -34,22 +37,33 @@ const CATEGORY_EMOJI = {
 };
 
 export default function AdminTasks() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  
+  // Selected task detail state
   const [selectedTask, setSelectedTask] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [runnerProfile, setRunnerProfile] = useState(null);
+  const [chatTranscript, setChatTranscript] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Bulk Actions
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState('');
+
+  async function loadTasks() {
+    setLoading(true);
+    const data = await fetchTasks();
+    setTasks(data);
+    setLoading(false);
+  }
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const data = await fetchTasks();
-      setTasks(data);
-      setLoading(false);
-    }
-    load();
+    loadTasks();
   }, []);
 
   const filteredTasks = tasks.filter(t => {
@@ -62,14 +76,90 @@ export default function AdminTasks() {
     setSelectedTask(task);
     setClientProfile(null);
     setRunnerProfile(null);
+    setChatTranscript([]);
+    setChatLoading(true);
+
+    const promises = [
+      fetchTaskChatTranscript(task.id)
+    ];
+
     if (task.clientId) {
-      const cp = await fetchProfileById(task.clientId);
-      setClientProfile(cp);
+      promises.push(fetchProfileById(task.clientId));
+    } else {
+      promises.push(Promise.resolve(null));
     }
+
     if (task.acceptedRunnerId) {
-      const rp = await fetchProfileById(task.acceptedRunnerId);
-      setRunnerProfile(rp);
+      promises.push(fetchProfileById(task.acceptedRunnerId));
+    } else {
+      promises.push(Promise.resolve(null));
     }
+
+    const [chat, client, runner] = await Promise.all(promises);
+    setChatTranscript(chat);
+    setClientProfile(client);
+    setRunnerProfile(runner);
+    setChatLoading(false);
+  };
+
+  const handleEscrowRelease = async () => {
+    if (!selectedTask) return;
+    if (!window.confirm('Force release escrow? This will mark the task as CONFIRMED and prepare the payout for the runner.')) return;
+    setActionLoading(true);
+
+    const success = await updateTaskStatus(selectedTask.id, 'confirmed');
+    if (success) {
+      alert('Escrow successfully released. Task set to CONFIRMED.');
+      setSelectedTask(null);
+      await loadTasks();
+    } else {
+      alert('Failed to release escrow.');
+    }
+    setActionLoading(false);
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    if (!selectedTask) return;
+    setActionLoading(true);
+    const success = await updateTaskStatus(selectedTask.id, newStatus);
+    if (success) {
+      alert(`Task status updated to ${newStatus}`);
+      setSelectedTask(null);
+      await loadTasks();
+    } else {
+      alert('Failed to update task status.');
+    }
+    setActionLoading(false);
+  };
+
+  // Bulk selections
+  const handleCheckboxToggle = (taskId) => {
+    setSelectedTaskIds(prev => 
+      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedTaskIds.length === filteredTasks.length) {
+      setSelectedTaskIds([]);
+    } else {
+      setSelectedTaskIds(filteredTasks.map(t => t.id));
+    }
+  };
+
+  const executeBulkStatus = async () => {
+    if (selectedTaskIds.length === 0 || !bulkStatus) return;
+    setActionLoading(true);
+    const success = await bulkUpdateTaskStatus(selectedTaskIds, bulkStatus, user.id);
+    if (success) {
+      alert(`Bulk updated ${selectedTaskIds.length} tasks to ${bulkStatus}.`);
+      setSelectedTaskIds([]);
+      setBulkStatus('');
+      await loadTasks();
+    } else {
+      alert('Failed to execute bulk update.');
+    }
+    setActionLoading(false);
   };
 
   // Stats
@@ -79,7 +169,7 @@ export default function AdminTasks() {
   const totalRevenue = tasks.filter(t => t.status === 'delivered' || t.status === 'confirmed').reduce((sum, t) => sum + (t.offeredPrice || 0), 0);
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Task Management</h1>
@@ -100,6 +190,41 @@ export default function AdminTasks() {
           </div>
         ))}
       </div>
+
+      {/* Bulk Action Panel */}
+      {selectedTaskIds.length > 0 && (
+        <div className="bg-accent/5 border border-accent/20 rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 animate-scale-in">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-ping" />
+            <span className="text-[13px] text-white font-bold">{selectedTaskIds.length} tasks selected for bulk update</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
+              className="input-field px-3 py-1.5 rounded-lg text-[12px] font-bold bg-dark border-border"
+            >
+              <option value="">Select Status...</option>
+              <option value="open">Open</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="confirmed">Confirmed (Release)</option>
+            </select>
+            <button
+              onClick={executeBulkStatus}
+              disabled={!bulkStatus || actionLoading}
+              className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-3.5 py-2 rounded-lg hover:bg-accent/20"
+            >
+              Apply Status
+            </button>
+            <button
+              onClick={() => setSelectedTaskIds([])}
+              className="text-[11px] font-bold text-charcoal-light hover:text-white px-2 py-2"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="flex gap-3 mb-6 flex-wrap">
@@ -141,17 +266,33 @@ export default function AdminTasks() {
             <table className="admin-table">
               <thead>
                 <tr>
+                  <th width="40">
+                    <input
+                      type="checkbox"
+                      checked={selectedTaskIds.length === filteredTasks.length && filteredTasks.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded bg-dark border-border"
+                    />
+                  </th>
                   <th>Task</th>
                   <th>Category</th>
                   <th>Status</th>
                   <th>Price</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>Created Date</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTasks.map(task => (
-                  <tr key={task.id}>
+                  <tr key={task.id} className="hover:bg-white/[0.01]">
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedTaskIds.includes(task.id)}
+                        onChange={() => handleCheckboxToggle(task.id)}
+                        className="rounded bg-dark border-border"
+                      />
+                    </td>
                     <td>
                       <div className="min-w-0">
                         <p className="text-[14px] font-bold text-white truncate max-w-[220px]">{task.title || 'Untitled'}</p>
@@ -174,7 +315,7 @@ export default function AdminTasks() {
                     </td>
                     <td>
                       <span className="text-[12px] text-charcoal-light font-medium">
-                        {task.createdAt ? new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                        {task.createdAt ? new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </span>
                     </td>
                     <td>
@@ -189,7 +330,7 @@ export default function AdminTasks() {
                 ))}
                 {filteredTasks.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-charcoal-light text-[14px]">
+                    <td colSpan={7} className="text-center py-12 text-charcoal-light text-[14px]">
                       No tasks found
                     </td>
                   </tr>
@@ -203,9 +344,9 @@ export default function AdminTasks() {
       {/* Task Detail Modal */}
       {selectedTask && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedTask(null)}>
-          <div className="w-full max-w-lg bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{CATEGORY_EMOJI[selectedTask.category] || '📦'}</span>
                 <div>
@@ -214,68 +355,73 @@ export default function AdminTasks() {
                 </div>
               </div>
               <button onClick={() => setSelectedTask(null)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
-                <span className="text-lg">×</span>
+                <X size={18} />
               </button>
             </div>
 
+            {/* Map Header */}
+            <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden border border-border shadow-lg mb-6 relative">
+              <MapView
+                pickupCoords={selectedTask.pickup}
+                destCoords={selectedTask.category !== 'custom' ? selectedTask.destination : null}
+                waypoints={selectedTask.waypoints || []}
+                height="100%"
+                darkMode
+                showRouteInfo={true}
+              />
+            </div>
+
             {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-dark rounded-xl p-4 border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign size={14} className="text-accent" />
-                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">Price</p>
-                </div>
-                <p className="text-[20px] font-black text-accent">{selectedTask.offeredPrice} <span className="text-[11px] text-accent/70">MAD</span></p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="bg-dark rounded-xl p-3 border border-border">
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Price</p>
+                <p className="text-[16px] font-black text-accent">{selectedTask.offeredPrice} MAD</p>
               </div>
-              <div className="bg-dark rounded-xl p-4 border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock size={14} className="text-charcoal-light" />
-                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">Created</p>
+              {selectedTask.itemBudget > 0 && (
+                <div className="bg-dark rounded-xl p-3 border border-border">
+                  <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Budget</p>
+                  <p className="text-[16px] font-bold text-warning">{selectedTask.itemBudget} MAD</p>
                 </div>
-                <p className="text-[14px] font-bold text-white">
-                  {selectedTask.createdAt ? new Date(selectedTask.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+              )}
+              <div className="bg-dark rounded-xl p-3 border border-border">
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Runner Paid</p>
+                <p className={`text-[14px] font-bold ${selectedTask.runner_paid ? 'text-accent' : 'text-warning'}`}>
+                  {selectedTask.runner_paid ? 'Yes' : 'Awaiting Release'}
                 </p>
+              </div>
+              <div className="bg-dark rounded-xl p-3 border border-border">
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Category</p>
+                <p className="text-[14px] font-bold text-white capitalize">{selectedTask.category}</p>
               </div>
             </div>
 
             {/* Description */}
             {selectedTask.description && (
               <div className="mb-5">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Description</p>
-                <p className="text-[13px] text-charcoal-light leading-relaxed bg-dark rounded-xl p-4 border border-border">{selectedTask.description}</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-1.5">Description</p>
+                <p className="text-[13px] text-charcoal-light leading-relaxed bg-dark rounded-xl p-3 border border-border">{selectedTask.description}</p>
               </div>
             )}
 
-            {/* Pickup & Destination */}
-            <div className="grid grid-cols-1 gap-3 mb-5">
-              {selectedTask.pickup?.name && (
-                <div className="bg-dark rounded-xl p-4 border border-border flex items-start gap-3">
-                  <MapPin size={16} className="text-accent shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-1">Pickup</p>
-                    <p className="text-[13px] font-bold text-white">{selectedTask.pickup.name}</p>
-                    {selectedTask.pickup.address && <p className="text-[11px] text-charcoal-light">{selectedTask.pickup.address}</p>}
-                  </div>
+            {/* Completion Photo */}
+            {selectedTask.delivery_photo_url && (
+              <div className="mb-5">
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
+                  <ShieldCheck size={14} className="text-accent" />
+                  Proof of Completion Photo
+                </p>
+                <div className="w-full aspect-[21/9] rounded-xl overflow-hidden border border-border bg-dark">
+                  <img src={selectedTask.delivery_photo_url} alt="Delivery Completion Proof" className="w-full h-full object-cover" />
                 </div>
-              )}
-              {selectedTask.destination?.name && (
-                <div className="bg-dark rounded-xl p-4 border border-border flex items-start gap-3">
-                  <MapPin size={16} className="text-danger shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-1">Destination</p>
-                    <p className="text-[13px] font-bold text-white">{selectedTask.destination.name}</p>
-                    {selectedTask.destination.address && <p className="text-[11px] text-charcoal-light">{selectedTask.destination.address}</p>}
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Parties */}
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-dark rounded-xl p-4 border border-border">
+              <div className="bg-dark rounded-xl p-3.5 border border-border">
                 <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Client</p>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[10px] font-black">
+                  <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[11px] font-black">
                     {clientProfile?.initials || '?'}
                   </div>
                   <div className="min-w-0">
@@ -283,11 +429,11 @@ export default function AdminTasks() {
                   </div>
                 </div>
               </div>
-              <div className="bg-dark rounded-xl p-4 border border-border">
+              <div className="bg-dark rounded-xl p-3.5 border border-border">
                 <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Runner</p>
                 {selectedTask.acceptedRunnerId ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-info/10 border border-info/20 flex items-center justify-center text-info text-[10px] font-black">
+                    <div className="w-8 h-8 rounded-full bg-info/10 border border-info/20 flex items-center justify-center text-info text-[11px] font-black">
                       {runnerProfile?.initials || '?'}
                     </div>
                     <div className="min-w-0">
@@ -295,14 +441,84 @@ export default function AdminTasks() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-[12px] text-charcoal-light italic">Not assigned</p>
+                  <p className="text-[12px] text-charcoal-light italic pt-1.5">Not assigned</p>
                 )}
               </div>
             </div>
 
-            {/* Task ID */}
-            <div className="bg-dark rounded-xl p-3 border border-border">
-              <p className="text-[10px] text-charcoal-light font-mono">Task ID: {selectedTask.id}</p>
+            {/* Chat Transcript Thread */}
+            <div className="mb-6">
+              <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                <MessageSquare size={14} className="text-charcoal-light" />
+                Negotiation Chat Transcript
+              </p>
+              {chatLoading ? (
+                <div className="flex justify-center py-6">
+                  <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : chatTranscript.length === 0 ? (
+                <div className="bg-dark rounded-xl p-6 text-center border border-border text-[12px] text-charcoal-light italic">
+                  No conversation logs created for this task.
+                </div>
+              ) : (
+                <div className="bg-dark rounded-xl p-4 border border-border max-h-[160px] overflow-y-auto space-y-3">
+                  {chatTranscript.map((msg, i) => {
+                    const isClient = msg.sender_id === selectedTask.clientId;
+                    return (
+                      <div key={i} className={`flex flex-col ${isClient ? 'items-start' : 'items-end'}`}>
+                        <div className="flex items-center gap-1.5 text-[9px] text-charcoal-light mb-0.5">
+                          <span className="font-bold">{isClient ? 'Client' : 'Runner'}</span>
+                          <span>•</span>
+                          <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <span className={`px-3 py-1.5 rounded-xl text-[12px] inline-block font-medium max-w-[80%]
+                          ${isClient ? 'bg-dark-surface text-white rounded-tl-none' : 'bg-accent text-dark rounded-tr-none'}`}>
+                          {msg.text}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Admin Controls Panel */}
+            <div className="border-t border-border pt-4">
+              <h4 className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-3 flex items-center gap-1">
+                <AlertTriangle size={12} className="text-warning" />
+                Escrow & Moderation Controls
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {['accepted', 'picked_up', 'en_route', 'delivered'].includes(selectedTask.status) && (
+                  <button
+                    onClick={handleEscrowRelease}
+                    disabled={actionLoading}
+                    className="px-4 py-2.5 rounded-xl bg-accent text-dark font-bold text-[12px] hover:bg-accent-hover transition-all flex items-center gap-1"
+                  >
+                    <CheckCircle size={14} /> Force Release Escrow Payout
+                  </button>
+                )}
+
+                {selectedTask.status !== 'cancelled' && (
+                  <button
+                    onClick={() => handleUpdateStatus('cancelled')}
+                    disabled={actionLoading}
+                    className="px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/5 text-danger font-bold text-[12px] hover:bg-danger/10 transition-all"
+                  >
+                    Force Cancel Task
+                  </button>
+                )}
+
+                {selectedTask.status === 'cancelled' && (
+                  <button
+                    onClick={() => handleUpdateStatus('open')}
+                    disabled={actionLoading}
+                    className="px-4 py-2.5 rounded-xl border border-border text-charcoal-light font-bold text-[12px] hover:text-white transition-all"
+                  >
+                    Reopen Task Listing
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

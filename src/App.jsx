@@ -22,10 +22,16 @@ import { Settings } from 'lucide-react';
 import AdminGuard from './components/AdminGuard';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminFinancials from './pages/admin/AdminFinancials';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminTasks from './pages/admin/AdminTasks';
 import AdminKYC from './pages/admin/AdminKYC';
+import AdminRunnerQueue from './pages/admin/AdminRunnerQueue';
 import AdminDisputes from './pages/admin/AdminDisputes';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import AdminSupport from './pages/admin/AdminSupport';
+import AdminLiveMap from './pages/admin/AdminLiveMap';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
 import AdminSettings from './pages/admin/AdminSettings';
 
@@ -143,10 +149,16 @@ const AppContent = () => {
         {/* Admin routes — nested under AdminLayout for shared sidebar */}
         <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
           <Route index element={<AdminDashboard />} />
+          <Route path="financials" element={<AdminFinancials />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="tasks" element={<AdminTasks />} />
           <Route path="kyc" element={<AdminKYC />} />
+          <Route path="runners" element={<AdminRunnerQueue />} />
           <Route path="disputes" element={<AdminDisputes />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="announcements" element={<AdminAnnouncements />} />
+          <Route path="support" element={<AdminSupport />} />
+          <Route path="live-map" element={<AdminLiveMap />} />
           <Route path="audit" element={<AdminAuditLog />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>

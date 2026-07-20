@@ -1,13 +1,19 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, ScrollText, LogOut, Zap, Package, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, ScrollText, LogOut, Zap, Package, Settings, DollarSign, UserCheck, Layers, Megaphone, MessageSquare, Map } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV_ITEMS = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/admin/financials', icon: DollarSign, label: 'Financials' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/tasks', icon: Package, label: 'Tasks' },
   { to: '/admin/kyc', icon: ShieldCheck, label: 'KYC Review' },
+  { to: '/admin/runners', icon: UserCheck, label: 'Runner Queue' },
   { to: '/admin/disputes', icon: AlertTriangle, label: 'Disputes' },
+  { to: '/admin/categories', icon: Layers, label: 'Categories' },
+  { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/admin/support', icon: MessageSquare, label: 'Support Tickets' },
+  { to: '/admin/live-map', icon: Map, label: 'Live Map' },
   { to: '/admin/audit', icon: ScrollText, label: 'Audit Log' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
