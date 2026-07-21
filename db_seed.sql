@@ -10,9 +10,9 @@ DECLARE
     task_3_id uuid := gen_random_uuid();
     task_4_id uuid := gen_random_uuid();
     conv_1_id uuid := gen_random_uuid();
-    cat_delivery_id uuid := '1e8a863f-6523-455b-80a5-cb99320d75a1';
-    cat_errands_id uuid := '24c9c1b9-3b60-4ea1-8a90-880ea77f5963';
-    cat_shopping_id uuid := '86202517-8e36-4767-96a4-68f76fa90de0';
+    cat_delivery_id text := 'delivery';
+    cat_errands_id text := 'shopping';
+    cat_shopping_id text := 'personal_shopping';
 BEGIN
     -- 1. DELETE EXISTING DATA
     DELETE FROM public.admin_audit_log;
@@ -24,6 +24,7 @@ BEGIN
     DELETE FROM public.conversations;
     DELETE FROM public.bids;
     DELETE FROM public.tasks;
+    DELETE FROM public.task_categories;
     
     -- Delete profiles except admin
     DELETE FROM public.profiles WHERE id != admin_id;
@@ -50,13 +51,18 @@ BEGIN
     UPDATE public.profiles SET tasks_created = 5, total_spent = 1500 WHERE id = client_1_id;
     UPDATE public.profiles SET tasks_completed = 12, rating = 4.8, total_earned = 3200 WHERE id = runner_1_id;
 
-    -- Ensure Categories exist (Insert on conflict do nothing)
+    -- Ensure Categories exist
     INSERT INTO public.task_categories (id, name_en, name_fr, name_ar, icon, description, commission_rate, is_featured)
     VALUES 
-    (cat_delivery_id, 'Delivery', 'Livraison', 'توصيل', 'Package', 'Send or receive packages', 10, true),
-    (cat_errands_id, 'Errands', 'Courses', 'تسوق', 'ShoppingCart', 'Grocery shopping and errands', 12, true),
-    (cat_shopping_id, 'Personal Shopping', 'Achats', 'تسوق شخصي', 'Store', 'Buy specific items', 15, false)
-    ON CONFLICT (id) DO NOTHING;
+    ('delivery', 'Delivery', 'Livraison', 'توصيل', 'Package', 'Send or receive packages', 10, true),
+    ('documents', 'Documents', 'Documents', 'وثائق', 'FileText', 'Office runs & paperwork', 8, true),
+    ('shopping', 'Shopping & Errands', 'Courses', 'تسوق', 'ShoppingCart', 'Grocery shopping and errands', 12, true),
+    ('personal_shopping', 'Personal Shopping', 'Achats', 'تسوق شخصي', 'Store', 'Buy specific items', 15, false),
+    ('custom', 'Custom Task', 'Tâche personnalisée', 'مهمة خاصة', 'Wrench', 'Anything else you need done', 10, false)
+    ON CONFLICT (id) DO UPDATE SET 
+      name_en = EXCLUDED.name_en,
+      icon = EXCLUDED.icon,
+      description = EXCLUDED.description;
 
     -- 4. INSERT TASKS
     INSERT INTO public.tasks (id, client_id, title, description, category, pickup_location, pickup_lat, pickup_lng, delivery_location, delivery_lat, delivery_lng, item_budget, offered_price, status, created_at, accepted_runner_id, runner_paid)

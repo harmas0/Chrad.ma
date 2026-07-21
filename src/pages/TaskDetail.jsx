@@ -9,6 +9,7 @@ import BidCard from '../components/BidCard';
 import MapView from '../components/MapView';
 import Modal from '../components/Modal';
 import PriceInput from '../components/PriceInput';
+import CategoryIcon from '../components/CategoryIcon';
 import { useI18n } from '../utils/i18n';
 
 function timeAgo(dateString) {
@@ -218,7 +219,9 @@ export default function TaskDetail() {
         {/* Task Title & Meta */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">{category?.icon}</span>
+            <div className="w-9 h-9 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+              <CategoryIcon icon={category?.icon || task.category} size={20} />
+            </div>
             <span className="text-[12px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
               {t(task.category)}
             </span>

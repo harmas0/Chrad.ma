@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Star, TrendingUp, ShieldCheck, Sparkles, MapPin } from 'lucide-react';
+import CategoryIcon from '../components/CategoryIcon';
 import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
@@ -147,7 +148,9 @@ export default function Home() {
                 style={{ animationDelay: `${i * 0.05}s` }}
                 id={`quick-${cat.id}`}
               >
-                <span className="text-2.5xl drop-shadow-md">{cat.icon}</span>
+                <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                  <CategoryIcon icon={cat.icon || cat.id} size={22} />
+                </div>
                 <span className="text-[11px] font-bold text-white leading-tight text-center truncate w-full px-1 font-heading">
                   {t(cat.id) !== cat.id ? t(cat.id) : (cat.nameEn || cat.label)}
                 </span>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Settings, Plus, Edit2, Trash2, Eye, Award, CheckSquare, Square, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../../data/adminApi';
+import CategoryIcon from '../../components/CategoryIcon';
 
 export default function AdminCategories() {
   const { user } = useAuth();
@@ -144,7 +145,9 @@ export default function AdminCategories() {
                   {categories.map((cat) => (
                     <tr key={cat.id}>
                       <td>
-                        <span className="text-[22px]">{cat.icon || '📦'}</span>
+                        <div className="w-9 h-9 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                          <CategoryIcon icon={cat.icon || cat.id} size={18} />
+                        </div>
                       </td>
                       <td>
                         <div className="min-w-0">

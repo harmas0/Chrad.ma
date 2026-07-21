@@ -1,6 +1,7 @@
 import { MapPin, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../utils/i18n';
+import CategoryIcon from './CategoryIcon';
 
 const categoryIcons = {
   delivery: '📦',
@@ -56,8 +57,8 @@ export default function TaskCard({ task, className = '', onClick }) {
       {/* Top Header */}
       <div className="flex items-start justify-between gap-3 mb-4 relative z-10">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-12 h-12 rounded-2xl bg-dark/60 border border-border flex shrink-0 items-center justify-center text-2xl shadow-inner">
-            {categoryIcons[task.category] || '📌'}
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex shrink-0 items-center justify-center text-accent shadow-inner">
+            <CategoryIcon icon={task.category} size={22} />
           </div>
           <div className="min-w-0">
             <h3 className="font-heading font-black text-white text-[15px] leading-snug line-clamp-1 mb-1">

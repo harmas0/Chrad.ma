@@ -1,3 +1,5 @@
+import CategoryIcon from './CategoryIcon';
+
 export default function CategoryCard({ category, isSelected, onClick }) {
   return (
     <button
@@ -22,13 +24,11 @@ export default function CategoryCard({ category, isSelected, onClick }) {
       )}
 
       {/* Icon */}
-      <span
-        className={`text-3xl transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-105'}`}
-        role="img"
-        aria-label={category.label}
+      <div
+        className={`p-3.5 rounded-2xl transition-transform duration-300 ${isSelected ? 'bg-accent/15 text-accent scale-110' : 'bg-surface text-charcoal group-hover:scale-105 group-hover:text-accent'}`}
       >
-        {category.icon}
-      </span>
+        <CategoryIcon icon={category.icon || category.id} size={28} />
+      </div>
 
       {/* Label */}
       <span className={`text-[13px] font-semibold ${isSelected ? 'text-accent' : 'text-charcoal'}`}>

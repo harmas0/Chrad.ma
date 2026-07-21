@@ -4,6 +4,7 @@ import { Map, List, Search, Flame } from 'lucide-react';
 import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import TaskCard from '../components/TaskCard';
 import MapView from '../components/MapView';
+import CategoryIcon from '../components/CategoryIcon';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 
@@ -134,7 +135,7 @@ export default function RunnerFeed() {
                 }`}
               id={`filter-${cat.id}`}
             >
-              <span className="text-[14px]">{cat.icon}</span>
+              <CategoryIcon icon={cat.icon || cat.id} size={15} />
               {t(cat.id)}
             </button>
           ))}
