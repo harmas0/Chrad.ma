@@ -11,18 +11,19 @@ import {
   Briefcase, 
   Sparkles, 
   Layers, 
-  HelpCircle,
-  Clock,
-  MapPin,
-  Box,
-  Coffee,
-  Heart,
   Zap,
-  Tag
+  DollarSign,
+  ShieldCheck,
+  MapPin,
+  CheckCircle,
+  MessageSquare,
+  ClipboardList,
+  UserCheck,
+  User,
+  Navigation
 } from 'lucide-react';
 
 const LUCIDE_MAP = {
-  // Lucide Icon names (case-insensitive)
   package: Package,
   shoppingcart: ShoppingCart,
   shopping_cart: ShoppingCart,
@@ -37,10 +38,13 @@ const LUCIDE_MAP = {
   briefcase: Briefcase,
   sparkles: Sparkles,
   layers: Layers,
-  box: Box,
-  coffee: Coffee,
-  heart: Heart,
   zap: Zap,
+  dollarsign: DollarSign,
+  shieldcheck: ShieldCheck,
+  mappin: MapPin,
+  checkcircle: CheckCircle,
+  messagesquare: MessageSquare,
+  clipboardlist: ClipboardList,
 
   // Category IDs fallback
   delivery: Package,
@@ -62,6 +66,15 @@ const EMOJI_TO_LUCIDE = {
   '🚚': Truck,
   '🛍️': ShoppingBag,
   '🎁': Gift,
+  '⚡': Zap,
+  '💰': DollarSign,
+  '🛡️': ShieldCheck,
+  '📍': MapPin,
+  '📝': ClipboardList,
+  '💬': MessageSquare,
+  '✅': CheckCircle,
+  '🏃': Navigation,
+  '🙋': User,
 };
 
 export default function CategoryIcon({ icon, size = 20, className = '' }) {
@@ -81,11 +94,6 @@ export default function CategoryIcon({ icon, size = 20, className = '' }) {
     return <IconComp size={size} className={className} />;
   }
 
-  // 3. Fallback: If it's a raw unicode emoji character that wasn't in EMOJI_TO_LUCIDE
-  if (/\p{Extended_Pictographic}/u.test(icon)) {
-    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }} className={className}>{icon}</span>;
-  }
-
-  // 4. Default fallback Lucide icon
+  // 3. Default fallback Lucide icon
   return <Package size={size} className={className} />;
 }

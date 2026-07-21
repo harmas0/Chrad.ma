@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
-import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Sparkles, User, Briefcase } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Sparkles, User, Briefcase, Zap } from 'lucide-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useI18n } from '../utils/i18n';
 
@@ -86,10 +86,10 @@ export default function Login() {
         {/* Logo and Brand */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-dark-surface rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border-light shadow-[0_0_35px_rgba(0,255,135,0.15)] animate-pulse-glow">
-            <span className="text-4xl">⚡</span>
+            <Zap className="text-accent" size={32} />
           </div>
           <h1 className="text-3xl font-black text-white uppercase tracking-wider font-heading mb-1.5">Chrad</h1>
-          <p className="text-charcoal-light font-medium text-[13px] tracking-wide">Premium On-Demand Tasks & Deliveries</p>
+          <p className="text-charcoal-light font-medium text-[13px] tracking-wide">{t('hero_desc') || 'Premium On-Demand Tasks & Deliveries'}</p>
         </div>
 
         {/* Auth Mode Toggle Tabs (only if not in forgot mode) */}
@@ -103,7 +103,7 @@ export default function Login() {
                   : 'text-charcoal-light hover:text-white'
                 }`}
             >
-              Sign In
+              {t('login') || 'Sign In'}
             </button>
             <button
               onClick={() => { setAuthMode('signup'); setError(null); setSuccessMessage(null); }}
@@ -113,7 +113,7 @@ export default function Login() {
                   : 'text-charcoal-light hover:text-white'
                 }`}
             >
-              Sign Up
+              {t('signup') || 'Sign Up'}
             </button>
           </div>
         )}
@@ -128,18 +128,18 @@ export default function Login() {
                 onClick={() => { setAuthMode('login'); setError(null); }}
                 className="inline-flex items-center gap-1.5 text-charcoal-light hover:text-white text-[12px] font-bold mb-4 transition-colors"
               >
-                <ArrowLeft size={14} /> Back to Sign In
+                <ArrowLeft size={14} /> {t('back') || 'Back'}
               </button>
             )}
             <h2 className="text-[22px] font-black text-white font-heading">
-              {authMode === 'login' && 'Welcome Back'}
-              {authMode === 'signup' && 'Create Account'}
-              {authMode === 'forgot' && 'Reset Password'}
+              {authMode === 'login' && (t('welcome_back') || 'Welcome Back')}
+              {authMode === 'signup' && (t('create_account') || 'Create Account')}
+              {authMode === 'forgot' && (t('reset_password') || 'Reset Password')}
             </h2>
             <p className="text-[12px] text-charcoal-light mt-1 font-medium">
-              {authMode === 'login' && 'Enter your credentials to access your portal'}
-              {authMode === 'signup' && 'Sign up to request tasks or earn as a runner'}
-              {authMode === 'forgot' && "Provide your email and we'll send a recovery link"}
+              {authMode === 'login' && (t('login_subtitle') || 'Enter your credentials to access your portal')}
+              {authMode === 'signup' && (t('signup_subtitle') || 'Sign up to request tasks or earn as a runner')}
+              {authMode === 'forgot' && (t('forgot_subtitle') || "Provide your email and we'll send a recovery link")}
             </p>
           </div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 import LanguageSwitcher from './LanguageSwitcher';
 import WalletModal from './WalletModal';
@@ -25,7 +26,7 @@ export default function HeaderNav({ title, showBack = false }) {
           ) : (
             <Link to="/" className="flex items-center gap-2 group">
               <div className="w-9 h-9 rounded-2xl bg-accent/20 border border-accent/40 flex items-center justify-center font-heading font-black text-accent text-lg shadow-[0_0_15px_rgba(0,255,135,0.2)] group-hover:scale-105 transition-transform">
-                ⚡
+                <Zap size={18} />
               </div>
               <div>
                 <span className="font-heading font-black text-white text-[17px] tracking-tight block leading-none">
