@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, Camera, Check, Phone, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Camera, Check, Phone, Clock, AlertTriangle, Key, ShieldCheck, Lock } from 'lucide-react';
 import { fetchTaskById, updateTaskStatus } from '../data/tasksApi';
 import { fetchProfileById } from '../data/usersApi';
 import MapView from '../components/MapView';
@@ -8,6 +8,7 @@ import StatusTimeline from '../components/StatusTimeline';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import ReportDispute from '../components/ReportDispute';
+import ReviewModal from '../components/ReviewModal';
 import { useI18n } from '../utils/i18n';
 import { submitReview } from '../data/reviewsApi';
 import { compressImage } from '../utils/imageCompressor';
@@ -137,6 +138,10 @@ export default function ActiveTask() {
   const [uploadingDeliveryPhoto, setUploadingDeliveryPhoto] = useState(false);
   const [showDeliveryUpload, setShowDeliveryUpload] = useState(false);
   const deliveryInputRef = useRef(null);
+
+  const [enteredPin, setEnteredPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -432,6 +437,26 @@ export default function ActiveTask() {
           </div>
         </div>
 
+        {/* Secret Delivery PIN Card (Client View) */}
+        {isClient && ['accepted', 'picked_up', 'en_route'].includes(currentStatus) && (
+          <div className="glass-card border border-accent/40 rounded-3xl p-5 mb-6 bg-accent/5 relative overflow-hidden shadow-[0_0_20px_rgba(0,255,135,0.1)]">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-accent/20 border border-accent/40 flex items-center justify-center text-accent shrink-0">
+                  <Key size={22} />
+                </div>
+                <div>
+                  <span className="text-[11px] font-black text-accent uppercase tracking-wider block">Delivery Verification PIN</span>
+                  <span className="text-[12px] text-charcoal-light font-medium block">Provide this 4-digit code to runner upon delivery</span>
+                </div>
+              </div>
+              <div className="bg-dark/90 border-2 border-accent/60 rounded-2xl px-4 py-2 font-mono text-[22px] font-black text-white tracking-[0.25em] shadow-inner">
+                {task.deliveryPin}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Status action buttons */}
         {isRunner && (
           <div className="flex gap-4 mb-6 w-full">
@@ -629,7 +654,10 @@ export default function ActiveTask() {
               </div>
 
               <button
-                onClick={() => handleStatusChange('confirmed')}
+                onClick={() => {
+                  handleStatusChange('confirmed');
+                  setShowReviewModal(true);
+                }}
                 className="w-full py-4 rounded-2xl btn-accent font-extrabold text-[16px] transition-all flex items-center justify-center gap-3 animate-pulse-glow relative z-10"
                 id="confirm-delivery"
               >
@@ -709,16 +737,14 @@ export default function ActiveTask() {
         )}
       </div>
 
-      {/* Report Dispute Modal */}
-      {showReport && task && reportedUserId && (
-        <ReportDispute
-          taskId={task.id}
-          reportedUserId={reportedUserId}
-          onClose={() => setShowReport(false)}
-          onSubmitted={() => {
-            setShowReport(false);
-            alert(t('report_submitted'));
-          }}
+      {/* Review Modal */}
+      {task && runner && (
+        <ReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          task={task}
+          runner={runner}
+          onSuccess={() => setReviewSubmitted(true)}
         />
       )}
     </div>

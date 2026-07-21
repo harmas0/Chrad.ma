@@ -61,6 +61,7 @@ function rowToTask(row) {
     acceptedRunnerId: row.accepted_runner_id,
     distance: row.distance ? Number(row.distance) : null,
     deliveryPhotoUrl: row.delivery_photo_url,
+    deliveryPin: row.delivery_pin || (row.id ? (String(row.id).replace(/\D/g, '') + '4829').slice(0, 4) : '4829'),
     waypoints: row.waypoints || [],
     runner_paid: row.runner_paid,
     runner_payout_at: row.runner_payout_at,

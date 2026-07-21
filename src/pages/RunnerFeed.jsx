@@ -5,6 +5,8 @@ import { fetchOpenTasks, TASK_CATEGORIES } from '../data/tasksApi';
 import TaskCard from '../components/TaskCard';
 import MapView from '../components/MapView';
 import CategoryIcon from '../components/CategoryIcon';
+import NotificationCenter from '../components/NotificationCenter';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 
@@ -76,8 +78,10 @@ export default function RunnerFeed() {
             <h1 className="text-[24px] font-heading font-black text-white tracking-tight">{t('explore_title')}</h1>
             <p className="text-[11px] text-accent font-black uppercase tracking-wider">{filteredTasks.length} {t('tasks_near_you')}</p>
           </div>
-          
-          {/* View Toggle Pill */}
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
+            <LanguageSwitcher compact />
+          </div>
           <div className="flex bg-dark/80 rounded-2xl p-1 gap-1 border border-white/10">
             <button
               onClick={() => setViewMode('list')}

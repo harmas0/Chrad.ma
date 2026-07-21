@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Star, TrendingUp, ShieldCheck, Sparkles, MapPin } from 'lucide-react';
-import CategoryIcon from '../components/CategoryIcon';
+import NotificationCenter from '../components/NotificationCenter';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
@@ -99,9 +100,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[11px] font-black uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
-              Live in Morocco
+            <div className="flex items-center gap-2">
+              <NotificationCenter />
+              <LanguageSwitcher compact />
             </div>
           </div>
 
