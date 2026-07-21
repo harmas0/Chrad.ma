@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
-import { ExternalLink, Sparkles, Tag, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ExternalLink, Sparkles, Tag, ArrowRight, Globe } from 'lucide-react';
 import { fetchActiveAds, recordAdImpression, recordAdClick } from '../data/adsApi';
 
 export default function AdBanner({ placement = 'home_banner', className = '' }) {
   const [ad, setAd] = useState(null);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
+  const adsenseRef = useRef(null);
 
   useEffect(() => {
     async function loadAd() {
       const ads = await fetchActiveAds(placement);
       if (ads && ads.length > 0) {
-        // Pick one at random if multiple ads exist
+        // Weighted random selection or simple random
         const selected = ads[Math.floor(Math.random() * ads.length)];
         setAd(selected);
       }
@@ -23,7 +24,26 @@ export default function AdBanner({ placement = 'home_banner', className = '' }) 
       recordAdImpression(ad.id);
       setImpressionRecorded(true);
     }
-  }, [ad?.id, impressionRecorded]);
+
+    // Google AdSense SDK auto loader
+    if (ad?.provider === 'google_adsense' && ad?.adsense_client_id) {
+      try {
+        const scriptId = 'adsense-js-sdk';
+        if (!document.getElementById(scriptId)) {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ad.adsense_client_id}`;
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          document.head.appendChild(script);
+        }
+        // Trigger push
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (err) {
+        console.warn('AdSense push notice:', err);
+      }
+    }
+  }, [ad, impressionRecorded]);
 
   if (!ad) return null;
 
@@ -40,6 +60,64 @@ export default function AdBanner({ placement = 'home_banner', className = '' }) 
     }
   };
 
+  // Provider 1: GOOGLE ADSENSE
+  if (ad.provider === 'google_adsense') {
+    return (
+      <div className={`my-4 ${className}`}>
+        <div className="glass-card border border-white/10 rounded-3xl p-4 text-center overflow-hidden relative">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[9px] font-black uppercase tracking-widest text-info bg-info/10 border border-info/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <Globe size={10} />
+              Google AdSense Network
+            </span>
+            <span className="text-[10px] text-charcoal-light font-bold">{ad.advertiser || 'Google Partner'}</span>
+          </div>
+
+          <div ref={adsenseRef} className="min-h-[90px] flex items-center justify-center bg-dark/40 rounded-2xl p-2 border border-white/5">
+            {ad.adsense_slot_id ? (
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block', width: '100%', minHeight: '90px' }}
+                data-ad-client={ad.adsense_client_id}
+                data-ad-slot={ad.adsense_slot_id}
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+              />
+            ) : (
+              <div className="py-4 text-[12px] text-charcoal-light font-medium">
+                <span className="text-white font-bold block mb-1">⚡ {ad.title}</span>
+                AdSense Unit Slot: {ad.adsense_client_id}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Provider 2: CUSTOM HTML / JS EMBED
+  if (ad.provider === 'html_embed' && ad.html_code) {
+    return (
+      <div className={`my-4 ${className}`}>
+        <div className="glass-card border border-white/10 rounded-3xl p-4 overflow-hidden relative">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-black uppercase tracking-widest text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <Sparkles size={10} />
+              Sponsored Partner
+            </span>
+            <span className="text-[10px] text-charcoal-light font-bold">{ad.advertiser || 'Partner'}</span>
+          </div>
+
+          <div 
+            dangerouslySetInnerHTML={{ __html: ad.html_code }}
+            className="w-full overflow-hidden rounded-2xl"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Provider 3: CUSTOM IMAGE & BUTTON BANNER
   return (
     <div className={`my-4 ${className}`}>
       <div 
@@ -49,7 +127,7 @@ export default function AdBanner({ placement = 'home_banner', className = '' }) 
         {/* Background Image / Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src={ad.image_url}
+            src={ad.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'}
             alt={ad.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-40"
           />

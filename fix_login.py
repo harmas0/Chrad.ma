@@ -1,32 +1,16 @@
-import re
-with open('src/pages/Login.jsx', 'r', encoding='utf-8') as f:
-    content = f.read()
+﻿import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
-old = '                  {authMode === ' + """login""" + ' && (
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode(' + """forgot""" + ')}
-                      className="text-[10px] font-bold text-accent hover:underline"
-                    >
-                      Forgot password?
-                    </button>
-                  )'
+path = 'src/pages/Login.jsx'
+with open(path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
 
-new = '                  {authMode === ' + """login""" +  && (
-                    <button
-                      type="button"
-                      data-testid="forgot-password-btn"
-                      onClick={() => setAuthMode(' + """forgot""" + ')}
-                      className="text-[10px] font-bold text-accent hover:underline"
-                    >
-                      Forgot password?
-                    </button>
-                  )'
+for i, line in enumerate(lines):
+    if 'type=" button\' in line and i + 1 < len(lines) and 'onClick={() => setAuthMode('forgot')}' in lines[i + 1]:
+ indent = ' '
+ lines[i] = line.rstrip() + '\n' + indent + 'data-testid=\forgot-password-btn\\n'
+ break
 
-if old in content:
-    content = content.replace(old, new)
-    with open('src/pages/Login.jsx', 'w', encoding='utf-8') as f:
-        f.write(content)
-    print('Login.jsx updated')
-else:
-    print('Pattern not found')
+with open(path, 'w', encoding='utf-8') as f:
+ f.writelines(lines)
+print('Login.jsx updated')

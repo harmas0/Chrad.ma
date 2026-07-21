@@ -11,8 +11,10 @@ import {
   ToggleRight, 
   ExternalLink,
   RefreshCw,
-  CheckCircle,
-  AlertCircle
+  Globe,
+  Code,
+  Image,
+  CheckCircle
 } from 'lucide-react';
 import Modal from '../../components/Modal';
 import { fetchAllAds, createAd, toggleAdActive, deleteAd } from '../../data/adsApi';
@@ -23,6 +25,9 @@ export default function AdminAds() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Creation Provider Tab: 'custom' | 'google_adsense' | 'html_embed'
+  const [providerTab, setProviderTab] = useState('custom');
+
   // Form State
   const [title, setTitle] = useState('');
   const [advertiser, setAdvertiser] = useState('');
@@ -31,6 +36,13 @@ export default function AdminAds() {
   const [placement, setPlacement] = useState('home_banner');
   const [badgeText, setBadgeText] = useState('SPONSORED');
   const [ctaText, setCtaText] = useState('View Offer');
+
+  // AdSense State
+  const [adsenseClientId, setAdsenseClientId] = useState('ca-pub-1234567890123456');
+  const [adsenseSlotId, setAdsenseSlotId] = useState('9876543210');
+
+  // HTML Code State
+  const [htmlCode, setHtmlCode] = useState('');
 
   async function loadData() {
     setLoading(true);
@@ -45,27 +57,33 @@ export default function AdminAds() {
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !imageUrl) return;
+    if (!title) return;
 
     setSubmitting(true);
+
     const newAd = await createAd({
       title,
       advertiser,
+      provider: providerTab,
       imageUrl,
       targetUrl,
       placement,
       badgeText,
       ctaText,
+      adsenseClientId,
+      adsenseSlotId,
+      htmlCode,
       isActive: true,
     });
 
     if (newAd) {
-      alert('Custom Ad Campaign Created Successfully!');
+      alert('Ad Campaign Created Successfully!');
       setShowCreateModal(false);
       setTitle('');
       setAdvertiser('');
       setImageUrl('');
       setTargetUrl('');
+      setHtmlCode('');
       loadData();
     } else {
       alert('Failed to create ad campaign.');
@@ -109,10 +127,10 @@ export default function AdminAds() {
         <div>
           <h1 className="text-[28px] font-black text-white tracking-tight mb-1 flex items-center gap-2.5">
             <Megaphone size={28} className="text-accent" />
-            Custom Ads & Monetization
+            Multi-Provider Custom Ads Manager
           </h1>
           <p className="text-[14px] text-charcoal-light font-medium">
-            Manage sponsored partner campaigns, placement slots, and track CTR performance
+            Manage Google AdSense, Custom Banners, and HTML Embed campaigns with real-time CTR analytics
           </p>
         </div>
 
@@ -163,7 +181,7 @@ export default function AdminAds() {
       {/* Campaigns Table */}
       <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
-          <h3 className="font-heading font-black text-white text-[16px]">Active & Scheduled Ad Campaigns</h3>
+          <h3 className="font-heading font-black text-white text-[16px]">Active Multi-Provider Ad Campaigns</h3>
           <button
             onClick={loadData}
             className="p-2 rounded-xl bg-dark/60 border border-white/10 text-charcoal-light hover:text-white transition-colors"
@@ -176,10 +194,10 @@ export default function AdminAds() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Ad Banner</th>
+                <th>Provider</th>
                 <th>Campaign & Advertiser</th>
                 <th>Placement Slot</th>
-                <th>Views (Impressions)</th>
+                <th>Views</th>
                 <th>Clicks</th>
                 <th>CTR %</th>
                 <th>Status</th>
@@ -189,14 +207,21 @@ export default function AdminAds() {
             <tbody>
               {ads.map((item) => {
                 const ctr = item.impressions > 0 ? ((item.clicks / item.impressions) * 100).toFixed(1) : '0.0';
+                const providerLabel = 
+                  item.provider === 'google_adsense' ? 'Google AdSense' :
+                  item.provider === 'html_embed' ? 'HTML Embed' : 'Custom Banner';
+
+                const providerColor =
+                  item.provider === 'google_adsense' ? 'bg-info/15 text-info border-info/30' :
+                  item.provider === 'html_embed' ? 'bg-warning/15 text-warning border-warning/30' :
+                  'bg-accent/15 text-accent border-accent/30';
+
                 return (
                   <tr key={item.id}>
                     <td>
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-20 h-12 object-cover rounded-xl border border-white/10"
-                      />
+                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${providerColor}`}>
+                        {providerLabel}
+                      </span>
                     </td>
                     <td>
                       <div className="min-w-0 max-w-xs">
@@ -205,7 +230,7 @@ export default function AdminAds() {
                       </div>
                     </td>
                     <td>
-                      <span className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-2.5 py-1 rounded-lg uppercase">
+                      <span className="text-[11px] font-bold text-white uppercase font-mono">
                         {item.placement}
                       </span>
                     </td>
@@ -262,62 +287,179 @@ export default function AdminAds() {
 
       {/* CREATE NEW AD MODAL */}
       <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New Ad Campaign">
-        <form onSubmit={handleCreateSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-              Campaign Headline / Title *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. McDonald's 20% Off Fast Delivery"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
-            />
+        <div className="space-y-4">
+          {/* Provider Selection Tabs */}
+          <div className="flex bg-dark/60 p-1 rounded-2xl border border-white/10 mb-4">
+            <button
+              type="button"
+              onClick={() => setProviderTab('custom')}
+              className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                providerTab === 'custom' ? 'bg-accent text-dark font-black shadow-md' : 'text-charcoal-light hover:text-white'
+              }`}
+            >
+              <Image size={14} />
+              Custom Banner
+            </button>
+            <button
+              type="button"
+              onClick={() => setProviderTab('google_adsense')}
+              className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                providerTab === 'google_adsense' ? 'bg-info text-dark font-black shadow-md' : 'text-charcoal-light hover:text-white'
+              }`}
+            >
+              <Globe size={14} />
+              Google AdSense
+            </button>
+            <button
+              type="button"
+              onClick={() => setProviderTab('html_embed')}
+              className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+                providerTab === 'html_embed' ? 'bg-warning text-dark font-black shadow-md' : 'text-charcoal-light hover:text-white'
+              }`}
+            >
+              <Code size={14} />
+              HTML / JS Embed
+            </button>
           </div>
 
-          <div>
-            <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-              Advertiser / Sponsor Name
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Marjane Supermarket"
-              value={advertiser}
-              onChange={(e) => setAdvertiser(e.target.value)}
-              className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
-            />
-          </div>
+          <form onSubmit={handleCreateSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                Campaign Title *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. McDonald's Fast Delivery Promo"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-              Banner Image URL *
-            </label>
-            <input
-              type="url"
-              required
-              placeholder="https://images.unsplash.com/..."
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
-            />
-          </div>
+            <div>
+              <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                Advertiser / Partner Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. McDonald's Casablanca"
+                value={advertiser}
+                onChange={(e) => setAdvertiser(e.target.value)}
+                className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-              Target URL / Destination Link
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. https://marjane.ma or /post"
-              value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
-              className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
-            />
-          </div>
+            {/* TAB 1: CUSTOM BANNER */}
+            {providerTab === 'custom' && (
+              <>
+                <div>
+                  <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                    Banner Image URL *
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://images.unsplash.com/..."
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
+                  />
+                </div>
 
-          <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                    Destination Link (Target URL)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. https://mcdonalds.ma or /post"
+                    value={targetUrl}
+                    onChange={(e) => setTargetUrl(e.target.value)}
+                    className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                      Badge Label
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="SPONSORED"
+                      value={badgeText}
+                      onChange={(e) => setBadgeText(e.target.value)}
+                      className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                      CTA Button Text
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="View Offer"
+                      value={ctaText}
+                      onChange={(e) => setCtaText(e.target.value)}
+                      className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* TAB 2: GOOGLE ADSENSE */}
+            {providerTab === 'google_adsense' && (
+              <div className="space-y-4 p-4 rounded-2xl bg-info/5 border border-info/20">
+                <p className="text-[12px] text-info font-bold flex items-center gap-1.5">
+                  <Globe size={16} />
+                  Google AdSense Publisher Integration
+                </p>
+                <div>
+                  <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                    AdSense Publisher Client ID (ca-pub-...)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ca-pub-1234567890123456"
+                    value={adsenseClientId}
+                    onChange={(e) => setAdsenseClientId(e.target.value)}
+                    className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[13px] text-white font-mono focus:border-info focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
+                    AdSense Slot ID
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="9876543210"
+                    value={adsenseSlotId}
+                    onChange={(e) => setAdsenseSlotId(e.target.value)}
+                    className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[13px] text-white font-mono focus:border-info focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: HTML EMBED */}
+            {providerTab === 'html_embed' && (
+              <div className="space-y-3 p-4 rounded-2xl bg-warning/5 border border-warning/20">
+                <p className="text-[12px] text-warning font-bold flex items-center gap-1.5">
+                  <Code size={16} />
+                  Custom HTML / JS Embed Snippet
+                </p>
+                <textarea
+                  rows={4}
+                  placeholder="<iframe src='...' width='100%' height='90'></iframe>"
+                  value={htmlCode}
+                  onChange={(e) => setHtmlCode(e.target.value)}
+                  className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white font-mono focus:border-warning focus:outline-none"
+                />
+              </div>
+            )}
+
             <div>
               <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
                 Placement Slot
@@ -333,41 +475,15 @@ export default function AdminAds() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                Badge Text
-              </label>
-              <input
-                type="text"
-                placeholder="SPONSORED"
-                value={badgeText}
-                onChange={(e) => setBadgeText(e.target.value)}
-                className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                CTA Button Text
-              </label>
-              <input
-                type="text"
-                placeholder="Learn More"
-                value={ctaText}
-                onChange={(e) => setCtaText(e.target.value)}
-                className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[14px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-[1.01] transition-all disabled:opacity-50 mt-4"
-          >
-            {submitting ? 'Creating Campaign...' : 'Publish Ad Campaign'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[14px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-[1.01] transition-all disabled:opacity-50 mt-4"
+            >
+              {submitting ? 'Publishing...' : 'Publish Campaign'}
+            </button>
+          </form>
+        </div>
       </Modal>
     </div>
   );

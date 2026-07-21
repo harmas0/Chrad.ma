@@ -86,21 +86,34 @@ export async function fetchAllAds() {
   }
 }
 
-// Admin: Create new custom ad
+// Admin: Create new custom or provider ad
 export async function createAd(adData) {
   try {
+    const payload = {
+      title: adData.title,
+      advertiser: adData.advertiser || 'Sponsor',
+      provider: adData.provider || 'custom',
+      placement: adData.placement || 'home_banner',
+      cta_text: adData.ctaText || 'Learn More',
+      badge_text: adData.badgeText || 'SPONSORED',
+      is_active: adData.isActive !== false,
+      weight: Number(adData.weight || 1),
+    };
+
+    if (adData.provider === 'custom') {
+      payload.image_url = adData.imageUrl;
+      payload.target_url = adData.targetUrl || '/post';
+    } else if (adData.provider === 'google_adsense') {
+      payload.adsense_client_id = adData.adsenseClientId;
+      payload.adsense_slot_id = adData.adsenseSlotId;
+      payload.image_url = adData.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
+    } else if (adData.provider === 'html_embed') {
+      payload.html_code = adData.htmlCode;
+    }
+
     const { data, error } = await supabase
       .from('ads')
-      .insert({
-        title: adData.title,
-        advertiser: adData.advertiser || 'Chrad Sponsor',
-        image_url: adData.imageUrl,
-        target_url: adData.targetUrl || '/post',
-        placement: adData.placement || 'home_banner',
-        cta_text: adData.ctaText || 'Learn More',
-        badge_text: adData.badgeText || 'SPONSORED',
-        is_active: adData.isActive !== false,
-      })
+      .insert(payload)
       .select()
       .single();
 
