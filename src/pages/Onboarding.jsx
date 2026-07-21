@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowRight, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
 
+import LanguageSwitcher from '../components/LanguageSwitcher';
+
 const SLIDES = [
   {
     title: 'Delegated Tasks, Instant Bids',
@@ -66,14 +68,17 @@ export default function Onboarding() {
           <span className="font-heading font-black text-white uppercase tracking-wider text-[16px]">Chrad</span>
         </div>
         
-        {currentSlide < SLIDES.length - 1 && (
-          <button 
-            onClick={handleSkip}
-            className="text-[13px] font-bold text-charcoal-light hover:text-white transition-colors py-1.5 px-3.5 bg-white/[0.02] border border-border rounded-xl"
-          >
-            Skip
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher compact />
+          {currentSlide < SLIDES.length - 1 && (
+            <button 
+              onClick={handleSkip}
+              className="text-[13px] font-bold text-charcoal-light hover:text-white transition-colors py-1.5 px-3.5 bg-white/[0.02] border border-border rounded-xl"
+            >
+              Skip
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Content (Card with Slide Transitions) */}

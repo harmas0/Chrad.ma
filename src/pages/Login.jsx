@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Sparkles, User, Briefcase } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useI18n } from '../utils/i18n';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   // authMode can be: 'login' | 'signup' | 'forgot'
   const [authMode, setAuthMode] = useState('login');
   
@@ -70,6 +73,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-dark flex flex-col justify-center items-center px-6 relative overflow-hidden pt-safe pb-safe-only">
+      {/* Top right language switcher */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Decorative background glows */}
       <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-[#00FF87]/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-[#00E5FF]/5 blur-[120px] pointer-events-none" />

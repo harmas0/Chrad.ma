@@ -3,11 +3,12 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Plus, MessageCircle, User, Compass } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
 import { supabase } from '../utils/supabaseClient';
-import { useAuth } from '../context/AuthContext';
+import { useI18n } from '../utils/i18n';
 
 export default function BottomNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
 
   async function loadUnread() {
@@ -46,11 +47,11 @@ export default function BottomNav() {
   if (hiddenRoutes.some(r => location.pathname.startsWith(r))) return null;
 
   const navItems = [
-    { to: '/', icon: Home, label: 'Home' },
-    { to: '/explore', icon: Compass, label: 'Explore' },
-    { to: '/create', icon: Plus, label: 'Post', isCreate: true },
-    { to: '/messages', icon: MessageCircle, label: 'Messages', badge: unreadCount },
-    { to: '/profile', icon: User, label: 'Profile' },
+    { to: '/', icon: Home, label: t('home') },
+    { to: '/explore', icon: Compass, label: t('explore') },
+    { to: '/create', icon: Plus, label: t('post'), isCreate: true },
+    { to: '/messages', icon: MessageCircle, label: t('messages'), badge: unreadCount },
+    { to: '/profile', icon: User, label: t('profile') },
   ];
 
   return (
