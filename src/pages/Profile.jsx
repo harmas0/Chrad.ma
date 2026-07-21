@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard, Globe } from 'lucide-react';
+import { Settings, ChevronRight, Star, TrendingUp, Award, LogOut, Shield, Bell, HelpCircle, CreditCard, Edit3, X, Save, Phone, Mail, MapPin, Clock, CheckCircle, LayoutDashboard, Globe, Wallet } from 'lucide-react';
+import WalletModal from '../components/WalletModal';
 import { fetchCurrentUser } from '../data/usersApi';
 import { fetchTasks } from '../data/tasksApi';
 import { fetchReviewsForUser } from '../data/reviewsApi';
@@ -18,6 +19,7 @@ export default function Profile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', phone: '', bio: '' });
   const { lang, setLang, currency, setCurrency, t, formatPrice } = useI18n();
+  const [showWalletModal, setShowWalletModal] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [showRunnerStepsModal, setShowRunnerStepsModal] = useState(false);
@@ -275,16 +277,21 @@ export default function Profile() {
         </div>
 
         {/* Member since badge */}
-        <div className="flex items-center gap-2 px-2 mb-6">
-          <Clock size={13} className="text-charcoal-light" />
-          <span className="text-[12px] text-charcoal-light font-medium">
-            Member since {userProfile.created_at ? new Date(userProfile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
-          </span>
-          <span className="text-[10px] text-charcoal-light mx-1">•</span>
-          <MapPin size={13} className="text-charcoal-light" />
-          <span className="text-[12px] text-charcoal-light font-medium">
-            Casablanca, Morocco
-          </span>
+        <div className="flex items-center justify-between px-2 mb-6">
+          <div className="flex items-center gap-2">
+            <Clock size={13} className="text-charcoal-light" />
+            <span className="text-[12px] text-charcoal-light font-medium">
+              Member since {userProfile?.joinedDate ? new Date(userProfile.joinedDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'recently'}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setShowWalletModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/15 border border-accent/30 text-accent font-bold text-[12px] hover:bg-accent/25 transition-all shadow-[0_0_15px_rgba(0,255,135,0.15)] active-press"
+          >
+            <Wallet size={16} />
+            <span>My Wallet & RIB</span>
+          </button>
         </div>
       </div>
 
@@ -709,6 +716,9 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* Wallet Modal */}
+      <WalletModal isOpen={showWalletModal} onClose={() => setShowWalletModal(false)} />
     </div>
   );
 }

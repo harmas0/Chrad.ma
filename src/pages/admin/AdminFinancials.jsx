@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Clock, CheckCircle, RefreshCw, BarChart2, ShieldAlert, Award } from 'lucide-react';
+import { DollarSign, Clock, CheckCircle, RefreshCw, BarChart2, ShieldAlert, Award, Building2, Check, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchFinancialStats, updatePayoutStatus } from '../../data/adminApi';
+import { fetchAllPayoutRequests, approvePayoutRequest, rejectPayoutRequest } from '../../data/walletApi';
 
 export default function AdminFinancials() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [payoutReqs, setPayoutReqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -15,6 +17,8 @@ export default function AdminFinancials() {
     if (data) {
       setStats(data);
     }
+    const reqs = await fetchAllPayoutRequests();
+    setPayoutReqs(reqs);
     setLoading(false);
   }
 
@@ -22,15 +26,29 @@ export default function AdminFinancials() {
     loadData();
   }, []);
 
-  const handleReleasePayout = async (taskId) => {
-    if (!window.confirm('Confirm you have paid this runner offline and want to mark this payout as completed?')) return;
+  const handleApproveRibPayout = async (reqId) => {
+    if (!window.confirm('Confirm you have transferred the funds to the runner RIB bank account?')) return;
     setActionLoading(true);
-    const success = await updatePayoutStatus(taskId, true, user.id);
-    if (success) {
-      alert('Payout successfully marked as paid.');
+    const res = await approvePayoutRequest({ requestId: reqId, adminId: user.id });
+    if (res) {
+      alert('Payout approved and marked as completed!');
       await loadData();
     } else {
-      alert('Failed to update payout.');
+      alert('Failed to approve payout.');
+    }
+    setActionLoading(false);
+  };
+
+  const handleRejectRibPayout = async (reqId) => {
+    const reason = window.prompt('Enter reason for rejecting this payout request:', 'RIB details mismatch');
+    if (!reason) return;
+    setActionLoading(true);
+    const res = await rejectPayoutRequest({ requestId: reqId, adminId: user.id, reason });
+    if (res) {
+      alert('Payout request rejected.');
+      await loadData();
+    } else {
+      alert('Failed to reject payout.');
     }
     setActionLoading(false);
   };
@@ -181,9 +199,119 @@ export default function AdminFinancials() {
         </div>
       </div>
 
+      {/* Moroccan Bank RIB Payout Requests */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-[18px] font-black text-white flex items-center gap-2">
+              <Building2 size={20} className="text-accent" />
+              Runner Bank RIB Withdrawal Requests
+            </h2>
+            <p className="text-[12px] text-charcoal-light font-medium">
+              Review and approve pending wire transfers to Moroccan runner bank accounts (RIB).
+            </p>
+          </div>
+          <button
+            onClick={loadData}
+            className="p-2 rounded-xl bg-dark/60 border border-white/10 text-charcoal-light hover:text-white transition-colors"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
+
+        <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Runner</th>
+                  <th>Bank Name</th>
+                  <th>24-Digit RIB Number</th>
+                  <th>Account Holder</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payoutReqs.map((req) => (
+                  <tr key={req.id}>
+                    <td>
+                      <div className="flex items-center gap-2.5">
+                        <img
+                          src={req.runner?.avatar_url || `https://i.pravatar.cc/150?u=${req.runner_id}`}
+                          alt="Avatar"
+                          className="w-8 h-8 rounded-full border border-white/10"
+                        />
+                        <div>
+                          <p className="text-[13px] font-bold text-white leading-tight">{req.runner?.name || 'Runner'}</p>
+                          <p className="text-[10px] text-charcoal-light font-mono">{req.runner_id.slice(0, 8)}…</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="text-[12px] font-bold text-white">{req.bank_name}</span>
+                    </td>
+                    <td>
+                      <span className="text-[12px] font-mono text-accent bg-accent/10 px-2 py-1 rounded-lg border border-accent/20">
+                        {req.rib_number}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="text-[12px] text-white font-medium">{req.account_holder}</span>
+                    </td>
+                    <td>
+                      <span className="text-[14px] font-black text-warning">{req.amount} MAD</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${
+                        req.status === 'approved' ? 'badge-approved' :
+                        req.status === 'rejected' ? 'badge-none' : 'badge-pending'
+                      }`}>
+                        {req.status}
+                      </span>
+                    </td>
+                    <td>
+                      {req.status === 'pending' ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleApproveRibPayout(req.id)}
+                            disabled={actionLoading}
+                            className="px-3 py-1.5 rounded-lg bg-accent text-dark font-extrabold text-[11px] hover:scale-105 transition-all flex items-center gap-1"
+                          >
+                            <Check size={12} strokeWidth={3} />
+                            Approve Payout
+                          </button>
+                          <button
+                            onClick={() => handleRejectRibPayout(req.id)}
+                            disabled={actionLoading}
+                            className="px-2.5 py-1.5 rounded-lg bg-danger/15 border border-danger/30 text-danger font-bold text-[11px] hover:bg-danger/25 transition-colors"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-muted italic font-medium">Processed</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {payoutReqs.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-charcoal-light text-[13px]">
+                      No bank payout requests submitted yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       {/* Payout Queue */}
       <div>
-        <h2 className="text-[18px] font-black text-white mb-4">Runner Payout Queue</h2>
+        <h2 className="text-[18px] font-black text-white mb-4">Standard Runner Payout Queue</h2>
         <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
           <div className="overflow-x-auto">
             <table className="admin-table">
