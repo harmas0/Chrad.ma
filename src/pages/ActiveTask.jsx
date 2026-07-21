@@ -289,18 +289,23 @@ export default function ActiveTask() {
   return (
     <div className="min-h-screen bg-dark flex flex-col pt-safe">
       {/* Header */}
-      <div className="sticky top-0 z-40 glass border-b border-border px-5 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-40 glass-floating border-b border-white/10 px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-colors"
+            className="w-10 h-10 rounded-2xl bg-dark/70 border border-white/10 flex items-center justify-center text-white hover:bg-surface transition-colors active-press"
             id="active-back"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={19} strokeWidth={2.5} />
           </button>
           <div>
-            <h1 className="text-[18px] font-bold text-white tracking-tight">{t('live_tracking')}</h1>
-            <p className="text-[11px] text-accent font-bold uppercase tracking-wider">{t('runner_active')}</p>
+            <h1 className="font-heading font-black text-white text-[16px] leading-tight line-clamp-1">{task.title}</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-accent font-black uppercase tracking-wider bg-accent/15 border border-accent/30 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+                Live Tracking
+              </span>
+            </div>
           </div>
         </div>
 

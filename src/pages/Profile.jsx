@@ -179,24 +179,24 @@ export default function Profile() {
         </div>
 
         {/* User Card */}
-        <div className="glass-panel rounded-3xl p-6 relative overflow-hidden animate-fade-in-up border border-border-light shadow-lg mb-6">
+        <div className="glass-card rounded-3xl p-6 relative overflow-hidden animate-fade-in-up border border-white/10 shadow-xl mb-6">
           {/* Background glow */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/3 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-44 h-44 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-info/5 rounded-full blur-2xl pointer-events-none" />
           
           <div className="flex items-start gap-5 mb-5 relative z-10">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-dark flex items-center justify-center text-[28px] font-black text-accent border-2 border-accent shadow-[0_0_20px_rgba(0,255,135,0.15)]">
+              <div className="w-20 h-20 rounded-2xl bg-dark/80 flex items-center justify-center text-[28px] font-heading font-black text-accent border-2 border-accent/40 shadow-[0_0_20px_rgba(0,255,135,0.25)]">
                 {userProfile.initials}
               </div>
               {userProfile.verified && (
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center border-2 border-dark shadow-lg">
-                  <CheckCircle size={12} className="text-dark" strokeWidth={3} />
+                <div className="absolute -bottom-1.5 -right-1.5 w-6.5 h-6.5 bg-accent rounded-full flex items-center justify-center border-2 border-dark shadow-lg">
+                  <CheckCircle size={13} className="text-dark" strokeWidth={3} />
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-[20px] font-black text-white leading-tight mb-1">{userProfile.name}</h2>
+              <h2 className="text-[20px] font-heading font-black text-white leading-tight mb-1">{userProfile.name}</h2>
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="text-warning text-[14px] font-bold flex items-center gap-1">
                   <Star size={14} fill="currentColor" />

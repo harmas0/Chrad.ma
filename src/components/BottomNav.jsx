@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, PlusCircle, MessageCircle, User, Compass } from 'lucide-react';
+import { Home, Plus, MessageCircle, User, Compass } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +26,6 @@ export default function BottomNav() {
     
     loadUnread();
 
-    // Listen for updates on conversations table to update badge in real-time
     const channel = supabase
       .channel('bottom-nav-unread')
       .on('postgres_changes', {
@@ -43,14 +42,13 @@ export default function BottomNav() {
     };
   }, [user]);
   
-  // Hide bottom nav on detail, chat, task creation, and active tracking screens
   const hiddenRoutes = ['/chat', '/create', '/active', '/task'];
   if (hiddenRoutes.some(r => location.pathname.startsWith(r))) return null;
 
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/explore', icon: Compass, label: 'Explore' },
-    { to: '/create', icon: PlusCircle, label: 'Post', isCreate: true },
+    { to: '/create', icon: Plus, label: 'Post', isCreate: true },
     { to: '/messages', icon: MessageCircle, label: 'Messages', badge: unreadCount },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
@@ -58,18 +56,18 @@ export default function BottomNav() {
   return (
     <nav 
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 pointer-events-none" 
-      style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 16px)', paddingLeft: '16px', paddingRight: '16px' }}
+      style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 14px)', paddingLeft: '14px', paddingRight: '14px' }}
       id="bottom-nav"
     >
-      <div className="w-full flex items-center justify-around px-2 h-[72px] bg-dark-surface border border-border-light shadow-[0_-10px_40px_rgba(0,0,0,0.5)] rounded-[28px] pointer-events-auto">
+      <div className="w-full flex items-center justify-around px-3 h-[74px] glass-floating rounded-[30px] pointer-events-auto shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
         {navItems.map(({ to, icon: Icon, label, isCreate, badge }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-3 py-2 transition-all duration-300 relative
+              `flex flex-col items-center justify-center gap-1.5 px-3 py-2 transition-all duration-300 relative select-none
                ${isCreate
-                 ? 'bg-accent text-dark rounded-full w-[56px] h-[56px] flex items-center justify-center -mt-8 shadow-[0_8px_25px_rgba(0,255,135,0.4)] hover:scale-105 active:scale-95'
+                 ? 'bg-accent text-dark rounded-2xl w-[58px] h-[58px] flex items-center justify-center -mt-9 shadow-[0_8px_30px_rgba(0,255,135,0.45)] hover:scale-105 active:scale-95 transition-transform border-2 border-dark'
                  : isActive
                    ? 'text-accent scale-105'
                    : 'text-charcoal-light hover:text-white'
@@ -77,19 +75,28 @@ export default function BottomNav() {
             }
             id={`nav-${label.toLowerCase()}`}
           >
-            {isCreate ? (
-              <Icon size={28} strokeWidth={2.5} />
-            ) : (
+            {({ isActive }) => (
               <>
-                <div className="relative">
-                  <Icon size={24} strokeWidth={2} />
-                  {badge > 0 && (
-                    <span className="absolute -top-1.5 -right-2 bg-danger text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-md border border-dark">
-                      {badge}
+                {isCreate ? (
+                  <Icon size={30} strokeWidth={3} />
+                ) : (
+                  <>
+                    <div className="relative">
+                      <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                      {badge > 0 && (
+                        <span className="absolute -top-1.5 -right-2.5 bg-danger text-white text-[9px] font-black rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-[0_0_10px_rgba(255,51,102,0.5)] border border-dark animate-pulse">
+                          {badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className={`text-[10px] tracking-wide leading-none font-extrabold ${isActive ? 'text-accent' : 'text-charcoal-light'}`}>
+                      {label}
                     </span>
-                  )}
-                </div>
-                <span className="text-[11px] font-semibold tracking-wide leading-none">{label}</span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent absolute -bottom-1 shadow-[0_0_8px_#00FF87]" />
+                    )}
+                  </>
+                )}
               </>
             )}
           </NavLink>

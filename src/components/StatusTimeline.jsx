@@ -3,7 +3,7 @@ import { Check } from 'lucide-react';
 const steps = [
   { key: 'accepted', label: 'Accepted', icon: '🤝' },
   { key: 'picked_up', label: 'Picked Up', icon: '📦' },
-  { key: 'en_route', label: 'En Route', icon: '🚗' },
+  { key: 'en_route', label: 'En Route', icon: '🛵' },
   { key: 'delivered', label: 'Delivered', icon: '✅' },
 ];
 
@@ -21,10 +21,12 @@ export default function StatusTimeline({ currentStatus }) {
   return (
     <div className="py-4" id="status-timeline">
       <div className="flex items-start justify-between relative">
-        {/* Connecting line */}
-        <div className="absolute top-6 left-[calc(12.5%)] right-[calc(12.5%)] h-1.5 bg-dark border border-border rounded-full" />
+        {/* Connecting Track Line */}
+        <div className="absolute top-5 left-[calc(12.5%)] right-[calc(12.5%)] h-1.5 bg-dark/80 border border-border/80 rounded-full" />
+        
+        {/* Animated Active Progress Fill */}
         <div
-          className="absolute top-6 left-[calc(12.5%)] h-1.5 bg-accent rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,255,135,0.6)]"
+          className="absolute top-5 left-[calc(12.5%)] h-1.5 bg-accent rounded-full transition-all duration-700 ease-out shadow-[0_0_12px_#00FF87]"
           style={{
             width: currentIndex >= 3
               ? '75%'
@@ -37,27 +39,26 @@ export default function StatusTimeline({ currentStatus }) {
         {steps.map((step, index) => {
           const isCompleted = index < currentIndex || currentStatus === 'confirmed';
           const isCurrent = index === currentIndex;
-          const isPending = index > currentIndex;
 
           return (
-            <div key={step.key} className="flex flex-col items-center gap-2 relative z-10 flex-1">
+            <div key={step.key} className="flex flex-col items-center gap-2 relative z-10 flex-1 select-none">
               <div
                 className={`
-                  w-12 h-12 rounded-full flex items-center justify-center text-xl
+                  w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-black
                   transition-all duration-500 ease-out
                   ${isCompleted
-                    ? 'bg-accent text-dark shadow-[0_0_15px_rgba(0,255,135,0.4)]'
+                    ? 'bg-accent text-dark shadow-[0_0_15px_rgba(0,255,135,0.4)] border border-accent-light'
                     : isCurrent
-                      ? 'bg-accent text-dark shadow-[0_0_20px_rgba(0,255,135,0.6)] animate-pulse-glow ring-4 ring-accent/30'
-                      : 'bg-dark-surface text-charcoal-light border-2 border-border'
+                      ? 'bg-accent text-dark shadow-[0_0_20px_rgba(0,255,135,0.7)] ring-4 ring-accent/30 animate-pulse'
+                      : 'bg-dark/80 text-charcoal-light border border-border'
                   }
                 `}
               >
-                {isCompleted ? <Check size={20} strokeWidth={4} /> : step.icon}
+                {isCompleted ? <Check size={18} strokeWidth={3.5} /> : step.icon}
               </div>
               <span
-                className={`text-[12px] font-bold text-center leading-tight uppercase tracking-wider
-                  ${isCurrent ? 'text-accent drop-shadow-[0_0_8px_rgba(0,255,135,0.4)]' : isCompleted ? 'text-white' : 'text-muted'}
+                className={`text-[11px] font-black text-center leading-tight uppercase tracking-wider
+                  ${isCurrent ? 'text-accent drop-shadow-[0_0_6px_rgba(0,255,135,0.5)]' : isCompleted ? 'text-white' : 'text-charcoal-light'}
                 `}
               >
                 {step.label}

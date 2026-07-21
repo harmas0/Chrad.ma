@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, ShieldCheck } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 
 function timeAgo(dateString) {
+  if (!dateString) return '';
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
   if (seconds < 60) return 'just now';
   const minutes = Math.floor(seconds / 60);
@@ -49,40 +50,40 @@ export default function Messages() {
   return (
     <div className="pb-safe min-h-screen bg-dark pt-safe">
       {/* Header */}
-      <div className="sticky top-0 z-40 glass-panel border-b border-border-light px-5 py-4 rounded-b-3xl">
-        <h1 className="text-[24px] font-black text-white tracking-tight">{t('inbox')}</h1>
+      <div className="sticky top-0 z-40 glass-floating border-b border-white/10 px-5 py-4.5 rounded-b-3xl">
+        <h1 className="text-[24px] font-heading font-black text-white tracking-tight">{t('inbox')}</h1>
       </div>
 
       {/* Content */}
-      <div className="animate-fade-in px-5 pt-6">
+      <div className="animate-fade-in px-5 pt-6 pb-28">
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(0,255,135,0.5)]" />
+            <div className="w-9 h-9 border-3 border-accent border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(0,255,135,0.5)]" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-10 text-center border border-border mt-4">
-            <MessageCircle size={48} className="text-charcoal-light mx-auto mb-4 opacity-50" />
-            <p className="text-[16px] font-bold text-white mb-2">{t('no_messages')}</p>
-            <p className="text-[14px] text-charcoal-light font-medium">
+          <div className="glass-card rounded-3xl p-10 text-center border border-white/10 mt-4">
+            <MessageCircle size={44} className="text-accent mx-auto mb-4 opacity-70" />
+            <p className="text-[16px] font-heading font-black text-white mb-1.5">{t('no_messages')}</p>
+            <p className="text-[13px] text-charcoal-light font-medium">
               {t('inbox_desc')}
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="space-y-3.5">
             {conversations.map((conv, i) => (
               <div
                 key={conv.id}
                 onClick={() => navigate(`/chat/${conv.id}`)}
-                className="glass-panel rounded-2xl border border-border-light p-4 hover:border-accent/20 transition-all cursor-pointer flex items-center gap-4 group animate-scale-in"
+                className="glass-card rounded-3xl p-4.5 border border-white/10 hover-lift active-press cursor-pointer flex items-center gap-4 group"
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
                 <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-dark border border-border flex items-center justify-center text-accent text-[14px] font-black shadow-inner">
+                  <div className="w-13 h-13 rounded-2xl bg-dark/80 border-2 border-white/10 flex items-center justify-center text-accent text-[14px] font-black shadow-inner">
                     {conv.participantInitials}
                   </div>
                   {/* Unread badge indicator */}
                   {conv.unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-dark rounded-full flex items-center justify-center text-[10px] font-black shadow-[0_0_8px_rgba(0,255,135,0.6)]">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-accent text-dark rounded-full flex items-center justify-center text-[10px] font-black shadow-[0_0_10px_rgba(0,255,135,0.6)] animate-pulse">
                       {conv.unreadCount}
                     </div>
                   )}
@@ -90,17 +91,17 @@ export default function Messages() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-[15px] font-bold text-white truncate group-hover:text-accent transition-colors">
+                    <h3 className="text-[15px] font-heading font-black text-white truncate group-hover:text-accent transition-colors">
                       {conv.participantName}
                     </h3>
-                    <span className="text-[11px] text-charcoal-light font-medium">
+                    <span className="text-[11px] text-charcoal-light font-bold">
                       {timeAgo(conv.lastMessageTime)}
                     </span>
                   </div>
-                  <p className="text-[12px] text-charcoal-light truncate font-medium mb-0.5">
+                  <p className="text-[13px] text-charcoal-light truncate font-medium mb-1">
                     {conv.lastMessageText}
                   </p>
-                  <p className="text-[10px] text-accent font-bold uppercase tracking-wider truncate">
+                  <p className="text-[10px] text-accent font-black uppercase tracking-wider truncate bg-accent/10 px-2 py-0.5 rounded-full w-max border border-accent/20">
                     {conv.taskTitle}
                   </p>
                 </div>

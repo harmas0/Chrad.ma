@@ -247,6 +247,7 @@ export default function MapView({
   runnerPosition: propsRunnerPosition,
   runnerCoords,
   taskMarkers,
+  runnerLocations = [],
   waypoints = [],
   showHeatmap = false,
   center = [33.5731, -7.6322], // Casablanca center
@@ -566,6 +567,22 @@ export default function MapView({
             </Popup>
           </Marker>
         )}
+
+        {/* Live Runner Locations (Multiple) */}
+        {runnerLocations && runnerLocations.map((loc) => (
+          <Marker 
+            key={loc.runnerId || loc.id} 
+            position={[loc.lat, loc.lng]} 
+            icon={runnerIcon}
+          >
+            <Popup>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>🏃 Runner ({loc.runnerId?.slice(0, 8)})</div>
+              <div style={{ fontSize: 11, color: '#888' }}>
+                {loc.taskId ? `Active on Task: ${loc.taskId.slice(0, 8)}` : 'Idle / Available'}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
         {/* Heatmap Layer if enabled */}
         {showHeatmap && taskMarkers?.map((task) => (

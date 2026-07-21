@@ -291,27 +291,30 @@ export default function CreateTask() {
   return (
     <div className="pb-action-bar min-h-screen bg-dark">
       {/* Top bar */}
-      <div className="sticky top-0 z-40 glass border-b border-border px-5 pt-safe pb-4">
+      <div className="sticky top-0 z-40 glass-floating border-b border-white/10 px-5 pt-safe pb-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => step > 0 ? setStep(step - 1) : navigate(-1)}
-            className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-white hover:bg-surface transition-colors"
+            className="w-10 h-10 rounded-2xl bg-dark/70 border border-white/10 flex items-center justify-center text-white hover:bg-surface transition-colors active-press"
             id="create-back"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={19} strokeWidth={2.5} />
           </button>
 
-          <h1 className="text-[18px] font-bold text-white tracking-tight">{t('post_task')}</h1>
+          <div className="text-center">
+            <h1 className="text-[17px] font-heading font-black text-white tracking-tight">{t('post_task')}</h1>
+            <span className="text-[10px] text-accent font-black uppercase tracking-widest block">{STEPS[step]}</span>
+          </div>
 
-          <span className="text-[14px] text-accent font-bold bg-accent/10 px-3 py-1 rounded-full">
+          <span className="text-[12px] text-accent font-black bg-accent/15 border border-accent/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(0,255,135,0.2)] font-heading">
             {step + 1}/{STEPS.length}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="mt-4 h-1.5 bg-dark-surface rounded-full overflow-hidden border border-border-light">
+        <div className="mt-3.5 h-1.5 bg-dark/80 rounded-full overflow-hidden border border-white/10">
           <div
-            className="h-full bg-accent rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,255,135,0.5)]"
+            className="h-full bg-accent rounded-full transition-all duration-500 ease-out shadow-[0_0_12px_#00FF87]"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
           />
         </div>
