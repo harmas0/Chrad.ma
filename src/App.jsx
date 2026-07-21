@@ -173,11 +173,13 @@ const AppContent = () => {
         </Route>
       </Routes>
       {user && !isBanned && !isAdminRoute && <BottomNav />}
+      <PWAInstallPrompt />
     </div>
   );
 };
 
 import ErrorBoundary from './components/ErrorBoundary';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 export default function App() {
   return (

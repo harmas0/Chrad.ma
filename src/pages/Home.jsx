@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Star, TrendingUp, ShieldCheck, Sparkles, MapPin } from 'lucide-react';
 import NotificationCenter from '../components/NotificationCenter';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import AnnouncementBanner from '../components/AnnouncementBanner';
 import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
@@ -105,6 +106,9 @@ export default function Home() {
               <LanguageSwitcher compact />
             </div>
           </div>
+
+          {/* Broadcast Announcement Banner */}
+          <AnnouncementBanner />
 
           {/* Hero Content Box */}
           <div className="glass-floating rounded-3xl p-6.5 border border-white/15 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.5)]">

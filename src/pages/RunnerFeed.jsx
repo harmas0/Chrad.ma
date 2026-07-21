@@ -7,6 +7,7 @@ import MapView from '../components/MapView';
 import CategoryIcon from '../components/CategoryIcon';
 import NotificationCenter from '../components/NotificationCenter';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import AnnouncementBanner from '../components/AnnouncementBanner';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 
@@ -101,6 +102,9 @@ export default function RunnerFeed() {
             </button>
           </div>
         </div>
+
+        {/* Broadcast Announcement Banner */}
+        <AnnouncementBanner />
 
         {/* Search Field */}
         <div className="relative mb-3.5">

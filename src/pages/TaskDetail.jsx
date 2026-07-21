@@ -10,6 +10,7 @@ import MapView from '../components/MapView';
 import Modal from '../components/Modal';
 import PriceInput from '../components/PriceInput';
 import CategoryIcon from '../components/CategoryIcon';
+import RunnerProfileModal from '../components/RunnerProfileModal';
 import { useI18n } from '../utils/i18n';
 
 function timeAgo(dateString) {
@@ -43,8 +44,11 @@ export default function TaskDetail() {
 
   const [counterModal, setCounterModal] = useState(false);
   const [counterBid, setCounterBid] = useState(null);
-  const [counterPrice, setCounterPrice] = useState(0);
-  const [counterMsg, setCounterMsg] = useState('');
+  const [counterPrice, setCounterPrice] = useState('');
+  const [biddingSuccess, setBiddingSuccess] = useState('');
+
+  const [selectedRunnerId, setSelectedRunnerId] = useState(null);
+  const [showRunnerModal, setShowRunnerModal] = useState(false);
   const [acceptedBidId, setAcceptedBidId] = useState(null);
 
   // Runner placing bid state
@@ -351,6 +355,10 @@ export default function TaskDetail() {
                           onAccept={handleAccept}
                           onCounter={handleCounter}
                           onReject={() => {}}
+                          onViewProfile={(runnerId) => {
+                            setSelectedRunnerId(runnerId);
+                            setShowRunnerModal(true);
+                          }}
                           animationDelay={i * 0.1}
                         />
                       </div>
@@ -481,6 +489,13 @@ export default function TaskDetail() {
           </div>
         </Modal>
       )}
+
+      {/* Runner Public Profile Modal */}
+      <RunnerProfileModal
+        isOpen={showRunnerModal}
+        onClose={() => setShowRunnerModal(false)}
+        runnerId={selectedRunnerId}
+      />
     </div>
   );
 }

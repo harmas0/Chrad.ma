@@ -1,6 +1,6 @@
 import { Star, Clock, Check, X, MessageCircle, ShieldCheck } from 'lucide-react';
 
-export default function BidCard({ bid, onAccept, onCounter, onReject, animationDelay = 0 }) {
+export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProfile, animationDelay = 0 }) {
   return (
     <div
       className="glass-card rounded-3xl border border-border-light p-5.5 stagger-item hover-lift relative overflow-hidden"
@@ -12,10 +12,13 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, animationD
 
       {/* Runner info header */}
       <div className="flex items-start justify-between gap-4 mb-4 relative z-10">
-        <div className="flex items-center gap-3.5 min-w-0">
+        <div 
+          onClick={() => onViewProfile && onViewProfile(bid.runnerId)}
+          className="flex items-center gap-3.5 min-w-0 cursor-pointer group/runner"
+        >
           {/* Avatar Ring */}
           <div className="relative">
-            <div className="w-13 h-13 rounded-2xl bg-dark/80 flex items-center justify-center text-sm font-black text-accent border-2 border-accent/40 shadow-[0_0_15px_rgba(0,255,135,0.2)]">
+            <div className="w-13 h-13 rounded-2xl bg-dark/80 flex items-center justify-center text-sm font-black text-accent border-2 border-accent/40 shadow-[0_0_15px_rgba(0,255,135,0.2)] group-hover/runner:scale-105 transition-transform">
               {bid.runnerInitials}
             </div>
             {bid.runnerCompletedTasks >= 50 && (
@@ -27,7 +30,7 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, animationD
 
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h4 className="font-heading font-extrabold text-white text-[15px] truncate">{bid.runnerName}</h4>
+              <h4 className="font-heading font-extrabold text-white text-[15px] truncate group-hover/runner:text-accent transition-colors">{bid.runnerName}</h4>
               {bid.runnerCompletedTasks >= 100 && (
                 <span className="text-[9px] font-black text-accent bg-accent/15 border border-accent/30 px-2 py-0.5 rounded-full tracking-wide uppercase">⚡ PRO</span>
               )}
