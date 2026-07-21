@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Ban, ShieldCheck, ChevronRight, X, AlertTriangle, Download, Trash, UserCheck, ShieldAlert, Award, Calendar, DollarSign, ListTodo } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchAllUsers, banUser, unbanUser, fetchUserFullProfile, resendKYCRequest, updateUserRole, bulkBanUsers, bulkUnbanUsers, bulkApproveKYC } from '../../data/adminApi';
+import AdminUserInspectModal from '../../components/AdminUserInspectModal';
 
 const ROLE_BADGES = {
   admin: 'badge badge-admin',
@@ -23,7 +24,8 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   
-  // Selected user full profile state
+  const [inspectUserId, setInspectUserId] = useState(null);
+  const [showInspectModal, setShowInspectModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userProfileData, setUserProfileData] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -302,12 +304,15 @@ export default function AdminUsers() {
                       />
                     </td>
                     <td>
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-[12px] font-black text-accent shrink-0">
+                      <div 
+                        onClick={() => { setInspectUserId(u.id); setShowInspectModal(true); }}
+                        className="flex items-center gap-3 cursor-pointer group/u"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-[12px] font-black text-accent shrink-0 group-hover/u:scale-105 transition-transform">
                           {u.initials || u.name?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[14px] font-bold text-white truncate">{u.name || 'Unknown'}</p>
+                          <p className="text-[14px] font-bold text-white truncate group-hover/u:text-accent transition-colors">{u.name || 'Unknown'}</p>
                           <p className="text-[11px] text-charcoal-light truncate">{u.email || u.id.slice(0, 12)}</p>
                         </div>
                       </div>
@@ -731,6 +736,14 @@ export default function AdminUsers() {
           </div>
         </div>
       )}
+
+      {/* Admin User Inspector & Wallet Modal */}
+      <AdminUserInspectModal
+        isOpen={showInspectModal}
+        onClose={() => setShowInspectModal(false)}
+        userId={inspectUserId}
+        onRefresh={loadData}
+      />
     </div>
   );
 }

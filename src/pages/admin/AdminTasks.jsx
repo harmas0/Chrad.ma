@@ -5,6 +5,7 @@ import { fetchTasks, updateTaskStatus } from '../../data/tasksApi';
 import { fetchProfileById } from '../../data/usersApi';
 import { fetchTaskChatTranscript, bulkUpdateTaskStatus, updatePayoutStatus } from '../../data/adminApi';
 import MapView from '../../components/MapView';
+import AdminTaskInspectModal from '../../components/AdminTaskInspectModal';
 
 const STATUS_OPTIONS = [
   { key: '', label: 'All' },
@@ -42,6 +43,8 @@ export default function AdminTasks() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [inspectTaskId, setInspectTaskId] = useState(null);
+  const [showInspectModal, setShowInspectModal] = useState(false);
   
   // Selected task detail state
   const [selectedTask, setSelectedTask] = useState(null);
@@ -294,8 +297,11 @@ export default function AdminTasks() {
                       />
                     </td>
                     <td>
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-bold text-white truncate max-w-[220px]">{task.title || 'Untitled'}</p>
+                      <div 
+                        onClick={() => { setInspectTaskId(task.id); setShowInspectModal(true); }}
+                        className="min-w-0 cursor-pointer group/t"
+                      >
+                        <p className="text-[14px] font-bold text-white truncate max-w-[220px] group-hover/t:text-accent transition-colors">{task.title || 'Untitled'}</p>
                         <p className="text-[11px] text-charcoal-light font-mono">{task.id?.slice(0, 16)}</p>
                       </div>
                     </td>
@@ -523,6 +529,14 @@ export default function AdminTasks() {
           </div>
         </div>
       )}
+
+      {/* Admin Task & Route Inspector Modal */}
+      <AdminTaskInspectModal
+        isOpen={showInspectModal}
+        onClose={() => setShowInspectModal(false)}
+        taskId={inspectTaskId}
+        onRefresh={loadData}
+      />
     </div>
   );
 }

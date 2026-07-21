@@ -14,23 +14,39 @@ const ACTION_LABELS = {
   UPDATE_DISPUTE_STATUS: { label: 'Updated dispute', color: 'text-info' },
 };
 
+import { supabase } from '../../utils/supabaseClient';
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  async function loadData() {
+    const [s, activity] = await Promise.all([
+      fetchDashboardStats(),
+      fetchAuditLog(10),
+    ]);
+    setStats(s);
+    setRecentActivity(activity);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function load() {
-      const [s, activity] = await Promise.all([
-        fetchDashboardStats(),
-        fetchAuditLog(10),
-      ]);
-      setStats(s);
-      setRecentActivity(activity);
-      setLoading(false);
-    }
-    load();
+    loadData();
+
+    // Subscribe to real-time changes across profiles, tasks, and audit logs
+    const channel = supabase
+      .channel('admin-dashboard-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => loadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => loadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payout_requests' }, () => loadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_audit_log' }, () => loadData())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   if (loading) {
