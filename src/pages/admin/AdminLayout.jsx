@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/admin/disputes', icon: AlertTriangle, label: 'Disputes' },
   { to: '/admin/categories', icon: Layers, label: 'Categories' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/admin/ads', icon: Sparkles, label: 'Ads Manager' },
   { to: '/admin/support', icon: MessageSquare, label: 'Support Tickets' },
   { to: '/admin/live-map', icon: Map, label: 'Live Map' },
   { to: '/admin/audit', icon: ScrollText, label: 'Audit Log' },

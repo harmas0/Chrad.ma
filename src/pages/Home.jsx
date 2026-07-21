@@ -4,6 +4,7 @@ import { ArrowRight, Zap, Star, TrendingUp, ShieldCheck, Sparkles, MapPin } from
 import NotificationCenter from '../components/NotificationCenter';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import AnnouncementBanner from '../components/AnnouncementBanner';
+import AdBanner from '../components/AdBanner';
 import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
@@ -162,6 +163,9 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Sponsored Ad Banner */}
+          <AdBanner placement="home_banner" />
         </section>
 
         {/* ── Stats Ribbon ── */}

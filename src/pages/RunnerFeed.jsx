@@ -8,6 +8,7 @@ import CategoryIcon from '../components/CategoryIcon';
 import NotificationCenter from '../components/NotificationCenter';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import AnnouncementBanner from '../components/AnnouncementBanner';
+import AdBanner from '../components/AdBanner';
 import { supabase } from '../utils/supabaseClient';
 import { useI18n } from '../utils/i18n';
 
@@ -148,6 +149,9 @@ export default function RunnerFeed() {
             </button>
           ))}
         </div>
+
+        {/* Sponsored Feed Card Ad */}
+        <AdBanner placement="feed_card" />
       </div>
 
       {/* Content */}

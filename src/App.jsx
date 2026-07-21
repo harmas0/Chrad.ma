@@ -32,6 +32,7 @@ import AdminRunnerQueue from './pages/admin/AdminRunnerQueue';
 import AdminDisputes from './pages/admin/AdminDisputes';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import AdminAds from './pages/admin/AdminAds';
 import AdminSupport from './pages/admin/AdminSupport';
 import AdminLiveMap from './pages/admin/AdminLiveMap';
 import AdminAuditLog from './pages/admin/AdminAuditLog';
@@ -166,6 +167,7 @@ const AppContent = () => {
           <Route path="disputes" element={<AdminDisputes />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="announcements" element={<AdminAnnouncements />} />
+          <Route path="ads" element={<AdminAds />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="live-map" element={<AdminLiveMap />} />
           <Route path="audit" element={<AdminAuditLog />} />
