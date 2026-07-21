@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, ScrollText, LogOut, Zap, Package, Settings, DollarSign, UserCheck, Layers, Megaphone, MessageSquare, Map } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, ScrollText, LogOut, Zap, Package, Settings, DollarSign, UserCheck, Layers, Megaphone, MessageSquare, Map, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV_ITEMS = [
