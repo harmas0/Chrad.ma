@@ -510,20 +510,43 @@ export default function CreateTask() {
                 ))}
               </div>
             )}
-
-            <div className="flex gap-3 mb-5">
+            <div className="flex gap-3 mb-4">
               <button
                 type="button"
                 onClick={handleUseMyLocation}
                 disabled={locatingGPS}
                 className="flex-1 py-3 px-4 rounded-xl bg-dark-surface border border-border text-[13px] font-bold text-white hover:border-border-light transition-all flex items-center justify-center gap-2"
               >
-                <Crosshair size={16} className={locatingGPS ? 'animate-spin text-accent' : 'text-charcoal-light'} />
-                {locatingGPS ? 'Locating...' : t('use_my_location')}
+                {locatingGPS ? <Loader2 size={16} className="animate-spin text-accent" /> : <Crosshair size={16} className="text-accent" />}
+                {t('use_my_location')}
               </button>
             </div>
 
-            {/* Interactive map panel */}
+            {/* Quick Morocco Location Chips */}
+            <div className="mb-5">
+              <span className="text-[11px] text-charcoal-light font-extrabold uppercase tracking-wider block mb-2">⚡ Popular Landmark Presets</span>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {[
+                  { name: 'Maarif, Casa', lat: 33.5810, lng: -7.6320, address: 'Maarif, Casablanca' },
+                  { name: 'Casa Port Station', lat: 33.5988, lng: -7.6105, address: 'Casa Port, Casablanca' },
+                  { name: 'Derb Ghallef', lat: 33.5830, lng: -7.6250, address: 'Derb Ghallef, Casablanca' },
+                  { name: 'Morocco Mall', lat: 33.5880, lng: -7.6690, address: 'Ain Diab, Casablanca' },
+                  { name: 'Rabat Agdal', lat: 33.9980, lng: -6.8480, address: 'Agdal, Rabat' },
+                  { name: 'Marrakech Gueliz', lat: 31.6340, lng: -8.0100, address: 'Gueliz, Marrakech' },
+                  { name: 'Tangier City', lat: 35.7760, lng: -5.8030, address: 'City Center, Tangier' },
+                ].map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => updateLocation(activeTab, chip)}
+                    className="px-3 py-1.5 rounded-lg bg-dark border border-border hover:border-accent/40 text-[11px] font-bold text-charcoal-light hover:text-accent transition-all shrink-0 active:scale-95"
+                  >
+                    📍 {chip.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="w-full aspect-[16/10] rounded-2xl overflow-hidden border border-border shadow-lg mb-6 relative">
               <MapView
                 pickupCoords={form.pickup}
@@ -536,12 +559,8 @@ export default function CreateTask() {
                 draggableDestination={form.category !== 'custom' ? activeTab === 'destination' : false}
                 onMarkerDrag={handleMarkerDrag}
                 onRouteCalculated={handleRouteCalculated}
+                showRouteInfo={true}
               />
-              <div className="absolute bottom-3 left-3 bg-dark/95 border border-border px-3 py-1.5 rounded-lg backdrop-blur-sm z-30 text-[11px] font-bold text-white">
-                {activeTab === 'pickup' && '📍 Drag green pin to move pickup'}
-                {activeTab === 'destination' && '🏁 Drag red flag to move destination'}
-                {activeTab.startsWith('waypoint-') && '📍 Drag yellow pin to move stop'}
-              </div>
             </div>
 
             <div className="bg-dark-surface rounded-xl p-4 border border-border flex items-start gap-3">
