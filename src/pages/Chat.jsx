@@ -82,7 +82,8 @@ export default function Chat() {
             id: newMsg.id,
             senderId: newMsg.sender_id,
             text: newMsg.text,
-            timestamp: newMsg.created_at,
+            // Supabase realtime sends column name, not alias — use timestamp OR created_at
+            timestamp: newMsg.timestamp || newMsg.created_at,
             type: newMsg.type || 'text',
           }];
         });

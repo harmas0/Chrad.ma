@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, ShieldCheck } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
 import { supabase } from '../utils/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../utils/i18n';
 
 function timeAgo(dateString) {
@@ -18,14 +19,16 @@ function timeAgo(dateString) {
 
 export default function Messages() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useI18n();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     let cancelled = false;
     async function load() {
-      const data = await fetchConversations();
+      const data = await fetchConversations(user.id);
       if (!cancelled) { setConversations(data); setLoading(false); }
     }
     load();
@@ -45,7 +48,7 @@ export default function Messages() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   return (
     <div className="pb-safe min-h-screen bg-dark pt-safe">

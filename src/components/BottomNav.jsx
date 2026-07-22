@@ -15,8 +15,8 @@ export default function BottomNav() {
   async function loadUnread() {
     if (!user) return;
     try {
-      const convs = await fetchConversations();
-      const totalUnread = convs.reduce((sum, c) => sum + (c.unread || 0), 0);
+      const convs = await fetchConversations(user.id);
+      const totalUnread = convs.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
       setUnreadCount(totalUnread);
     } catch (e) {
       console.error('Failed to load unread count:', e);
