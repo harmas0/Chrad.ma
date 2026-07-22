@@ -26,6 +26,7 @@ const SLIDES = [
     badgeKey: 'onboarding_slide1_badge',
     badgeDefault: 'FAST & ON-DEMAND',
     iconComponent: Zap,
+    videoUrl: '/videos/onboarding-1.mp4',
     color: '#00FF87',
     glowColor: 'rgba(0, 255, 135, 0.25)',
     graphicType: 'lightning',
@@ -39,6 +40,7 @@ const SLIDES = [
     badgeKey: 'onboarding_slide2_badge',
     badgeDefault: 'FLEXIBLE EARNINGS',
     iconComponent: DollarSign,
+    videoUrl: '/videos/onboarding-2.mp4',
     color: '#00E5FF',
     glowColor: 'rgba(0, 229, 255, 0.25)',
     graphicType: 'earnings',
@@ -52,6 +54,7 @@ const SLIDES = [
     badgeKey: 'onboarding_slide3_badge',
     badgeDefault: '100% ESCROW PROTECTED',
     iconComponent: ShieldCheck,
+    videoUrl: '/videos/escrow-security.mp4',
     color: '#FFB020',
     glowColor: 'rgba(255, 176, 32, 0.25)',
     graphicType: 'escrow',
@@ -65,6 +68,7 @@ const SLIDES = [
     badgeKey: 'onboarding_slide4_badge',
     badgeDefault: 'LIVE MAP DISPATCH',
     iconComponent: MapPin,
+    videoUrl: '/videos/delivery-hero.mp4',
     color: '#FF0055',
     glowColor: 'rgba(255, 0, 85, 0.25)',
     graphicType: 'map',
@@ -178,45 +182,62 @@ export default function Onboarding() {
             </span>
           </div>
 
-          {/* Interactive Graphical Motion Container */}
+          {/* Interactive Graphical Motion Container with Video Background */}
           <div 
             className="aspect-[16/10] w-full rounded-3xl bg-dark/70 border border-white/10 flex items-center justify-center mb-8 relative overflow-hidden transition-all duration-500 group shadow-inner"
           >
-            {/* Grid Pattern Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
-
-            {/* Slide Graphic */}
-            <div className="relative z-10 text-center animate-fade-in space-y-3">
-              <div 
-                className="w-24 h-24 rounded-3xl mx-auto flex items-center justify-center shadow-2xl animate-float border transition-all duration-500"
-                style={{ backgroundColor: `${slide.color}15`, borderColor: `${slide.color}50`, color: slide.color }}
-              >
-                <IconComponent size={52} strokeWidth={2} />
+            {/* Background Video Layer */}
+            {slide.videoUrl ? (
+              <div className="absolute inset-0 z-0">
+                <video
+                  key={slide.videoUrl}
+                  src={slide.videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-transparent" />
               </div>
+            ) : (
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
+            )}
+
+            {/* Slide Overlay Pill & Badges */}
+            <div className="relative z-10 text-center animate-fade-in space-y-3 p-4">
+              {!slide.videoUrl && (
+                <div 
+                  className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center shadow-2xl animate-float border transition-all duration-500"
+                  style={{ backgroundColor: `${slide.color}15`, borderColor: `${slide.color}50`, color: slide.color }}
+                >
+                  <IconComponent size={44} strokeWidth={2} />
+                </div>
+              )}
 
               {slide.graphicType === 'lightning' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl animate-pulse-slow">
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl animate-pulse-slow">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00FF87] animate-ping" />
                   <span className="text-[12px] font-black text-white">{t('live_bids')} <strong className="text-[#00FF87]">45 MAD</strong> {t('_arrival')} <strong className="text-white">{t('8m')}</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'earnings' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Building2 size={16} className="text-[#00E5FF]" />
                   <span className="text-[12px] font-black text-white">{t('moroccan_bank_rib_transfer')} <strong className="text-[#00E5FF]">+350 MAD</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'escrow' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Lock size={15} className="text-[#FFB020]" />
                   <span className="text-[12px] font-black text-white">{t('secret_otp_delivery_pin')} <strong className="text-[#FFB020] font-mono tracking-widest">4821</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'map' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Navigation size={16} className="text-[#FF0055] animate-spin-slow" />
                   <span className="text-[12px] font-black text-white">{t('live_telemetry')} <strong className="text-[#FF0055]">{t('marif_casablanca')}</strong></span>
                 </div>

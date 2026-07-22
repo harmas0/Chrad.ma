@@ -112,30 +112,42 @@ export default function Home() {
           {/* Broadcast Announcement Banner */}
           <AnnouncementBanner />
 
-          {/* Hero Content Box */}
-          <div className="glass-floating rounded-3xl p-6.5 border border-white/15 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.5)]">
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles size={16} className="text-accent" />
-              <span className="text-[11px] text-accent font-black uppercase tracking-widest">{t('fast_escrow_delivery')}</span>
+          {/* Hero Content Box with Video Background */}
+          <div className="glass-floating rounded-3xl p-6.5 border border-white/15 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.5)] group">
+            <div className="absolute inset-0 z-0">
+              <video
+                src="/videos/delivery-hero.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover opacity-25 group-hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/70 to-dark/40" />
             </div>
 
-            <h2 className="text-[28px] font-heading font-black text-white leading-[1.15] mb-3 tracking-tight">
-              {t('welcome')}
-            </h2>
-            <p className="text-[14px] text-charcoal-light leading-relaxed mb-6 font-medium">
-              {t('hero_desc')}
-            </p>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles size={16} className="text-accent" />
+                <span className="text-[11px] text-accent font-black uppercase tracking-widest">{t('fast_escrow_delivery')}</span>
+              </div>
 
-            <button
-              onClick={() => navigate('/create')}
-              className="btn-accent text-[14px] font-heading font-black px-6 py-4 rounded-2xl w-full flex items-center justify-center gap-2 uppercase tracking-wider shadow-[0_8px_25px_rgba(0,255,135,0.3)] active-press"
-              id="hero-cta"
-            >
-              {t('post_task')}
-              <ArrowRight size={18} strokeWidth={3} />
-            </button>
+              <h2 className="text-[28px] font-heading font-black text-white leading-[1.15] mb-3 tracking-tight">
+                {t('welcome')}
+              </h2>
+              <p className="text-[14px] text-charcoal-light leading-relaxed mb-6 font-medium">
+                {t('hero_desc')}
+              </p>
+
+              <button
+                onClick={() => navigate('/create')}
+                className="btn-accent text-[14px] font-heading font-black px-6 py-4 rounded-2xl w-full flex items-center justify-center gap-2 uppercase tracking-wider shadow-[0_8px_25px_rgba(0,255,135,0.3)] active-press"
+                id="hero-cta"
+              >
+                {t('post_task')}
+                <ArrowRight size={18} strokeWidth={3} />
+              </button>
+            </div>
           </div>
         </section>
 
