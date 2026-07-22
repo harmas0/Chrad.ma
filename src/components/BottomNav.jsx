@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Plus, MessageCircle, User, Compass } from 'lucide-react';
 import { fetchConversations } from '../data/messagesApi';
 import { supabase } from '../utils/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../utils/i18n';
 
 export default function BottomNav() {
