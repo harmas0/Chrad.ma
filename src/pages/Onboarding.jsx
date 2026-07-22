@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -6,12 +6,14 @@ import {
   MapPin, 
   Sparkles, 
   Zap, 
-  Wallet, 
   Lock, 
-  CheckCircle,
   Building2,
   Navigation,
-  DollarSign
+  DollarSign,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause
 } from 'lucide-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useI18n } from '../utils/i18n';
@@ -28,7 +30,7 @@ const SLIDES = [
     iconComponent: Zap,
     videoUrl: '/videos/onboarding-1.mp4',
     color: '#00FF87',
-    glowColor: 'rgba(0, 255, 135, 0.25)',
+    glowColor: 'rgba(0, 255, 135, 0.35)',
     graphicType: 'lightning',
   },
   {
@@ -42,7 +44,7 @@ const SLIDES = [
     iconComponent: DollarSign,
     videoUrl: '/videos/onboarding-2.mp4',
     color: '#00E5FF',
-    glowColor: 'rgba(0, 229, 255, 0.25)',
+    glowColor: 'rgba(0, 229, 255, 0.35)',
     graphicType: 'earnings',
   },
   {
@@ -56,7 +58,7 @@ const SLIDES = [
     iconComponent: ShieldCheck,
     videoUrl: '/videos/escrow-security.mp4',
     color: '#FFB020',
-    glowColor: 'rgba(255, 176, 32, 0.25)',
+    glowColor: 'rgba(255, 176, 32, 0.35)',
     graphicType: 'escrow',
   },
   {
@@ -70,17 +72,48 @@ const SLIDES = [
     iconComponent: MapPin,
     videoUrl: '/videos/delivery-hero.mp4',
     color: '#FF0055',
-    glowColor: 'rgba(255, 0, 85, 0.25)',
+    glowColor: 'rgba(255, 0, 85, 0.35)',
     graphicType: 'map',
   },
 ];
 
 export default function Onboarding() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const videoRefs = useRef([]);
   const navigate = useNavigate();
   const { t } = useI18n();
+
+  // Reset & play current video smoothly when slide changes
+  useEffect(() => {
+    videoRefs.current.forEach((vRef, idx) => {
+      if (vRef) {
+        if (idx === currentSlide) {
+          vRef.currentTime = 0;
+          vRef.play().catch(() => {});
+          setIsPlaying(true);
+        } else {
+          vRef.pause();
+        }
+      }
+    });
+  }, [currentSlide]);
+
+  const togglePlayPause = () => {
+    const activeVideo = videoRefs.current[currentSlide];
+    if (activeVideo) {
+      if (isPlaying) {
+        activeVideo.pause();
+        setIsPlaying(false);
+      } else {
+        activeVideo.play().catch(() => {});
+        setIsPlaying(true);
+      }
+    }
+  };
 
   const handleNext = () => {
     if (currentSlide < SLIDES.length - 1) {
@@ -120,27 +153,44 @@ export default function Onboarding() {
   };
 
   const slide = SLIDES[currentSlide];
-  const IconComponent = slide.iconComponent;
 
   return (
     <div 
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="min-h-screen bg-dark flex flex-col justify-between pt-safe pb-safe-only px-6 overflow-hidden relative select-none"
+      className="min-h-screen bg-dark flex flex-col justify-between pt-safe pb-safe-only px-5 overflow-hidden relative select-none"
     >
-      {/* Background Ambient Glows */}
-      <div 
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-[140px] pointer-events-none transition-all duration-700"
-        style={{ backgroundColor: slide.glowColor }}
-      />
+      {/* Dynamic Background Video Preloader Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {SLIDES.map((s, idx) => (
+          <video
+            key={s.id}
+            ref={(el) => (videoRefs.current[idx] = el)}
+            src={s.videoUrl}
+            loop
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              idx === currentSlide ? 'opacity-35 blur-[2px] scale-105' : 'opacity-0 pointer-events-none'
+            }`}
+          />
+        ))}
+        {/* Dark Vignette Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-dark/60" />
+        <div 
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full blur-[150px] transition-all duration-700 opacity-60"
+          style={{ backgroundColor: slide.glowColor }}
+        />
+      </div>
 
-      {/* Top Navigation Bar */}
+      {/* Top Header Navigation Bar */}
       <div className="flex items-center justify-between mt-4 relative z-20">
         <div className="flex items-center gap-2.5">
           <div 
-            className="w-10 h-10 rounded-2xl bg-dark/80 flex items-center justify-center border transition-all duration-500 shadow-lg text-accent"
-            style={{ borderColor: `${slide.color}50` }}
+            className="w-10 h-10 rounded-2xl bg-dark/90 flex items-center justify-center border transition-all duration-500 shadow-lg text-accent"
+            style={{ borderColor: `${slide.color}60` }}
           >
             <Zap size={22} className="animate-pulse-glow" />
           </div>
@@ -152,12 +202,22 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Mute/Audio Toggle */}
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="w-9 h-9 rounded-xl bg-dark/70 backdrop-blur-md border border-white/10 flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
+            title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+          >
+            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} className="text-accent" />}
+          </button>
+
           <LanguageSwitcher compact />
+
           {currentSlide < SLIDES.length - 1 && (
             <button
               onClick={handleSkip}
-              className="text-[12px] font-extrabold text-charcoal-light hover:text-white transition-colors py-1.5 px-3.5 bg-dark/60 border border-white/10 rounded-xl"
+              className="text-[12px] font-extrabold text-charcoal-light hover:text-white transition-colors py-1.5 px-3.5 bg-dark/70 backdrop-blur-md border border-white/10 rounded-xl"
             >
               {t('skip') || 'Skip'}
             </button>
@@ -165,100 +225,101 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* Main Slide Card Container */}
-      <div className="flex-1 flex flex-col justify-center my-6 relative z-10">
+      {/* Main Adaptive Video Slide Card */}
+      <div className="flex-1 flex flex-col justify-center my-4 relative z-10 max-w-lg mx-auto w-full">
         <div 
-          className="glass-floating rounded-[36px] p-8 border relative overflow-hidden transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-          style={{ borderColor: `${slide.color}40` }}
+          className="glass-floating rounded-[36px] p-6 border relative overflow-hidden transition-all duration-500 shadow-[0_25px_60px_rgba(0,0,0,0.8)]"
+          style={{ borderColor: `${slide.color}50` }}
         >
-          {/* Badge */}
-          <div 
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full mb-6 border bg-white/[0.03] transition-all duration-500"
-            style={{ borderColor: `${slide.color}30` }}
-          >
-            <Sparkles size={13} style={{ color: slide.color }} />
-            <span className="text-[10px] uppercase tracking-widest font-black" style={{ color: slide.color }}>
-              {t(slide.badgeKey) || slide.badgeDefault}
+          {/* Badge & Step Indicator */}
+          <div className="flex items-center justify-between mb-4">
+            <div 
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border bg-white/[0.04] transition-all duration-500"
+              style={{ borderColor: `${slide.color}40` }}
+            >
+              <Sparkles size={13} style={{ color: slide.color }} />
+              <span className="text-[10px] uppercase tracking-widest font-black" style={{ color: slide.color }}>
+                {t(slide.badgeKey) || slide.badgeDefault}
+              </span>
+            </div>
+
+            <span className="text-[11px] font-mono font-bold text-white/50 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+              0{currentSlide + 1} / 0{SLIDES.length}
             </span>
           </div>
 
-          {/* Interactive Graphical Motion Container with Video Background */}
+          {/* Adaptive Video Viewport Container */}
           <div 
-            className="aspect-[16/10] w-full rounded-3xl bg-dark/70 border border-white/10 flex items-center justify-center mb-8 relative overflow-hidden transition-all duration-500 group shadow-inner"
+            onClick={togglePlayPause}
+            className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-3xl bg-dark/90 border border-white/15 relative overflow-hidden transition-all duration-500 group shadow-2xl cursor-pointer mb-5"
+            style={{ boxShadow: `0 0 25px ${slide.glowColor}` }}
           >
-            {/* Background Video Layer */}
-            {slide.videoUrl ? (
-              <div className="absolute inset-0 z-0">
-                <video
-                  key={slide.videoUrl}
-                  src={slide.videoUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-transparent" />
+            {/* Primary Video Element */}
+            <video
+              src={slide.videoUrl}
+              autoPlay
+              loop
+              muted={isMuted}
+              playsInline
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+
+            {/* Video Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/30 to-transparent" />
+
+            {/* Play / Pause Toggle Overlay Indicator */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-dark/40 backdrop-blur-xs">
+              <div className="w-12 h-12 rounded-full bg-dark/80 border border-white/20 flex items-center justify-center text-white shadow-xl">
+                {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
               </div>
-            ) : (
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px]" />
-            )}
+            </div>
 
-            {/* Slide Overlay Pill & Badges */}
-            <div className="relative z-10 text-center animate-fade-in space-y-3 p-4">
-              {!slide.videoUrl && (
-                <div 
-                  className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center shadow-2xl animate-float border transition-all duration-500"
-                  style={{ backgroundColor: `${slide.color}15`, borderColor: `${slide.color}50`, color: slide.color }}
-                >
-                  <IconComponent size={44} strokeWidth={2} />
-                </div>
-              )}
-
+            {/* Floating Live Badge Over Video */}
+            <div className="absolute bottom-3 left-3 right-3 z-10">
               {slide.graphicType === 'lightning' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl animate-pulse-slow">
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-xl shadow-xl">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00FF87] animate-ping" />
-                  <span className="text-[12px] font-black text-white">{t('live_bids')} <strong className="text-[#00FF87]">45 MAD</strong> {t('_arrival')} <strong className="text-white">{t('8m')}</strong></span>
+                  <span className="text-[11px] font-black text-white">{t('live_bids')} <strong className="text-[#00FF87]">45 MAD</strong> {t('_arrival')} <strong className="text-white">{t('8m')}</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'earnings' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
-                  <Building2 size={16} className="text-[#00E5FF]" />
-                  <span className="text-[12px] font-black text-white">{t('moroccan_bank_rib_transfer')} <strong className="text-[#00E5FF]">+350 MAD</strong></span>
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-xl shadow-xl">
+                  <Building2 size={15} className="text-[#00E5FF]" />
+                  <span className="text-[11px] font-black text-white">{t('moroccan_bank_rib_transfer')} <strong className="text-[#00E5FF]">+350 MAD</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'escrow' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
-                  <Lock size={15} className="text-[#FFB020]" />
-                  <span className="text-[12px] font-black text-white">{t('secret_otp_delivery_pin')} <strong className="text-[#FFB020] font-mono tracking-widest">4821</strong></span>
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-xl shadow-xl">
+                  <Lock size={14} className="text-[#FFB020]" />
+                  <span className="text-[11px] font-black text-white">{t('secret_otp_delivery_pin')} <strong className="text-[#FFB020] font-mono tracking-widest">4821</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'map' && (
-                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
-                  <Navigation size={16} className="text-[#FF0055] animate-spin-slow" />
-                  <span className="text-[12px] font-black text-white">{t('live_telemetry')} <strong className="text-[#FF0055]">{t('marif_casablanca')}</strong></span>
+                <div className="inline-flex items-center gap-2 bg-dark/90 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-xl shadow-xl">
+                  <Navigation size={15} className="text-[#FF0055] animate-spin-slow" />
+                  <span className="text-[11px] font-black text-white">{t('live_telemetry')} <strong className="text-[#FF0055]">{t('marif_casablanca')}</strong></span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Text Content */}
-          <div className="space-y-3">
-            <h2 className="text-[26px] font-black text-white leading-tight font-heading">
+          <div className="space-y-2">
+            <h2 className="text-[24px] sm:text-[26px] font-black text-white leading-tight font-heading">
               {t(slide.titleKey) || slide.titleDefault}
             </h2>
-            <p className="text-[14px] text-charcoal-light font-medium leading-relaxed">
+            <p className="text-[13px] sm:text-[14px] text-charcoal-light font-medium leading-relaxed">
               {t(slide.descKey) || slide.descDefault}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom Controls: Indicators & Primary Button */}
-      <div className="space-y-5 mb-4 relative z-20">
+      {/* Bottom Controls: Navigation Pills & Primary Button */}
+      <div className="space-y-4 mb-4 relative z-20 max-w-lg mx-auto w-full">
         {/* Pagination Indicator Bars */}
         <div className="flex justify-center items-center gap-2">
           {SLIDES.map((s, index) => (
@@ -267,8 +328,9 @@ export default function Onboarding() {
               onClick={() => setCurrentSlide(index)}
               className="h-2 rounded-full transition-all duration-500"
               style={{
-                width: currentSlide === index ? '32px' : '8px',
-                backgroundColor: currentSlide === index ? s.color : 'rgba(255, 255, 255, 0.15)',
+                width: currentSlide === index ? '36px' : '8px',
+                backgroundColor: currentSlide === index ? s.color : 'rgba(255, 255, 255, 0.2)',
+                boxShadow: currentSlide === index ? `0 0 12px ${s.color}` : 'none'
               }}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -278,24 +340,19 @@ export default function Onboarding() {
         {/* Action Button */}
         <button
           onClick={handleNext}
-          className="w-full py-4.5 rounded-2xl font-heading font-black tracking-wider uppercase text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 active:scale-[0.98] shadow-2xl"
+          className="w-full py-4 rounded-2xl font-heading font-black tracking-wider uppercase text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 active:scale-[0.98] shadow-2xl"
           style={{
             backgroundColor: slide.color,
             color: '#0D1117',
             boxShadow: `0 8px 30px ${slide.glowColor}`,
           }}
         >
-          {currentSlide === SLIDES.length - 1 ? (
-            <>
-              <span>{t('get_started') || 'Get Started'}</span>
-              <Sparkles size={18} strokeWidth={2.5} />
-            </>
-          ) : (
-            <>
-              <span>{t('next_slide') || 'Next Slide'}</span>
-              <ArrowRight size={18} strokeWidth={2.5} />
-            </>
-          )}
+          <span>
+            {currentSlide === SLIDES.length - 1
+              ? t('get_started') || 'Get Started'
+              : t('next_slide') || 'Next Slide'}
+          </span>
+          <ArrowRight size={18} strokeWidth={3} />
         </button>
       </div>
     </div>
