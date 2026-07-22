@@ -1,7 +1,7 @@
 import { useI18n } from '../utils/i18n';
 import { Star, Clock, Check, X, MessageCircle, ShieldCheck } from 'lucide-react';
 
-export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProfile, animationDelay = 0 }) {
+export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProfile, onMessage, animationDelay = 0 }) {
   const { t } = useI18n();
   return (
     <div
@@ -90,6 +90,17 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
           >
             {t('counter')}
           </button>
+          {onMessage && (
+            <button
+              onClick={() => onMessage?.(bid.runnerId)}
+              className="w-11 border border-border bg-dark-surface text-accent rounded-2xl hover:bg-surface active-press transition-all flex items-center justify-center"
+              id={`message-bid-${bid.id}`}
+              title="Message runner"
+              aria-label="Message runner"
+            >
+              <MessageCircle size={17} strokeWidth={2.5} />
+            </button>
+          )}
           <button
             onClick={() => onReject?.(bid)}
             className="w-11 border border-danger/30 text-danger bg-danger/10 rounded-2xl hover:bg-danger/20 active-press transition-all flex items-center justify-center"

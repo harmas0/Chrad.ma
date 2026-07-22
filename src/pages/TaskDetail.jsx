@@ -45,6 +45,7 @@ export default function TaskDetail() {
   const [counterModal, setCounterModal] = useState(false);
   const [counterBid, setCounterBid] = useState(null);
   const [counterPrice, setCounterPrice] = useState('');
+  const [counterMsg, setCounterMsg] = useState('');
   const [biddingSuccess, setBiddingSuccess] = useState('');
 
   const [selectedRunnerId, setSelectedRunnerId] = useState(null);

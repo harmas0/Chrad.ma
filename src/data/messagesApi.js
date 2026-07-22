@@ -1,20 +1,26 @@
 import { supabase } from '../utils/supabaseClient';
 
 // Helper to convert DB row to UI shape
-function rowToConversation(row, profile) {
+function rowToConversation(row, currentUserId) {
+  // Determine which profile is the OTHER participant
+  const isUserParticipant = row.participant_id === currentUserId;
+  const otherProfile = isUserParticipant 
+    ? (row.client || row.profiles)
+    : (row.participant || row.profiles);
+
   return {
     id: row.id,
     taskId: row.task_id,
-    taskTitle: '', // Will be filled by the caller or a join
-    participantId: row.participant_id,
-    participantName: profile?.name || 'Unknown',
-    participantInitials: profile?.initials || '??',
-    participantPhone: profile?.phone || '',
-    lastMessageText: row.last_message,        // aligned with Messages.jsx usage
-    lastMessage: row.last_message,            // backward-compat alias
+    taskTitle: row.tasks?.title || '',
+    participantId: isUserParticipant ? row.client_id : row.participant_id,
+    participantName: otherProfile?.name || 'User',
+    participantInitials: otherProfile?.initials || (otherProfile?.name ? otherProfile.name.slice(0, 2).toUpperCase() : '??'),
+    participantPhone: otherProfile?.phone || '',
+    lastMessageText: row.last_message,
+    lastMessage: row.last_message,
     lastMessageTime: row.last_message_time,
-    unreadCount: row.unread || 0,             // aligned with Messages.jsx usage
-    unread: row.unread || 0,                  // backward-compat alias
+    unreadCount: row.unread || 0,
+    unread: row.unread || 0,
   };
 }
 
@@ -23,45 +29,36 @@ function rowToMessage(row) {
     id: row.id,
     senderId: row.sender_id,
     text: row.text,
-    // Use created_at as fallback since some rows store it there
     timestamp: row.timestamp || row.created_at,
     type: row.type || 'text',
   };
 }
 
 // Fetch all conversations for the logged-in user
-// Conversations table has: id, task_id, client_id, participant_id, last_message, last_message_time, unread
 export async function fetchConversations(userId) {
   let query = supabase
     .from('conversations')
-    .select('*, profiles:participant_id(*), tasks:task_id(title)')
+    .select('*, client:client_id(*), participant:participant_id(*), profiles:participant_id(*), tasks:task_id(title)')
     .order('last_message_time', { ascending: false });
 
-  // If userId is provided, filter to conversations this user is part of
   if (userId) {
     query = query.or(`client_id.eq.${userId},participant_id.eq.${userId}`);
   }
 
   const { data, error } = await query;
   if (error) { console.error('fetchConversations error:', error); return []; }
-  return data.map(row => {
-    const conv = rowToConversation(row, row.profiles);
-    conv.taskTitle = row.tasks?.title || '';
-    return conv;
-  });
+  return data.map(row => rowToConversation(row, userId));
 }
 
-// Fetch a single conversation by ID
-export async function fetchConversationById(id) {
+// Fetch a single conversation by ID with two-way participant resolution
+export async function fetchConversationById(id, currentUserId) {
   const { data, error } = await supabase
     .from('conversations')
-    .select('*, profiles:participant_id(*), tasks:task_id(title)')
+    .select('*, client:client_id(*), participant:participant_id(*), profiles:participant_id(*), tasks:task_id(title)')
     .eq('id', id)
     .single();
   if (error) { console.error('fetchConversationById error:', error); return null; }
-  const conv = rowToConversation(data, data.profiles);
-  conv.taskTitle = data.tasks?.title || '';
-  return conv;
+  return rowToConversation(data, currentUserId);
 }
 
 // Fetch all messages for a conversation
@@ -94,7 +91,7 @@ export async function sendMessage(conversationId, senderId, text, type = 'text')
   // Update conversation's last message + increment unread for the OTHER participant
   const { data: conv } = await supabase
     .from('conversations')
-    .select('unread, client_id, participant_id')
+    .select('unread')
     .eq('id', conversationId)
     .single();
 
@@ -111,19 +108,35 @@ export async function sendMessage(conversationId, senderId, text, type = 'text')
   return { id: msgId, senderId, text, timestamp: now, type };
 }
 
+// Send automated system notification message inside chat
+export async function sendSystemMessage(conversationId, text) {
+  return sendMessage(conversationId, 'system', text, 'system');
+}
+
 // Fetch or create conversation between client and runner for a task
-export async function fetchOrCreateConversation(taskId, participantId) {
+export async function fetchOrCreateConversation(taskId, participantId, clientId) {
   const { data, error } = await supabase
     .from('conversations')
     .select('*')
     .eq('task_id', taskId)
-    .eq('participant_id', participantId)
+    .or(`participant_id.eq.${participantId},client_id.eq.${participantId}`)
     .maybeSingle();
   
   if (error) {
     console.error('fetchOrCreateConversation check error:', error);
   }
   if (data) return data;
+
+  // Resolve client ID from task if missing
+  let taskClientId = clientId;
+  if (!taskClientId) {
+    const { data: taskData } = await supabase
+      .from('tasks')
+      .select('client_id, user_id')
+      .eq('id', taskId)
+      .maybeSingle();
+    taskClientId = taskData?.client_id || taskData?.user_id || null;
+  }
   
   const id = `conv-${Date.now()}`;
   const { data: newConv, error: createError } = await supabase
@@ -131,6 +144,7 @@ export async function fetchOrCreateConversation(taskId, participantId) {
     .insert({
       id,
       task_id: taskId,
+      client_id: taskClientId,
       participant_id: participantId,
       last_message: 'Conversation started',
       last_message_time: new Date().toISOString(),

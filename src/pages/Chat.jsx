@@ -41,10 +41,11 @@ export default function Chat() {
   }
 
   useEffect(() => {
+    if (!id || !currentUserId) return;
     let cancelled = false;
     async function load() {
       const [conv, msgs] = await Promise.all([
-        fetchConversationById(id),
+        fetchConversationById(id, currentUserId),
         fetchMessagesForConversation(id),
       ]);
       if (!cancelled) {
@@ -57,7 +58,7 @@ export default function Chat() {
     }
     load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, currentUserId]);
 
   // Real-time Supabase subscription for new messages
   useEffect(() => {
@@ -234,10 +235,18 @@ export default function Chat() {
         </div>
 
         {/* Task context banner */}
-        <div className="mt-2 flex items-center gap-2 bg-dark/50 rounded-xl px-3 py-2 border border-border">
-          <MapPin size={13} className="text-accent flex-shrink-0" />
-          <span className="text-[11px] text-charcoal-light font-medium truncate">
-            {conversation.taskTitle} • {t('tap_view_task')}
+        <div 
+          onClick={() => conversation.taskId && navigate(`/task/${conversation.taskId}`)}
+          className="mt-2 flex items-center justify-between bg-dark/50 hover:bg-dark/80 rounded-xl px-3 py-2 border border-border cursor-pointer transition-colors group"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin size={13} className="text-accent flex-shrink-0" />
+            <span className="text-[11px] text-charcoal-light font-medium truncate group-hover:text-white transition-colors">
+              {conversation.taskTitle} • {t('tap_view_task')}
+            </span>
+          </div>
+          <span className="text-[10px] text-accent font-bold uppercase tracking-wider bg-accent/10 px-2 py-0.5 rounded-md shrink-0">
+            View Task →
           </span>
         </div>
       </div>
@@ -246,12 +255,24 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto px-5 py-6">
         {messages.map((msg, i) => {
           const isMine = msg.senderId === currentUserId;
+          const isSystem = msg.type === 'system';
           const msgDate = formatDate(msg.timestamp);
           const showDateSep = msgDate !== lastDate;
           lastDate = msgDate;
 
           const showTimestamp = i === 0 || 
             new Date(msg.timestamp).getTime() - new Date(messages[i-1].timestamp).getTime() > 300000;
+
+          if (isSystem) {
+            return (
+              <div key={msg.id} className="my-4 flex justify-center">
+                <div className="bg-accent/10 border border-accent/25 text-accent text-[12px] font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm text-center">
+                  <span>⚡</span>
+                  <span>{msg.text}</span>
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div key={msg.id} className="mb-3">
@@ -320,9 +341,30 @@ export default function Chat() {
 
       {/* Input area */}
       <div 
-        className="sticky bottom-0 glass-panel border-t border-border-light px-4 pt-3"
+        className="sticky bottom-0 glass-panel border-t border-border-light px-4 pt-2.5"
         style={{ paddingBottom: 'calc(16px + var(--safe-area-bottom, 0px))' }}
       >
+        {/* Quick reply presets */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-1">
+          {[
+            '🚗 On my way!',
+            '📍 Arrived at location',
+            '✅ Task completed!',
+            '🙏 Thank you!'
+          ].map((quickText, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setNewMessage(quickText);
+                inputRef.current?.focus();
+              }}
+              className="px-3 py-1 bg-dark-surface hover:bg-surface border border-border text-[11px] font-semibold text-charcoal-light hover:text-white rounded-full whitespace-nowrap transition-colors shrink-0"
+            >
+              {quickText}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center gap-3">
           <input
             type="file"
