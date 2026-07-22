@@ -90,9 +90,9 @@ export default function Home() {
       <div className="flex flex-col space-y-8">
         
         {/* ── Hero Branding & Header ── */}
-        <section className="relative px-6 pt-2">
+        <section className="relative px-6 pt-2 z-40">
           {/* Logo & Status Badge */}
-          <div className="flex items-center justify-between mb-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6 animate-fade-in relative z-50">
             <div className="flex items-center gap-3 p-2 px-3 rounded-2xl glass-card border border-white/10">
               <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,255,135,0.4)]">
                 <span className="text-[20px]">⚡</span>

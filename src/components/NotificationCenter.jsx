@@ -113,7 +113,7 @@ export default function NotificationCenter() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-dark/95 backdrop-blur-xl border border-white/15 shadow-[0_15px_40px_rgba(0,0,0,0.7)] p-4 z-[9999] animate-scale-in">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-dark/95 backdrop-blur-xl border border-white/15 shadow-[0_15px_40px_rgba(0,0,0,0.7)] p-4 z-[99999] animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
