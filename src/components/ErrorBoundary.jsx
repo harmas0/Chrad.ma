@@ -1,6 +1,5 @@
-import { useI18n } from '../utils/i18n';
 import React from 'react';
-import { AlertOctagon, RefreshCw, Home } from 'lucide-react';
+import { AlertOctagon, RefreshCw } from 'lucide-react';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -33,9 +32,9 @@ export default class ErrorBoundary extends React.Component {
             <AlertOctagon size={40} />
           </div>
 
-          <h1 className="text-[26px] font-heading font-black text-white mb-2">{t('something_went_wrong')}</h1>
+          <h1 className="text-[26px] font-heading font-black text-white mb-2">Something Went Wrong</h1>
           <p className="text-[14px] text-charcoal-light max-w-sm mb-6 leading-relaxed font-medium">
-            {t('an_unexpected_glitch_occurred_dont_')}
+            An unexpected error occurred. Don't worry, your data and wallet are safe.
           </p>
 
           {this.state.error?.message && (
@@ -50,7 +49,7 @@ export default class ErrorBoundary extends React.Component {
               className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[14px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <RefreshCw size={16} />
-              {t('reload_app')}
+              Reload App
             </button>
           </div>
         </div>
