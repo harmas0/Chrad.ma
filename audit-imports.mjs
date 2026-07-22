@@ -10,13 +10,13 @@ function getFiles(dir, files = []) {
   return files;
 }
 
-const IDENTIFIERS = [
-  'useAuth',
-  'CategoryIcon',
-  'useNavigate',
-  'useI18n',
-  'useEffect',
-  'useState',
+// Check: identifier -> what it should be imported from (partial match)
+const CHECKS = [
+  { id: 'useAuth',      source: 'AuthContext', definedIn: 'AuthContext.jsx' },
+  { id: 'CategoryIcon', source: 'CategoryIcon', definedIn: null },
+  { id: 'useI18n',      source: 'i18n',         definedIn: 'i18n.jsx' },
+  { id: 'useNavigate',  source: 'react-router-dom', definedIn: null },
+  { id: 'supabase',     source: 'supabaseClient',   definedIn: null },
 ];
 
 const files = getFiles(path.join(process.cwd(), 'src'));
@@ -26,27 +26,28 @@ for (const f of files) {
   const content = fs.readFileSync(f, 'utf8');
   const rel = path.relative(process.cwd(), f);
 
-  for (const id of IDENTIFIERS) {
-    // Check if identifier is used in JSX/JS expressions (not just in strings or comments)
-    const usedPattern = new RegExp(`\\b${id}\\b`);
-    if (!usedPattern.test(content)) continue;
+  for (const { id, source, definedIn } of CHECKS) {
+    // Skip the file that defines the identifier
+    if (definedIn && rel.endsWith(definedIn)) continue;
 
-    // Check if there is an import line containing this identifier
-    const importLines = content.split('\n').filter(line => line.trim().startsWith('import'));
-    const hasImport = importLines.some(line => line.includes(id));
-    
-    // Some identifiers can be defined locally too (useState, useEffect from react)
-    const isLocallyDefined = content.includes(`const ${id}`) || content.includes(`function ${id}`);
+    const usedRegex = new RegExp(`\\b${id}\\b`);
+    if (!usedRegex.test(content)) continue;
+
+    // Check if there's an import line that includes both 'import' and the identifier
+    const importLines = content.split('\n').filter(l => l.trim().startsWith('import'));
+    const hasImport = importLines.some(l => l.includes(id));
+    // Also allow: locally defined (e.g. const useAuth = ...)
+    const isLocallyDefined = new RegExp(`(export\\s+)?(const|function)\\s+${id}\\b`).test(content);
 
     if (!hasImport && !isLocallyDefined) {
-      problems.push(`${rel} -> MISSING import for: ${id}`);
+      problems.push(`${rel} -> MISSING import for: ${id}  (should come from: ${source})`);
     }
   }
 }
 
 if (problems.length === 0) {
-  console.log('ALL CLEAR - No missing imports found!');
+  console.log('✅ ALL CLEAR - No missing imports found!');
 } else {
-  console.log(`Found ${problems.length} missing import(s):`);
+  console.log(`❌ Found ${problems.length} missing import(s):`);
   problems.forEach(p => console.log('  ' + p));
 }
