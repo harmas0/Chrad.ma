@@ -16,7 +16,7 @@ export default function HeaderNav({ title, showBack = false }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 glass-floating border-b border-white/10 px-5 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-[9999] glass-floating border-b border-white/10 px-5 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {showBack ? (
             <button
