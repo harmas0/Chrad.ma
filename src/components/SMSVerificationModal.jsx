@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Smartphone, ShieldCheck, CheckCircle, AlertCircle, RefreshCw, Loader2, KeyRound } from 'lucide-react';
+import { useI18n } from '../utils/i18n';
 import { sendSMSOTP, verifySMSOTP } from '../utils/smsVerificationService';
 
 export default function SMSVerificationModal({ isOpen, onClose, userId, initialPhone, onVerified }) {
+  const { t } = useI18n();
   const [phone, setPhone] = useState(initialPhone || '');
   const [step, setStep] = useState('input'); // 'input' | 'otp' | 'success'
   const [otpCode, setOtpCode] = useState('');

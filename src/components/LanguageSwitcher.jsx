@@ -9,7 +9,7 @@ const FLAG_MAP = {
 };
 
 export default function LanguageSwitcher({ compact = false }) {
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 

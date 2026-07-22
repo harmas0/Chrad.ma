@@ -34,7 +34,7 @@ function timeAgo(dateString) {
 
 export default function TaskCard({ task, className = '', onClick }) {
   const navigate = useNavigate();
-  const { formatPrice } = useI18n();
+  const { formatPrice, t } = useI18n();
   const status = statusStyles[task.status] || statusStyles.open;
 
   const handleClick = (e) => {
