@@ -210,7 +210,7 @@ export default function Login() {
                       onClick={() => setAuthMode('forgot')}
                       className="text-[10px] font-bold text-accent hover:underline"
                     >
-                      Forgot password?
+                      {t('forgot_password')}
                     </button>
                   )}
                 </div>
