@@ -1,31 +1,26 @@
-// Firebase Messaging background service worker script
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+// Firebase Messaging Background Service Worker
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// Initialize the Firebase app in the service worker background context.
-// Replace these template credentials with your actual Firebase project settings.
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyChradMA_ProdKeyForPush",
+  authDomain: "chrad-ma-prod.firebaseapp.com",
+  projectId: "chrad-ma-prod",
+  storageBucket: "chrad-ma-prod.appspot.com",
+  messagingSenderId: "716906967642",
+  appId: "1:716906967642:web:chradmaprod"
 });
 
-// Retrieve an instance of Firebase Cloud Messaging
 const messaging = firebase.messaging();
 
-// Handle background messages
 messaging.onBackgroundMessage((payload) => {
-  console.log('Received background message: ', payload);
-
-  const notificationTitle = payload.notification?.title || 'New Task Alert';
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  const notificationTitle = payload.notification.title || 'Chrad.ma Alert';
   const notificationOptions = {
-    body: payload.notification?.body || 'Check the app for details.',
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
-    data: payload.data
+    body: payload.notification.body || 'New task activity update',
+    icon: '/pwa-192x192.png',
+    badge: '/pwa-192x192.png',
+    data: payload.data || {}
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
