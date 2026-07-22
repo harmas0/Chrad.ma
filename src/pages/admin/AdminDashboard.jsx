@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, ShieldCheck, AlertTriangle, Package, TrendingUp, Ban, ArrowRight, Clock } from 'lucide-react';
 import { fetchDashboardStats, fetchAuditLog } from '../../data/adminApi';
+import AdminSystemHealth from '../../components/AdminSystemHealth';
 
 const ACTION_LABELS = {
   BAN_USER: { label: 'Banned user', color: 'text-danger' },
@@ -71,10 +72,13 @@ export default function AdminDashboard() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('dashboard')}</h1>
         <p className="text-[14px] text-charcoal-light font-medium">{t('overview_of_your_platform_activity')}</p>
       </div>
+
+      {/* Infrastructure Health Radar */}
+      <AdminSystemHealth />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">

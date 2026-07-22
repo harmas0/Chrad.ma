@@ -1,7 +1,8 @@
 import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
-import { ScrollText, Filter, ChevronDown, User, ShieldCheck, Ban, AlertTriangle, RefreshCw } from 'lucide-react';
+import { ScrollText, Filter, ChevronDown, User, ShieldCheck, Ban, AlertTriangle, RefreshCw, Download } from 'lucide-react';
 import { fetchAuditLog } from '../../data/adminApi';
+import { exportToCSV } from '../../utils/exportCsv';
 
 const ACTION_CONFIG = {
   BAN_USER: { icon: Ban, color: 'text-danger', bg: 'bg-danger/10 border-danger/20', label: 'Banned User' },
@@ -37,9 +38,18 @@ export default function AdminAuditLog() {
           <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('audit_log')}</h1>
           <p className="text-[14px] text-charcoal-light font-medium">{t('complete_history_of_admin_actions')}</p>
         </div>
-        <span className="text-[12px] text-charcoal-light font-medium bg-dark-surface border border-border px-4 py-2 rounded-xl">
-          {logs.length} entries
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => exportToCSV(logs, `chrad_audit_log_${new Date().toISOString().split('T')[0]}.csv`)}
+            className="p-3 bg-dark border border-border rounded-xl text-charcoal-light hover:text-white flex items-center gap-2 transition-all text-[13px] font-bold"
+          >
+            <Download size={14} />
+            Export Audit Log CSV
+          </button>
+          <span className="text-[12px] text-charcoal-light font-medium bg-dark-surface border border-border px-4 py-3 rounded-xl">
+            {logs.length} entries
+          </span>
+        </div>
       </div>
 
       {/* Log entries */}

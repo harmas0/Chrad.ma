@@ -4,6 +4,7 @@ import { Search, Ban, ShieldCheck, ChevronRight, X, AlertTriangle, Download, Tra
 import { useAuth } from '../../context/AuthContext';
 import { fetchAllUsers, banUser, unbanUser, fetchUserFullProfile, resendKYCRequest, updateUserRole, bulkBanUsers, bulkUnbanUsers, bulkApproveKYC } from '../../data/adminApi';
 import AdminUserInspectModal from '../../components/AdminUserInspectModal';
+import { exportToCSV } from '../../utils/exportCsv';
 
 const ROLE_BADGES = {
   admin: 'badge badge-admin',
@@ -161,28 +162,21 @@ export default function AdminUsers() {
 
   // CSV Export
   const handleExportCSV = () => {
-    if (users.length === 0) return;
-    const headers = ['ID', 'Name', 'Email', 'Role', 'KYC Status', 'Is Banned', 'Joined Date'];
-    const rows = users.map(u => [
-      u.id,
-      u.name || 'Unknown',
-      u.email || '',
-      u.role || 'user',
-      u.kyc_status || 'none',
-      u.is_banned ? 'Yes' : 'No',
-      u.joined_date || u.created_at ? new Date(u.joined_date || u.created_at).toLocaleDateString() : ''
-    ]);
-
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `chrad_users_export_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToCSV(
+      users,
+      `chrad_users_export_${new Date().toISOString().split('T')[0]}.csv`,
+      [
+        { key: 'id', label: 'User ID' },
+        { key: 'name', label: 'Full Name' },
+        { key: 'email', label: 'Email Address' },
+        { key: 'role', label: 'Role' },
+        { key: 'kyc_status', label: 'KYC Status' },
+        { key: 'is_banned', label: 'Banned' },
+        { key: 'wallet_balance', label: 'Wallet Balance (MAD)' },
+        { key: 'earnings', label: 'Total Earnings (MAD)' },
+        { key: 'joined_date', label: 'Joined Date' },
+      ]
+    );
   };
 
   return (

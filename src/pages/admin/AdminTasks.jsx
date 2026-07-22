@@ -1,12 +1,13 @@
 import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
-import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, X, CheckCircle, RefreshCw, MessageSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, X, CheckCircle, RefreshCw, MessageSquare, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchTasks, updateTaskStatus } from '../../data/tasksApi';
 import { fetchProfileById } from '../../data/usersApi';
 import { fetchTaskChatTranscript, bulkUpdateTaskStatus, updatePayoutStatus } from '../../data/adminApi';
 import MapView from '../../components/MapView';
 import AdminTaskInspectModal from '../../components/AdminTaskInspectModal';
+import { exportToCSV } from '../../utils/exportCsv';
 
 const STATUS_OPTIONS = [
   { key: '', label: 'All' },
@@ -176,9 +177,18 @@ export default function AdminTasks() {
   return (
     <div className="animate-fade-in pb-10">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('task_management')}</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_and_manage_all_platform_tas')}</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('task_management')}</h1>
+          <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_and_manage_all_platform_tas')}</p>
+        </div>
+        <button
+          onClick={() => exportToCSV(tasks, `chrad_tasks_export_${new Date().toISOString().split('T')[0]}.csv`)}
+          className="p-3 bg-dark border border-border rounded-xl text-charcoal-light hover:text-white flex items-center gap-2 transition-all text-[13px] font-bold"
+        >
+          <Download size={14} />
+          Export Tasks CSV
+        </button>
       </div>
 
       {/* Mini Stats */}

@@ -1,9 +1,10 @@
 import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
-import { DollarSign, Clock, CheckCircle, RefreshCw, BarChart2, ShieldAlert, Award, Building2, Check, X, AlertCircle } from 'lucide-react';
+import { DollarSign, Clock, CheckCircle, RefreshCw, BarChart2, ShieldAlert, Award, Building2, Check, X, AlertCircle, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchFinancialStats, updatePayoutStatus } from '../../data/adminApi';
 import { fetchAllPayoutRequests, approvePayoutRequest, rejectPayoutRequest } from '../../data/walletApi';
+import { exportToCSV } from '../../utils/exportCsv';
 
 export default function AdminFinancials() {
   const { t } = useI18n();
@@ -76,9 +77,18 @@ export default function AdminFinancials() {
   return (
     <div className="animate-fade-in pb-10">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('financial_overview')}</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_earnings_escrow_holdings_an')}</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('financial_overview')}</h1>
+          <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_earnings_escrow_holdings_an')}</p>
+        </div>
+        <button
+          onClick={() => exportToCSV(payoutReqs, `chrad_payout_requests_${new Date().toISOString().split('T')[0]}.csv`)}
+          className="p-3 bg-dark border border-border rounded-xl text-charcoal-light hover:text-white flex items-center gap-2 transition-all text-[13px] font-bold"
+        >
+          <Download size={14} />
+          Export Payouts CSV
+        </button>
       </div>
 
       {/* Stats Cards */}
