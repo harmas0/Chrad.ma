@@ -161,7 +161,7 @@ export default function ReviewModal({ isOpen, onClose, task, runner, onSuccess }
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Share details about your experience..."
+            placeholder={t('share_details_about_your_experience')}
             rows={3}
             className="w-full bg-dark/60 border border-white/10 rounded-2xl p-4 text-[14px] text-white placeholder:text-muted focus:border-accent focus:outline-none transition-all resize-none"
           />
@@ -204,11 +204,11 @@ export default function ReviewModal({ isOpen, onClose, task, runner, onSuccess }
           className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[15px] uppercase tracking-wider shadow-[0_0_25px_rgba(0,255,135,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {submitting ? (
-            <span>Submitting...</span>
+            <span>{t('submitting')}</span>
           ) : (
             <>
               <Sparkles size={18} />
-              <span>Submit Review</span>
+              <span>{t('submit_review')}</span>
             </>
           )}
         </button>

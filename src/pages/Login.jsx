@@ -88,7 +88,7 @@ export default function Login() {
           <div className="w-16 h-16 bg-dark-surface rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border-light shadow-[0_0_35px_rgba(0,255,135,0.15)] animate-pulse-glow">
             <Zap className="text-accent" size={32} />
           </div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-wider font-heading mb-1.5">Chrad</h1>
+          <h1 className="text-3xl font-black text-white uppercase tracking-wider font-heading mb-1.5">{t('chrad')}</h1>
           <p className="text-charcoal-light font-medium text-[13px] tracking-wide">{t('hero_desc') || 'Premium On-Demand Tasks & Deliveries'}</p>
         </div>
 
@@ -164,7 +164,7 @@ export default function Login() {
             {/* SignUp Name Input */}
             {authMode === 'signup' && (
               <div className="space-y-1.5">
-                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">Full Name</label>
+                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">{t('full_name')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-charcoal-light">
                     <User size={18} />
@@ -174,7 +174,7 @@ export default function Login() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder={t('john_doe')}
                     className="w-full bg-dark border border-border rounded-2xl py-3.5 pl-12 pr-4 text-[13px] text-white focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all"
                   />
                 </div>
@@ -183,7 +183,7 @@ export default function Login() {
 
             {/* Email Input */}
             <div className="space-y-1.5">
-              <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">Email Address</label>
+              <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">{t('email_address')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-charcoal-light">
                   <Mail size={18} />
@@ -193,7 +193,7 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="yourname@domain.com"
+                  placeholder={t('yournamedomaincom')}
                   className="w-full bg-dark border border-border rounded-2xl py-3.5 pl-12 pr-4 text-[13px] text-white focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all"
                 />
               </div>
@@ -203,7 +203,7 @@ export default function Login() {
             {authMode !== 'forgot' && (
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider">Password</label>
+                  <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider">{t('password')}</label>
                   {authMode === 'login' && (
                     <button
                       type="button"
@@ -240,7 +240,7 @@ export default function Login() {
             {/* Role Cards Selector (only in signup mode) */}
             {authMode === 'signup' && (
               <div className="space-y-2 pt-2">
-                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">Choose Your Account Tier</label>
+                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">{t('choose_your_account_tier')}</label>
                 <div className="grid grid-cols-2 gap-3">
                   
                   {/* Client Card */}
@@ -259,8 +259,8 @@ export default function Login() {
                     )}
                     <User size={22} className={!isRunner ? 'text-accent' : 'text-charcoal-light'} />
                     <div>
-                      <h4 className={`text-[12px] font-black uppercase ${!isRunner ? 'text-white' : 'text-charcoal-light'}`}>Client</h4>
-                      <p className="text-[9px] text-charcoal-light leading-snug mt-1 font-medium">Post tasks and hire helper runners</p>
+                      <h4 className={`text-[12px] font-black uppercase ${!isRunner ? 'text-white' : 'text-charcoal-light'}`}>{t('client')}</h4>
+                      <p className="text-[9px] text-charcoal-light leading-snug mt-1 font-medium">{t('post_tasks_and_hire_helper_runners')}</p>
                     </div>
                   </div>
 
@@ -280,8 +280,8 @@ export default function Login() {
                     )}
                     <Briefcase size={22} className={isRunner ? 'text-accent' : 'text-charcoal-light'} />
                     <div>
-                      <h4 className={`text-[12px] font-black uppercase ${isRunner ? 'text-white' : 'text-charcoal-light'}`}>Runner</h4>
-                      <p className="text-[9px] text-charcoal-light leading-snug mt-1 font-medium">Accept nearby tasks and earn money</p>
+                      <h4 className={`text-[12px] font-black uppercase ${isRunner ? 'text-white' : 'text-charcoal-light'}`}>{t('runner')}</h4>
+                      <p className="text-[9px] text-charcoal-light leading-snug mt-1 font-medium">{t('accept_nearby_tasks_and_earn_money')}</p>
                     </div>
                   </div>
 
@@ -301,17 +301,17 @@ export default function Login() {
                 <>
                   {authMode === 'login' && (
                     <>
-                      Sign In <LogIn size={16} />
+                      {t('sign_in')} <LogIn size={16} />
                     </>
                   )}
                   {authMode === 'signup' && (
                     <>
-                      Create Account <UserPlus size={16} />
+                      {t('create_account')} <UserPlus size={16} />
                     </>
                   )}
                   {authMode === 'forgot' && (
                     <>
-                      Send Reset Link <KeyRound size={16} />
+                      {t('send_reset_link')} <KeyRound size={16} />
                     </>
                   )}
                 </>
@@ -334,11 +334,11 @@ export default function Login() {
             >
               {authMode === 'login' ? (
                 <>
-                  New to Chrad? <span className="text-accent">Create an account</span>
+                  {t('new_to_chrad')} <span className="text-accent">{t('create_an_account')}</span>
                 </>
               ) : (
                 <>
-                  Already have an account? <span className="text-accent">Sign In</span>
+                  {t('already_have_an_account')} <span className="text-accent">{t('sign_in')}</span>
                 </>
               )}
             </button>

@@ -276,11 +276,11 @@ export default function CreateTask() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center bg-dark">
         <div className="animate-bounce-in text-7xl mb-8 drop-shadow-[0_0_20px_rgba(0,255,135,0.4)]">🚀</div>
-        <h2 className="text-[26px] font-extrabold text-white mb-3">Task Posted!</h2>
-        <p className="text-charcoal-light text-[15px] mb-6">Runners nearby are being notified.</p>
+        <h2 className="text-[26px] font-extrabold text-white mb-3">{t('task_posted')}</h2>
+        <p className="text-charcoal-light text-[15px] mb-6">{t('runners_nearby_are_being_notified')}</p>
         <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-accent/10 border border-accent/20 text-accent text-[14px] font-bold animate-pulse-glow">
           <div className="w-2.5 h-2.5 bg-accent rounded-full animate-ping" />
-          Broadcasting to runners...
+          {t('broadcasting_to_runners')}
         </div>
       </div>
     );
@@ -436,12 +436,12 @@ export default function CreateTask() {
                         }}
                         className="text-[11px] text-accent font-black uppercase tracking-wider bg-accent/10 px-3 py-1.5 rounded-lg border border-accent/20 transition-all hover:bg-accent/20 active:scale-95"
                       >
-                        + Add Stop
+                        {t('_add_stop')}
                       </button>
                     )}
                   </div>
                   {form.waypoints.length === 0 ? (
-                    <p className="text-[12px] text-charcoal-light font-medium italic">No extra stops added yet.</p>
+                    <p className="text-[12px] text-charcoal-light font-medium italic">{t('no_extra_stops_added_yet')}</p>
                   ) : (
                     <div className="flex flex-col gap-2">
                       {form.waypoints.map((wp, idx) => (
@@ -524,7 +524,7 @@ export default function CreateTask() {
 
             {/* Quick Morocco Location Chips */}
             <div className="mb-5">
-              <span className="text-[11px] text-charcoal-light font-extrabold uppercase tracking-wider block mb-2">⚡ Popular Landmark Presets</span>
+              <span className="text-[11px] text-charcoal-light font-extrabold uppercase tracking-wider block mb-2">{t('_popular_landmark_presets')}</span>
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {[
                   { name: 'Maarif, Casa', lat: 33.5810, lng: -7.6320, address: 'Maarif, Casablanca' },
@@ -593,9 +593,9 @@ export default function CreateTask() {
               <div className="bg-accent/5 border border-accent/20 rounded-2xl p-4 mb-6 flex items-start gap-3 stagger-item animate-scale-in" style={{ animationDelay: '0.05s' }}>
                 <span className="text-xl">💡</span>
                 <div>
-                  <p className="text-[13px] font-bold text-accent mb-0.5">Suggested Offer</p>
+                  <p className="text-[13px] font-bold text-accent mb-0.5">{t('suggested_offer')}</p>
                   <p className="text-[12px] text-charcoal-light leading-relaxed">
-                    Based on the road distance of <strong className="text-white">{routeStats.distanceKm} km</strong> (~{routeStats.durationMin} mins travel time), we recommend offering a price of <strong className="text-white">{Math.max(20, Math.round((15 + routeStats.distanceKm * 5) / 5) * 5)} MAD</strong>.
+                    {t('based_on_the_road_distance_of')} <strong className="text-white">{routeStats.distanceKm} km</strong> (~{routeStats.durationMin} mins travel time), we recommend offering a price of <strong className="text-white">{Math.max(20, Math.round((15 + routeStats.distanceKm * 5) / 5) * 5)} MAD</strong>.
                   </p>
                 </div>
               </div>
@@ -638,7 +638,7 @@ export default function CreateTask() {
             {/* Fee Breakdown */}
             <div className="bg-dark-surface rounded-2xl p-5 border border-border stagger-item" style={{ animationDelay: '0.3s' }}>
               <div className="flex justify-between items-center mb-3">
-                <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Task Payment</span>
+                <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">{t('task_payment')}</span>
                 <span className="text-[15px] font-bold text-white">{formatPrice(form.price)}</span>
               </div>
               <div className="flex justify-between items-center mb-3">
@@ -648,7 +648,7 @@ export default function CreateTask() {
                 </span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-border/40">
-                <span className="text-[13px] text-white font-extrabold uppercase tracking-wider">Total Cost</span>
+                <span className="text-[13px] text-white font-extrabold uppercase tracking-wider">{t('total_cost')}</span>
                 <span className="text-[18px] font-black text-accent">
                   {formatPrice(form.price + (feePercent === 0 ? 0 : Math.round(form.price * feePercent / 100)))}
                 </span>
@@ -704,7 +704,7 @@ export default function CreateTask() {
               {/* Price */}
               <div className="pt-4 border-t border-border relative z-10 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">Task Payment</span>
+                  <span className="text-[13px] text-charcoal-light font-bold uppercase tracking-wider">{t('task_payment')}</span>
                   <span className="text-[18px] font-bold text-white">{formatPrice(form.price)}</span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -714,7 +714,7 @@ export default function CreateTask() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                  <span className="text-[14px] text-white font-extrabold uppercase tracking-wider">Total to Pay</span>
+                  <span className="text-[14px] text-white font-extrabold uppercase tracking-wider">{t('total_to_pay')}</span>
                   <span className="text-[26px] font-black text-accent tracking-tighter">
                     {formatPrice(form.price + (feePercent === 0 ? 0 : Math.round(form.price * feePercent / 100)))}
                   </span>

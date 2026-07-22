@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useRef } from 'react';
 import { AlertTriangle, X, Camera, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +13,7 @@ const REASONS = [
 ];
 
 export default function ReportDispute({ taskId, reportedUserId, onClose, onSubmitted }) {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [reason, setReason] = useState('');
   const [description, setDescription] = useState('');
@@ -80,7 +82,7 @@ export default function ReportDispute({ taskId, reportedUserId, onClose, onSubmi
             <div className="w-10 h-10 rounded-xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
               <AlertTriangle size={20} />
             </div>
-            <h3 className="text-[18px] font-extrabold text-white">Report a Problem</h3>
+            <h3 className="text-[18px] font-extrabold text-white">{t('report_a_problem')}</h3>
           </div>
           <button onClick={onClose} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
             <X size={18} />
@@ -95,7 +97,7 @@ export default function ReportDispute({ taskId, reportedUserId, onClose, onSubmi
 
         {/* Reason */}
         <div className="mb-5">
-          <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-3 block">What happened?</label>
+          <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-3 block">{t('what_happened')}</label>
           <div className="grid grid-cols-2 gap-2">
             {REASONS.map(r => (
               <button
@@ -116,13 +118,13 @@ export default function ReportDispute({ taskId, reportedUserId, onClose, onSubmi
 
         {/* Description */}
         <div className="mb-5">
-          <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Description</label>
+          <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('description')}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="input-field w-full px-4 py-3.5 rounded-xl text-[14px] font-medium resize-none"
             rows={3}
-            placeholder="Describe what happened in detail..."
+            placeholder={t('describe_what_happened_in_detail')}
           />
         </div>
 
@@ -171,7 +173,7 @@ export default function ReportDispute({ taskId, reportedUserId, onClose, onSubmi
           ) : (
             <>
               <Send size={18} strokeWidth={2.5} />
-              Submit Report
+              {t('submit_report')}
             </>
           )}
         </button>

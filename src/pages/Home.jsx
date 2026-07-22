@@ -97,8 +97,8 @@ export default function Home() {
                 <span className="text-[20px]">⚡</span>
               </div>
               <div>
-                <h1 className="text-[22px] font-heading font-black text-white leading-none tracking-tight">Chrad<span className="text-accent">.ma</span></h1>
-                <span className="text-[10px] text-accent font-black tracking-widest uppercase">Instant Errands</span>
+                <h1 className="text-[22px] font-heading font-black text-white leading-none tracking-tight">{t('chrad')}<span className="text-accent">{t('ma')}</span></h1>
+                <span className="text-[10px] text-accent font-black tracking-widest uppercase">{t('instant_errands')}</span>
               </div>
             </div>
 
@@ -117,7 +117,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={16} className="text-accent" />
-              <span className="text-[11px] text-accent font-black uppercase tracking-widest">Fast Escrow Delivery</span>
+              <span className="text-[11px] text-accent font-black uppercase tracking-widest">{t('fast_escrow_delivery')}</span>
             </div>
 
             <h2 className="text-[28px] font-heading font-black text-white leading-[1.15] mb-3 tracking-tight">
@@ -141,8 +141,8 @@ export default function Home() {
         {/* ── Category Quick Grid ── */}
         <section className="px-6">
           <div className="flex items-center justify-between mb-3.5">
-            <h3 className="text-[14px] font-heading font-black text-white uppercase tracking-wider">Categories</h3>
-            <span className="text-[11px] text-charcoal-light font-bold">Pick your task</span>
+            <h3 className="text-[14px] font-heading font-black text-white uppercase tracking-wider">{t('categories')}</h3>
+            <span className="text-[11px] text-charcoal-light font-bold">{t('pick_your_task')}</span>
           </div>
 
           <div className="grid grid-cols-4 gap-2.5">

@@ -1,7 +1,9 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Smartphone, Download, X, Share } from 'lucide-react';
 
 export default function PWAInstallPrompt() {
+  const { t } = useI18n();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -69,11 +71,11 @@ export default function PWAInstallPrompt() {
 
           <div className="flex-1 min-w-0">
             <h4 className="font-heading font-black text-white text-[14px] leading-tight flex items-center gap-1.5 mb-0.5">
-              <span>Install Chrad App</span>
-              <span className="text-[9px] font-black text-accent bg-accent/15 px-1.5 py-0.2 rounded uppercase">PWA</span>
+              <span>{t('install_chrad_app')}</span>
+              <span className="text-[9px] font-black text-accent bg-accent/15 px-1.5 py-0.2 rounded uppercase">{t('pwa')}</span>
             </h4>
             <p className="text-[11px] text-charcoal-light font-medium line-clamp-1">
-              Add to Home Screen for instant runner alerts & offline access
+              {t('add_to_home_screen_for_instant_runn')}
             </p>
           </div>
 
@@ -83,7 +85,7 @@ export default function PWAInstallPrompt() {
               className="px-3.5 py-2 rounded-xl bg-accent text-dark font-extrabold text-[12px] uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,135,0.3)] hover:scale-105 transition-all flex items-center gap-1"
             >
               <Download size={14} strokeWidth={3} />
-              Install
+              {t('install')}
             </button>
             <button
               onClick={handleDismiss}
@@ -102,19 +104,19 @@ export default function PWAInstallPrompt() {
             <div className="w-14 h-14 rounded-2xl bg-accent/20 border border-accent/40 flex items-center justify-center text-accent mx-auto">
               <Share size={26} />
             </div>
-            <h3 className="font-heading font-black text-white text-[18px]">Install on iOS Safari</h3>
+            <h3 className="font-heading font-black text-white text-[18px]">{t('install_on_ios_safari')}</h3>
             <ol className="text-left text-[13px] text-charcoal-light space-y-2.5 bg-dark/60 p-4 rounded-2xl border border-white/10 font-medium">
               <li className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-accent/20 text-accent text-[11px] font-black flex items-center justify-center">1</span>
-                Tap the <Share size={14} className="inline text-accent" /> Share button in Safari toolbar.
+                {t('tap_the')} <Share size={14} className="inline text-accent" /> {t('share_button_in_safari_toolbar')}
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-accent/20 text-accent text-[11px] font-black flex items-center justify-center">2</span>
-                Scroll down and select <strong className="text-white">"Add to Home Screen"</strong>.
+                {t('scroll_down_and_select')} <strong className="text-white">{t('add_to_home_screen')}</strong>.
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-accent/20 text-accent text-[11px] font-black flex items-center justify-center">3</span>
-                Tap <strong className="text-accent">Add</strong> at top right.
+                {t('tap')} <strong className="text-accent">{t('add')}</strong> {t('at_top_right')}
               </li>
             </ol>
             <button

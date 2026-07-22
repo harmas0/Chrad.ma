@@ -1,9 +1,11 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { MessageSquare, Calendar, ShieldCheck, HelpCircle, Send, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchSupportTickets, replySupportTicket } from '../../data/adminApi';
 
 export default function AdminSupport() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +59,8 @@ export default function AdminSupport() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Support Center</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Respond to user inquiries and platform dispute inquiries</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('support_center')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('respond_to_user_inquiries_and_platf')}</p>
       </div>
 
       {/* Filter Tabs */}
@@ -84,7 +86,7 @@ export default function AdminSupport() {
 
       {filteredTickets.length === 0 ? (
         <div className="glass-panel p-12 text-center text-charcoal-light border border-dashed border-border-light rounded-2xl py-20">
-          No support tickets found matching this filter.
+          {t('no_support_tickets_found_matching_t')}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -132,15 +134,15 @@ export default function AdminSupport() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-[16px] font-bold text-white flex items-center gap-1.5">
                     <MessageSquare size={16} className="text-accent" />
-                    Ticket Thread
+                    {t('ticket_thread')}
                   </h2>
                   <button onClick={() => setSelectedTicket(null)} className="text-charcoal-light hover:text-white font-bold text-xs uppercase">Close</button>
                 </div>
 
                 <div className="bg-dark rounded-xl p-4 border border-border mb-4">
-                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">Subject</p>
+                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">{t('subject')}</p>
                   <p className="text-[13px] text-white font-bold mb-3">{selectedTicket.subject || 'Platform Inquiry'}</p>
-                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">Inquiry Details</p>
+                  <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">{t('inquiry_details')}</p>
                   <p className="text-[13px] text-charcoal-light leading-relaxed whitespace-pre-wrap">{selectedTicket.message}</p>
                 </div>
 
@@ -148,7 +150,7 @@ export default function AdminSupport() {
                   <div className="p-4 rounded-xl bg-accent/5 border border-accent/20">
                     <div className="flex items-center gap-1.5 text-accent text-[11px] font-bold uppercase tracking-wider mb-2">
                       <CheckCircle size={14} />
-                      Resolution Answer
+                      {t('resolution_answer')}
                     </div>
                     <p className="text-[13px] text-charcoal-light leading-relaxed">{selectedTicket.admin_reply}</p>
                     <p className="text-[10px] text-charcoal-light mt-3 font-medium">
@@ -158,7 +160,7 @@ export default function AdminSupport() {
                 ) : (
                   <form onSubmit={handleReplySubmit} className="space-y-4">
                     <div>
-                      <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Resolution Answer</label>
+                      <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('resolution_answer')}</label>
                       <textarea
                         value={reply}
                         onChange={(e) => setReply(e.target.value)}
@@ -173,14 +175,14 @@ export default function AdminSupport() {
                       disabled={submitting || !reply.trim()}
                       className="w-full btn-accent py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
                     >
-                      <Send size={14} /> Send Reply
+                      <Send size={14} /> {t('send_reply')}
                     </button>
                   </form>
                 )}
               </div>
             ) : (
               <div className="glass-panel p-6 border border-dashed border-border-light rounded-2xl text-center text-charcoal-light text-[13px] py-16">
-                Select a ticket thread from the queue to read user inquiries, view dates, and write answers.
+                {t('select_a_ticket_thread_from_the_que')}
               </div>
             )}
           </div>

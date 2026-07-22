@@ -112,7 +112,7 @@ export default function TaskCard({ task, className = '', onClick }) {
           </span>
         ) : (
           <span className="text-accent hover:translate-x-1 transition-transform inline-flex items-center gap-0.5 text-[11px]">
-            Details <ArrowRight size={12} />
+            {t('details')} <ArrowRight size={12} />
           </span>
         )}
       </div>

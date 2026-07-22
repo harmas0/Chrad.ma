@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { DollarSign, Clock, CheckCircle, RefreshCw, BarChart2, ShieldAlert, Award, Building2, Check, X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -5,6 +6,7 @@ import { fetchFinancialStats, updatePayoutStatus } from '../../data/adminApi';
 import { fetchAllPayoutRequests, approvePayoutRequest, rejectPayoutRequest } from '../../data/walletApi';
 
 export default function AdminFinancials() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [payoutReqs, setPayoutReqs] = useState([]);
@@ -75,8 +77,8 @@ export default function AdminFinancials() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Financial Overview</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Monitor earnings, escrow holdings, and release payouts</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('financial_overview')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_earnings_escrow_holdings_an')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -99,14 +101,14 @@ export default function AdminFinancials() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[16px] font-bold text-white flex items-center gap-2">
               <BarChart2 size={16} className="text-accent" />
-              Daily Platform Commission Revenue
+              {t('daily_platform_commission_revenue')}
             </h2>
-            <span className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider">Last 14 Days</span>
+            <span className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider">{t('last_14_days')}</span>
           </div>
 
           {stats.chartData.length === 0 ? (
             <div className="h-[200px] flex items-center justify-center text-charcoal-light text-[13px]">
-              No transactions recorded in this period.
+              {t('no_transactions_recorded_in_this_pe')}
             </div>
           ) : (
             <div className="w-full">
@@ -177,24 +179,24 @@ export default function AdminFinancials() {
         {/* Financial info notes */}
         <div className="glass-panel p-6 border border-border-light rounded-2xl flex flex-col justify-between">
           <div>
-            <h2 className="text-[16px] font-bold text-white mb-4">Commission Model</h2>
+            <h2 className="text-[16px] font-bold text-white mb-4">{t('commission_model')}</h2>
             <p className="text-[13px] text-charcoal-light leading-relaxed mb-4">
-              Chrad.ma runs a dynamic commission-on-delivery system. When a task is marked as <strong>delivered</strong> or <strong>confirmed</strong>, the system calculates the platform commission from the offered run price.
+              {t('chradma_runs_a_dynamic_commissionon')} <strong>{t('delivered')}</strong> {t('or')} <strong>{t('confirmed')}</strong>{t('_the_system_calculates_the_platform')}
             </p>
             <div className="bg-dark rounded-xl p-4 border border-border space-y-2 mb-4">
               <div className="flex justify-between text-[12px]">
-                <span className="text-charcoal-light">Base Platform Fee:</span>
+                <span className="text-charcoal-light">{t('base_platform_fee')}</span>
                 <span className="text-white font-bold">10%</span>
               </div>
               <div className="flex justify-between text-[12px]">
-                <span className="text-charcoal-light">Runner Payout Share:</span>
+                <span className="text-charcoal-light">{t('runner_payout_share')}</span>
                 <span className="text-accent font-bold">90%</span>
               </div>
             </div>
           </div>
           <div className="text-[11px] text-charcoal-light font-medium flex items-center gap-1.5 bg-white/[0.02] border border-white/5 rounded-xl p-3">
             <Award size={14} className="text-accent shrink-0" />
-            Payout releases can be managed manually in the queue to the left.
+            {t('payout_releases_can_be_managed_manu')}
           </div>
         </div>
       </div>
@@ -205,7 +207,7 @@ export default function AdminFinancials() {
           <div>
             <h2 className="text-[18px] font-black text-white flex items-center gap-2">
               <Building2 size={20} className="text-accent" />
-              Runner Bank RIB Withdrawal Requests
+              {t('runner_bank_rib_withdrawal_requests')}
             </h2>
             <p className="text-[12px] text-charcoal-light font-medium">
               Review and approve pending wire transfers to Moroccan runner bank accounts (RIB).
@@ -224,13 +226,13 @@ export default function AdminFinancials() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Runner</th>
-                  <th>Bank Name</th>
-                  <th>24-Digit RIB Number</th>
-                  <th>Account Holder</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t('runner')}</th>
+                  <th>{t('bank_name')}</th>
+                  <th>{t('24digit_rib_number')}</th>
+                  <th>{t('account_holder')}</th>
+                  <th>{t('amount')}</th>
+                  <th>{t('status')}</th>
+                  <th>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,7 +282,7 @@ export default function AdminFinancials() {
                             className="px-3 py-1.5 rounded-lg bg-accent text-dark font-extrabold text-[11px] hover:scale-105 transition-all flex items-center gap-1"
                           >
                             <Check size={12} strokeWidth={3} />
-                            Approve Payout
+                            {t('approve_payout')}
                           </button>
                           <button
                             onClick={() => handleRejectRibPayout(req.id)}
@@ -291,7 +293,7 @@ export default function AdminFinancials() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-muted italic font-medium">Processed</span>
+                        <span className="text-[11px] text-muted italic font-medium">{t('processed')}</span>
                       )}
                     </td>
                   </tr>
@@ -299,7 +301,7 @@ export default function AdminFinancials() {
                 {payoutReqs.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-10 text-charcoal-light text-[13px]">
-                      No bank payout requests submitted yet.
+                      {t('no_bank_payout_requests_submitted_y')}
                     </td>
                   </tr>
                 )}
@@ -311,18 +313,18 @@ export default function AdminFinancials() {
 
       {/* Payout Queue */}
       <div>
-        <h2 className="text-[18px] font-black text-white mb-4">Standard Runner Payout Queue</h2>
+        <h2 className="text-[18px] font-black text-white mb-4">{t('standard_runner_payout_queue')}</h2>
         <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
           <div className="overflow-x-auto">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Task / ID</th>
-                  <th>Runner ID</th>
-                  <th>Payout Amount</th>
-                  <th>Task Finished</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>{t('task_id')}</th>
+                  <th>{t('runner_id')}</th>
+                  <th>{t('payout_amount')}</th>
+                  <th>{t('task_finished')}</th>
+                  <th>{t('status')}</th>
+                  <th>{t('action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -355,7 +357,7 @@ export default function AdminFinancials() {
                         className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-lg hover:bg-accent/20 transition-colors disabled:opacity-50 flex items-center gap-1"
                       >
                         <CheckCircle size={12} />
-                        Release Payout
+                        {t('release_payout')}
                       </button>
                     </td>
                   </tr>
@@ -363,7 +365,7 @@ export default function AdminFinancials() {
                 {stats.payoutQueue.length === 0 && (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-charcoal-light text-[14px]">
-                      No pending runner payouts
+                      {t('no_pending_runner_payouts')}
                     </td>
                   </tr>
                 )}

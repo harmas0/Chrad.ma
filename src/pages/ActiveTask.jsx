@@ -282,7 +282,7 @@ export default function ActiveTask() {
   if (!task) {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center">
-        <p className="text-charcoal-light font-bold text-lg">Task not found</p>
+        <p className="text-charcoal-light font-bold text-lg">{t('task_not_found')}</p>
       </div>
     );
   }
@@ -446,8 +446,8 @@ export default function ActiveTask() {
                   <Key size={22} />
                 </div>
                 <div>
-                  <span className="text-[11px] font-black text-accent uppercase tracking-wider block">Delivery Verification PIN</span>
-                  <span className="text-[12px] text-charcoal-light font-medium block">Provide this 4-digit code to runner upon delivery</span>
+                  <span className="text-[11px] font-black text-accent uppercase tracking-wider block">{t('delivery_verification_pin')}</span>
+                  <span className="text-[12px] text-charcoal-light font-medium block">{t('provide_this_4digit_code_to_runner_')}</span>
                 </div>
               </div>
               <div className="bg-dark/90 border-2 border-accent/60 rounded-2xl px-4 py-2 font-mono text-[22px] font-black text-white tracking-[0.25em] shadow-inner">
@@ -480,8 +480,8 @@ export default function ActiveTask() {
               <div className="w-full flex flex-col gap-3">
                 {showDeliveryUpload ? (
                   <div className="glass-panel border border-accent/30 rounded-3xl p-5 text-center relative overflow-hidden w-full">
-                    <h4 className="text-[15px] font-extrabold text-white mb-2">Upload Delivery Proof</h4>
-                    <p className="text-[12px] text-charcoal-light mb-4">Please take or upload a photo of the delivered item / location.</p>
+                    <h4 className="text-[15px] font-extrabold text-white mb-2">{t('upload_delivery_proof')}</h4>
+                    <p className="text-[12px] text-charcoal-light mb-4">{t('please_take_or_upload_a_photo_of_th')}</p>
                     
                     <input
                       type="file"
@@ -519,7 +519,7 @@ export default function ActiveTask() {
                         className="w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-border hover:border-accent/50 bg-dark flex flex-col items-center justify-center gap-2 mb-4"
                       >
                         <Camera className="text-charcoal-light" size={28} />
-                        <span className="text-[12px] text-charcoal-light font-bold">Take Delivery Photo</span>
+                        <span className="text-[12px] text-charcoal-light font-bold">{t('take_delivery_photo')}</span>
                       </button>
                     )}
 
@@ -532,7 +532,7 @@ export default function ActiveTask() {
                         }}
                         className="flex-1 py-3 rounded-xl border border-border text-charcoal-light font-bold text-[13px]"
                       >
-                        Cancel
+                        {t('cancel')}
                       </button>
                       <button
                         onClick={async () => {
@@ -597,7 +597,7 @@ export default function ActiveTask() {
                       }}
                       className="text-[11px] text-charcoal-light font-bold hover:text-white mt-3 block mx-auto underline"
                     >
-                      Skip photo & mark delivered
+                      {t('skip_photo_mark_delivered')}
                     </button>
                   </div>
                 ) : (
@@ -677,8 +677,8 @@ export default function ActiveTask() {
 
             {isClient && !reviewSubmitted ? (
               <div className="border-t border-border pt-6 mt-4 text-left">
-                <h4 className="text-[16px] font-bold text-white mb-2 text-center">Rate the Runner</h4>
-                <p className="text-[12px] text-charcoal-light text-center mb-4">Share your feedback to help the community.</p>
+                <h4 className="text-[16px] font-bold text-white mb-2 text-center">{t('rate_the_runner')}</h4>
+                <p className="text-[12px] text-charcoal-light text-center mb-4">{t('share_your_feedback_to_help_the_com')}</p>
                 
                 {/* Star selection */}
                 <div className="flex justify-center gap-3 mb-5">

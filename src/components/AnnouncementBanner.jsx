@@ -1,8 +1,10 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Megaphone, X, Sparkles } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 
 export default function AnnouncementBanner() {
+  const { t } = useI18n();
   const [announcement, setAnnouncement] = useState(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -52,7 +54,7 @@ export default function AnnouncementBanner() {
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/15 px-2 py-0.5 rounded-full border border-accent/30 flex items-center gap-1">
               <Sparkles size={10} />
-              Announcement
+              {t('announcement')}
             </span>
             <h4 className="font-heading font-black text-white text-[14px] truncate">{announcement.title}</h4>
           </div>

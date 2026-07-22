@@ -130,14 +130,14 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-6 text-center">
         <span className="text-5xl mb-4">⚠️</span>
-        <h2 className="text-[20px] font-black text-white mb-2">Profile Load Error</h2>
-        <p className="text-charcoal-light text-[14px] mb-6 max-w-xs">We couldn't retrieve your profile data. Please try again or log out and log back in.</p>
+        <h2 className="text-[20px] font-black text-white mb-2">{t('profile_load_error')}</h2>
+        <p className="text-charcoal-light text-[14px] mb-6 max-w-xs">{t('we_couldnt_retrieve_your_profile_da')}</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <button onClick={loadData} className="w-full btn-accent py-4 rounded-xl font-bold">
-            Retry Connection
+            {t('retry_connection')}
           </button>
           <button onClick={signOut} className="w-full py-4 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors font-bold uppercase tracking-wider text-[13px]">
-            Log Out
+            {t('log_out')}
           </button>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function Profile() {
       {/* Header */}
       <div className="px-5 pt-safe pb-4">
         <div className="flex items-center justify-between mb-6 pt-4">
-          <h1 className="text-[24px] font-extrabold text-white tracking-tight">Profile</h1>
+          <h1 className="text-[24px] font-extrabold text-white tracking-tight">{t('profile')}</h1>
           <div className="flex items-center gap-3">
             <button className="w-10 h-10 rounded-full bg-dark-surface border border-border flex items-center justify-center text-charcoal-light hover:bg-surface hover:text-white transition-colors">
               <Settings size={20} />
@@ -206,7 +206,7 @@ export default function Profile() {
                 </span>
                 {userProfile.verified && (
                   <span className="text-[10px] text-accent font-bold uppercase tracking-wider bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-lg">
-                    ✓ Verified
+                    {t('_verified')}
                   </span>
                 )}
               </div>
@@ -290,7 +290,7 @@ export default function Profile() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/15 border border-accent/30 text-accent font-bold text-[12px] hover:bg-accent/25 transition-all shadow-[0_0_15px_rgba(0,255,135,0.15)] active-press"
           >
             <Wallet size={16} />
-            <span>My Wallet & RIB</span>
+            <span>{t('my_wallet_rib')}</span>
           </button>
         </div>
       </div>
@@ -298,7 +298,7 @@ export default function Profile() {
       {/* My Active Tasks */}
       {activeTasks.length > 0 && (
         <section className="px-5 mb-8">
-          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">Active Tasks</h3>
+          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">{t('active_tasks')}</h3>
           <div>
             {activeTasks.map((task) => (
               <button
@@ -312,7 +312,7 @@ export default function Profile() {
                 <div className="flex-1 min-w-0">
                   <span className="text-[15px] font-bold text-white block truncate mb-1">{task.title}</span>
                   <span className="text-[11px] text-accent font-bold uppercase tracking-wider flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Live tracking <ChevronRight size={12} strokeWidth={3} />
+                    {t('live_tracking')} <ChevronRight size={12} strokeWidth={3} />
                   </span>
                 </div>
                 <div className="text-right">
@@ -328,7 +328,7 @@ export default function Profile() {
       {/* Completed Tasks Summary */}
       {completedTasks.length > 0 && (
         <section className="px-5 mb-8">
-          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">Recent Completed</h3>
+          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">{t('recent_completed')}</h3>
           <div className="glass-panel rounded-2xl border border-border-light overflow-hidden divide-y divide-border">
             {completedTasks.slice(0, 3).map((task) => (
               <div key={task.id} className="flex items-center gap-4 px-5 py-4">
@@ -337,7 +337,7 @@ export default function Profile() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <span className="text-[14px] font-bold text-white block truncate">{task.title}</span>
-                  <span className="text-[11px] text-charcoal-light font-medium">Completed</span>
+                  <span className="text-[11px] text-charcoal-light font-medium">{t('completed')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle size={14} className="text-accent" />
@@ -352,7 +352,7 @@ export default function Profile() {
       {/* Recent Reviews & Feedback */}
       {!loadingReviews && reviews.length > 0 && (
         <section className="px-5 mb-8">
-          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">Recent Reviews</h3>
+          <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">{t('recent_reviews')}</h3>
           <div className="glass-panel rounded-3xl p-5 border border-border-light flex flex-col gap-4">
             {reviews.slice(0, 5).map((rev) => (
               <div key={rev.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
@@ -388,7 +388,7 @@ export default function Profile() {
 
       {/* Menu Items */}
       <section className="px-5 mb-8">
-        <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">Settings</h3>
+        <h3 className="text-[14px] font-bold text-charcoal-light uppercase tracking-wider mb-4 px-1">{t('settings')}</h3>
         <div className="glass-panel rounded-3xl overflow-hidden divide-y divide-border border border-border-light">
           {menuItems.map((item, i) => (
             <button
@@ -416,7 +416,7 @@ export default function Profile() {
           className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[15px] font-bold uppercase tracking-wider"
         >
           <LogOut size={18} strokeWidth={2.5} />
-          Log Out
+          {t('log_out')}
         </button>
       </section>
 
@@ -428,7 +428,7 @@ export default function Profile() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-extrabold text-white">Edit Profile</h3>
+              <h3 className="text-[18px] font-extrabold text-white">{t('edit_profile')}</h3>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
@@ -439,33 +439,33 @@ export default function Profile() {
 
             <div className="flex flex-col gap-4 mb-6">
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Full Name</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('full_name')}</label>
                 <input
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
                   className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-semibold"
-                  placeholder="Your full name"
+                  placeholder={t('your_full_name')}
                 />
               </div>
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Phone</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('phone')}</label>
                 <input
                   type="tel"
                   value={editForm.phone}
                   onChange={(e) => setEditForm(p => ({ ...p, phone: e.target.value }))}
                   className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-semibold"
-                  placeholder="+212 6XX XXX XXX"
+                  placeholder={t('212_6xx_xxx_xxx')}
                 />
               </div>
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Bio</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('bio')}</label>
                 <textarea
                   value={editForm.bio}
                   onChange={(e) => setEditForm(p => ({ ...p, bio: e.target.value }))}
                   className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-semibold resize-none"
                   rows={3}
-                  placeholder="Tell us about yourself..."
+                  placeholder={t('tell_us_about_yourself')}
                 />
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function Profile() {
               className="w-full btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider flex items-center justify-center gap-2"
             >
               <Save size={18} strokeWidth={2.5} />
-              Save Changes
+              {t('save_changes')}
             </button>
           </div>
         </div>
@@ -569,7 +569,7 @@ export default function Profile() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[20px] font-black text-white">Become a Runner</h3>
+              <h3 className="text-[20px] font-black text-white">{t('become_a_runner')}</h3>
               <button
                 onClick={() => setShowRunnerStepsModal(false)}
                 className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
@@ -580,7 +580,7 @@ export default function Profile() {
 
             <div className="mb-6">
               <p className="text-[14px] text-charcoal-light mb-5 font-medium leading-relaxed">
-                To start accepting tasks, earning money, and bidding on runs, you must verify your profile by completing these simple steps:
+                {t('to_start_accepting_tasks_earning_mo')}
               </p>
 
               <div className="flex flex-col gap-4">
@@ -589,8 +589,8 @@ export default function Profile() {
                     1
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-bold text-white mb-0.5">Identity Verification</h4>
-                    <p className="text-[12px] text-charcoal-light font-medium">Upload your CIN, Passport, or Driver's license.</p>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">{t('identity_verification')}</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">{t('upload_your_cin_passport_or_drivers')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -598,8 +598,8 @@ export default function Profile() {
                     2
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-bold text-white mb-0.5">Profile Selfie</h4>
-                    <p className="text-[12px] text-charcoal-light font-medium">Take a photo holding your identity card next to your face.</p>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">{t('profile_selfie')}</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">{t('take_a_photo_holding_your_identity_')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -607,8 +607,8 @@ export default function Profile() {
                     3
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-bold text-white mb-0.5">Vehicle Documents</h4>
-                    <p className="text-[12px] text-charcoal-light font-medium">Provide registration papers for your motorcycle or vehicle.</p>
+                    <h4 className="text-[14px] font-bold text-white mb-0.5">{t('vehicle_documents')}</h4>
+                    <p className="text-[12px] text-charcoal-light font-medium">{t('provide_registration_papers_for_you')}</p>
                   </div>
                 </div>
               </div>
@@ -616,12 +616,12 @@ export default function Profile() {
 
             {userProfile.kyc_status === 'pending' ? (
               <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 mb-6 text-center">
-                <p className="text-[13px] font-bold text-warning">Your verification is currently pending review.</p>
-                <p className="text-[11px] text-charcoal-light mt-1">We will notify you within 24 hours.</p>
+                <p className="text-[13px] font-bold text-warning">{t('your_verification_is_currently_pend')}</p>
+                <p className="text-[11px] text-charcoal-light mt-1">{t('we_will_notify_you_within_24_hours')}</p>
               </div>
             ) : userProfile.kyc_status === 'rejected' ? (
               <div className="bg-danger/10 border border-danger/30 rounded-xl p-4 mb-6">
-                <p className="text-[13px] font-bold text-danger">Verification rejected</p>
+                <p className="text-[13px] font-bold text-danger">{t('verification_rejected')}</p>
                 <p className="text-[12px] text-charcoal-light mt-1">{userProfile.kyc_rejection_reason || 'Please submit updated documents.'}</p>
               </div>
             ) : null}
@@ -656,7 +656,7 @@ export default function Profile() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-extrabold text-white">Help & Support</h3>
+              <h3 className="text-[18px] font-extrabold text-white">{t('help_support')}</h3>
               <button
                 onClick={() => setShowSupportModal(false)}
                 className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors"
@@ -667,23 +667,23 @@ export default function Profile() {
 
             <div className="flex flex-col gap-4 mb-6">
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Subject</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('subject')}</label>
                 <input
                   type="text"
                   value={supportSubject}
                   onChange={(e) => setSupportSubject(e.target.value)}
                   className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-semibold"
-                  placeholder="e.g. KYC verification, Payment issue"
+                  placeholder={t('eg_kyc_verification_payment_issue')}
                 />
               </div>
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Message</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('message')}</label>
                 <textarea
                   value={supportMessage}
                   onChange={(e) => setSupportMessage(e.target.value)}
                   className="input-field w-full px-4 py-3.5 rounded-xl text-[15px] font-medium resize-none"
                   rows={4}
-                  placeholder="Describe your issue or question in detail..."
+                  placeholder={t('describe_your_issue_or_question_in_')}
                 />
               </div>
             </div>

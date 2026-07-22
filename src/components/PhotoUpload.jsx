@@ -1,7 +1,9 @@
+import { useI18n } from '../utils/i18n';
 import { useRef, useState } from 'react';
 import { Camera, X, ImagePlus } from 'lucide-react';
 
 export default function PhotoUpload({ photos = [], onPhotosChange, maxPhotos = 4 }) {
+  const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -27,7 +29,7 @@ export default function PhotoUpload({ photos = [], onPhotosChange, maxPhotos = 4
   return (
     <div id="photo-upload">
       <label className="text-[14px] font-bold text-white uppercase tracking-wider block mb-2.5">
-        Photos <span className="text-charcoal-light font-medium lowercase">(optional)</span>
+        {t('photos')} <span className="text-charcoal-light font-medium lowercase">(optional)</span>
       </label>
 
       <div className="flex gap-3 flex-wrap">
@@ -73,7 +75,7 @@ export default function PhotoUpload({ photos = [], onPhotosChange, maxPhotos = 4
             id="add-photo-btn"
           >
             <ImagePlus size={22} className="text-charcoal-light" />
-            <span className="text-[11px] text-charcoal-light font-bold">Add</span>
+            <span className="text-[11px] text-charcoal-light font-bold">{t('add')}</span>
           </button>
         )}
       </div>

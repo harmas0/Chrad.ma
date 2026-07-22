@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Search, Ban, ShieldCheck, ChevronRight, X, AlertTriangle, Download, Trash, UserCheck, ShieldAlert, Award, Calendar, DollarSign, ListTodo } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -18,6 +19,7 @@ const KYC_BADGES = {
 };
 
 export default function AdminUsers() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -188,7 +190,7 @@ export default function AdminUsers() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">User Management</h1>
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('user_management')}</h1>
           <p className="text-[14px] text-charcoal-light font-medium">{users.length} total users matching filters</p>
         </div>
         <button
@@ -196,7 +198,7 @@ export default function AdminUsers() {
           className="p-3 bg-dark border border-border rounded-xl text-charcoal-light hover:text-white flex items-center gap-2 transition-all text-[13px] font-bold"
         >
           <Download size={14} />
-          Export to CSV
+          {t('export_to_csv')}
         </button>
       </div>
 
@@ -212,19 +214,19 @@ export default function AdminUsers() {
               onClick={() => { setBulkAction('kyc'); setShowBulkModal(true); }}
               className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-3.5 py-2 rounded-lg hover:bg-accent/20"
             >
-              Approve KYC
+              {t('approve_kyc')}
             </button>
             <button
               onClick={() => { setBulkAction('ban'); setShowBulkModal(true); }}
               className="text-[11px] font-bold text-danger bg-danger/10 border border-danger/20 px-3.5 py-2 rounded-lg hover:bg-danger/20"
             >
-              Ban Selected
+              {t('ban_selected')}
             </button>
             <button
               onClick={() => { setBulkAction('unban'); executeBulkAction(); }}
               className="text-[11px] font-bold text-white bg-dark border border-border px-3.5 py-2 rounded-lg hover:border-charcoal-light"
             >
-              Unban Selected
+              {t('unban_selected')}
             </button>
             <button
               onClick={() => setSelectedUserIds([])}
@@ -244,7 +246,7 @@ export default function AdminUsers() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email..."
+            placeholder={t('search_by_name_or_email')}
             className="input-field w-full pl-11 pr-4 py-3 rounded-xl text-[14px] font-medium"
           />
         </div>
@@ -284,12 +286,12 @@ export default function AdminUsers() {
                       className="rounded bg-dark border-border"
                     />
                   </th>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>KYC Status</th>
+                  <th>{t('user')}</th>
+                  <th>{t('role')}</th>
+                  <th>{t('kyc_status')}</th>
                   <th>Account Status</th>
-                  <th>Joined Date</th>
-                  <th>Action</th>
+                  <th>{t('joined_date')}</th>
+                  <th>{t('action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,9 +327,9 @@ export default function AdminUsers() {
                     </td>
                     <td>
                       {u.is_banned ? (
-                        <span className="badge badge-banned">Banned</span>
+                        <span className="badge badge-banned">{t('banned')}</span>
                       ) : (
-                        <span className="badge badge-approved">Active</span>
+                        <span className="badge badge-approved">{t('active')}</span>
                       )}
                     </td>
                     <td>
@@ -341,14 +343,14 @@ export default function AdminUsers() {
                           onClick={() => handleOpenUserDetail(u)}
                           className="text-[11px] font-bold text-charcoal-light hover:text-accent bg-dark border border-border px-3 py-1.5 rounded-lg hover:border-accent/30 transition-colors flex items-center gap-1"
                         >
-                          Details <ChevronRight size={14} />
+                          {t('details')} <ChevronRight size={14} />
                         </button>
                         {!u.is_banned && u.role !== 'admin' && (
                           <button
                             onClick={() => { setSelectedUser(u); setShowBanModal(true); }}
                             className="text-[11px] font-bold text-danger hover:text-white bg-dark border border-border hover:bg-danger hover:border-danger px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
                           >
-                            Ban
+                            {t('ban')}
                           </button>
                         )}
                       </div>
@@ -358,7 +360,7 @@ export default function AdminUsers() {
                 {users.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-charcoal-light text-[14px]">
-                      No users found
+                      {t('no_users_found')}
                     </td>
                   </tr>
                 )}
@@ -427,14 +429,14 @@ export default function AdminUsers() {
                       <div className="bg-dark rounded-xl p-4 border border-border">
                         <div className="flex items-center gap-2 mb-1.5">
                           <DollarSign size={14} className="text-accent" />
-                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">Spent</p>
+                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">{t('spent')}</p>
                         </div>
                         <p className="text-[20px] font-black text-white">{(Number(userProfileData.profile.spent || 0)).toFixed(2)} MAD</p>
                       </div>
                       <div className="bg-dark rounded-xl p-4 border border-border">
                         <div className="flex items-center gap-2 mb-1.5">
                           <DollarSign size={14} className="text-accent" />
-                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">Earnings</p>
+                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest">{t('earnings')}</p>
                         </div>
                         <p className="text-[20px] font-black text-accent">{(Number(userProfileData.profile.earnings || 0)).toFixed(2)} MAD</p>
                       </div>
@@ -448,26 +450,26 @@ export default function AdminUsers() {
                         </span>
                       </div>
                       <div className="flex justify-between text-[13px] border-b border-border/50 pb-2">
-                        <span className="text-charcoal-light">Account Status:</span>
+                        <span className="text-charcoal-light">{t('account_status')}</span>
                         <span className={`font-bold ${userProfileData.profile.is_banned ? 'text-danger' : 'text-accent'}`}>
                           {userProfileData.profile.is_banned ? 'Banned' : 'Active'}
                         </span>
                       </div>
                       {userProfileData.profile.is_banned && (
                         <div className="bg-danger/5 border border-danger/20 rounded-xl p-3 text-[12px] text-charcoal-light">
-                          <strong className="text-white block mb-1">Reason for Ban:</strong>
+                          <strong className="text-white block mb-1">{t('reason_for_ban')}</strong>
                           {userProfileData.profile.ban_reason || 'No reason provided'}
                         </div>
                       )}
                       <div className="flex justify-between text-[13px] border-b border-border/50 pb-2">
-                        <span className="text-charcoal-light">User ID:</span>
+                        <span className="text-charcoal-light">{t('user_id')}</span>
                         <span className="font-mono text-white text-[12px]">{userProfileData.profile.id}</span>
                       </div>
                     </div>
 
                     {/* Quick Actions Panel */}
                     <div className="border-t border-border pt-6">
-                      <h4 className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-4">Quick Admin Actions</h4>
+                      <h4 className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-4">{t('quick_admin_actions')}</h4>
                       <div className="flex flex-wrap gap-2">
                         {/* Ban / Unban */}
                         {userProfileData.profile.is_banned ? (
@@ -527,7 +529,7 @@ export default function AdminUsers() {
                         </div>
                       ))}
                       {userProfileData.tasksCreated.length === 0 && (
-                        <p className="text-charcoal-light text-center py-4">No tasks created</p>
+                        <p className="text-charcoal-light text-center py-4">{t('no_tasks_created')}</p>
                       )}
                     </div>
 
@@ -540,7 +542,7 @@ export default function AdminUsers() {
                         </div>
                       ))}
                       {userProfileData.tasksRun.length === 0 && (
-                        <p className="text-charcoal-light text-center py-4">No runner jobs completed</p>
+                        <p className="text-charcoal-light text-center py-4">{t('no_runner_jobs_completed')}</p>
                       )}
                     </div>
                   </div>
@@ -549,10 +551,10 @@ export default function AdminUsers() {
                 {profileTab === 'kyc' && (
                   <div className="space-y-4">
                     <div className="bg-dark rounded-xl p-4 border border-border">
-                      <p className="text-[12px] text-charcoal-light mb-2">Current Tier: <strong className="text-white font-bold uppercase">{userProfileData.profile.runner_tier || 'standard'}</strong></p>
+                      <p className="text-[12px] text-charcoal-light mb-2">{t('current_tier')} <strong className="text-white font-bold uppercase">{userProfileData.profile.runner_tier || 'standard'}</strong></p>
                       {userProfileData.profile.runner_notes && (
                         <div className="p-3 bg-white/[0.02] border border-white/5 rounded-lg text-[12px] text-charcoal-light">
-                          <strong className="text-white block mb-0.5">Verification Notes:</strong>
+                          <strong className="text-white block mb-0.5">{t('verification_notes')}</strong>
                           {userProfileData.profile.runner_notes}
                         </div>
                       )}
@@ -561,17 +563,17 @@ export default function AdminUsers() {
                     <div className="grid grid-cols-2 gap-4">
                       {userProfileData.profile.kyc_id_url && (
                         <div>
-                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">ID Card / Passport</p>
+                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">{t('id_card_passport')}</p>
                           <a href={userProfileData.profile.kyc_id_url} target="_blank" rel="noreferrer" className="aspect-[4/3] rounded-xl border border-border bg-dark block overflow-hidden">
-                            <img src={userProfileData.profile.kyc_id_url} alt="ID Document" className="w-full h-full object-cover" />
+                            <img src={userProfileData.profile.kyc_id_url} alt={t('id_document')} className="w-full h-full object-cover" />
                           </a>
                         </div>
                       )}
                       {userProfileData.profile.kyc_selfie_url && (
                         <div>
-                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">Selfie</p>
+                          <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mb-2">{t('selfie')}</p>
                           <a href={userProfileData.profile.kyc_selfie_url} target="_blank" rel="noreferrer" className="aspect-[4/3] rounded-xl border border-border bg-dark block overflow-hidden">
-                            <img src={userProfileData.profile.kyc_selfie_url} alt="Selfie" className="w-full h-full object-cover" />
+                            <img src={userProfileData.profile.kyc_selfie_url} alt={t('selfie')} className="w-full h-full object-cover" />
                           </a>
                         </div>
                       )}
@@ -581,7 +583,7 @@ export default function AdminUsers() {
 
                 {profileTab === 'logs' && (
                   <div className="space-y-3">
-                    <h4 className="text-[14px] font-bold text-white">Action Logs</h4>
+                    <h4 className="text-[14px] font-bold text-white">{t('action_logs')}</h4>
                     <div className="max-h-[300px] overflow-y-auto space-y-2.5 border border-border rounded-xl p-4 bg-dark">
                       {userProfileData.auditLogs.map((log) => (
                         <div key={log.id} className="flex flex-col border-b border-border/40 pb-2 last:border-0 last:pb-0">
@@ -595,7 +597,7 @@ export default function AdminUsers() {
                         </div>
                       ))}
                       {userProfileData.auditLogs.length === 0 && (
-                        <p className="text-charcoal-light text-center py-6 text-[13px]">No logs recorded for this user</p>
+                        <p className="text-charcoal-light text-center py-6 text-[13px]">{t('no_logs_recorded_for_this_user')}</p>
                       )}
                     </div>
                   </div>
@@ -613,7 +615,7 @@ export default function AdminUsers() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[18px] font-extrabold text-white flex items-center gap-2">
                 <ShieldAlert size={18} className="text-danger" />
-                Ban User Account
+                {t('ban_user_account')}
               </h3>
               <button onClick={() => setShowBanModal(false)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
@@ -621,13 +623,13 @@ export default function AdminUsers() {
             </div>
 
             <p className="text-[13px] text-charcoal-light mb-4">
-              Enter reason for banning <strong className="text-white">{selectedUser.name}</strong>.
+              {t('enter_reason_for_banning')} <strong className="text-white">{selectedUser.name}</strong>.
             </p>
 
             <textarea
               value={banReason}
               onChange={(e) => setBanReason(e.target.value)}
-              placeholder="Describe why this account is banned..."
+              placeholder={t('describe_why_this_account_is_banned')}
               rows={3}
               className="input-field w-full px-4 py-3.5 rounded-xl text-[13px] font-medium resize-none mb-6"
             />
@@ -644,7 +646,7 @@ export default function AdminUsers() {
                 disabled={actionLoading || !banReason.trim()}
                 className="flex-1 py-3 rounded-xl bg-danger text-white font-bold text-[13px] hover:bg-danger/90 transition-colors disabled:opacity-50"
               >
-                Confirm Ban
+                {t('confirm_ban')}
               </button>
             </div>
           </div>
@@ -656,14 +658,14 @@ export default function AdminUsers() {
         <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in" onClick={() => setResendKycModal(false)}>
           <div className="w-full max-w-md bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-extrabold text-white">Reset & Request KYC</h3>
+              <h3 className="text-[18px] font-extrabold text-white">{t('reset_request_kyc')}</h3>
               <button onClick={() => setResendKycModal(false)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
               </button>
             </div>
 
             <p className="text-[13px] text-charcoal-light mb-4">
-              State the reason for requesting resubmission.
+              {t('state_the_reason_for_requesting_res')}
             </p>
 
             <textarea
@@ -679,14 +681,14 @@ export default function AdminUsers() {
                 onClick={() => setResendKycModal(false)}
                 className="flex-1 py-3 rounded-xl border border-border text-charcoal font-bold text-[13px]"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleResendKYC}
                 disabled={actionLoading || !resendReason.trim()}
                 className="flex-1 btn-accent py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider"
               >
-                Submit Request
+                {t('submit_request')}
               </button>
             </div>
           </div>
@@ -698,21 +700,21 @@ export default function AdminUsers() {
         <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in" onClick={() => setShowBulkModal(false)}>
           <div className="w-full max-w-md bg-dark-surface border border-border-light rounded-3xl p-6 animate-scale-in shadow-2xl mx-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-extrabold text-white uppercase tracking-wider">Execute Bulk Action</h3>
+              <h3 className="text-[18px] font-extrabold text-white uppercase tracking-wider">{t('execute_bulk_action')}</h3>
               <button onClick={() => setShowBulkModal(false)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
               </button>
             </div>
 
             <p className="text-[13px] text-charcoal-light mb-4">
-              You are applying bulk <strong>{bulkAction}</strong> to {selectedUserIds.length} accounts.
+              {t('you_are_applying_bulk')} <strong>{bulkAction}</strong> to {selectedUserIds.length} accounts.
             </p>
 
             {bulkAction === 'ban' && (
               <textarea
                 value={bulkReason}
                 onChange={(e) => setBulkReason(e.target.value)}
-                placeholder="Reason for bulk ban..."
+                placeholder={t('reason_for_bulk_ban')}
                 rows={3}
                 className="input-field w-full px-4 py-3.5 rounded-xl text-[13px] font-medium resize-none mb-6"
               />
@@ -723,14 +725,14 @@ export default function AdminUsers() {
                 onClick={() => setShowBulkModal(false)}
                 className="flex-1 py-3 rounded-xl border border-border text-charcoal font-bold text-[13px]"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={executeBulkAction}
                 disabled={actionLoading || (bulkAction === 'ban' && !bulkReason.trim())}
                 className="flex-1 py-3 rounded-xl btn-accent font-bold text-[13px] uppercase tracking-wider"
               >
-                Confirm Bulk Run
+                {t('confirm_bulk_run')}
               </button>
             </div>
           </div>

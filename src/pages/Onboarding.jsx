@@ -142,9 +142,9 @@ export default function Onboarding() {
           </div>
           <div>
             <span className="font-heading font-black text-white uppercase tracking-wider text-[17px] block leading-none">
-              Chrad<span style={{ color: slide.color }}>.ma</span>
+              {t('chrad')}<span style={{ color: slide.color }}>{t('ma')}</span>
             </span>
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-charcoal-light">Errand Network</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-charcoal-light">{t('errand_network')}</span>
           </div>
         </div>
 
@@ -197,28 +197,28 @@ export default function Onboarding() {
               {slide.graphicType === 'lightning' && (
                 <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl animate-pulse-slow">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00FF87] animate-ping" />
-                  <span className="text-[12px] font-black text-white">Live Bids: <strong className="text-[#00FF87]">45 MAD</strong> • Arrival: <strong className="text-white">8m</strong></span>
+                  <span className="text-[12px] font-black text-white">{t('live_bids')} <strong className="text-[#00FF87]">45 MAD</strong> {t('_arrival')} <strong className="text-white">{t('8m')}</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'earnings' && (
                 <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Building2 size={16} className="text-[#00E5FF]" />
-                  <span className="text-[12px] font-black text-white">Moroccan Bank RIB Transfer <strong className="text-[#00E5FF]">+350 MAD</strong></span>
+                  <span className="text-[12px] font-black text-white">{t('moroccan_bank_rib_transfer')} <strong className="text-[#00E5FF]">+350 MAD</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'escrow' && (
                 <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Lock size={15} className="text-[#FFB020]" />
-                  <span className="text-[12px] font-black text-white">Secret OTP Delivery PIN: <strong className="text-[#FFB020] font-mono tracking-widest">4821</strong></span>
+                  <span className="text-[12px] font-black text-white">{t('secret_otp_delivery_pin')} <strong className="text-[#FFB020] font-mono tracking-widest">4821</strong></span>
                 </div>
               )}
 
               {slide.graphicType === 'map' && (
                 <div className="inline-flex items-center gap-2 bg-dark/90 border border-white/15 px-4 py-2 rounded-2xl shadow-xl">
                   <Navigation size={16} className="text-[#FF0055] animate-spin-slow" />
-                  <span className="text-[12px] font-black text-white">Live Telemetry: <strong className="text-[#FF0055]">Maârif, Casablanca</strong></span>
+                  <span className="text-[12px] font-black text-white">{t('live_telemetry')} <strong className="text-[#FF0055]">{t('marif_casablanca')}</strong></span>
                 </div>
               )}
             </div>

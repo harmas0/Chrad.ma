@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Bell, ShieldAlert, Trash2, Calendar, Megaphone, Users, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -5,6 +6,7 @@ import { fetchAnnouncements, createAnnouncement, deleteAnnouncement } from '../.
 import { fetchPlatformSettings, updatePlatformSettings } from '../../data/settingsApi';
 
 export default function AdminAnnouncements() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [announcements, setAnnouncements] = useState([]);
   const [settings, setSettings] = useState(null);
@@ -103,8 +105,8 @@ export default function AdminAnnouncements() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Announcements & Maintenance</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Broadcast alerts and toggle system access windows</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('announcements_maintenance')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('broadcast_alerts_and_toggle_system_')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -113,27 +115,27 @@ export default function AdminAnnouncements() {
           <div className="glass-panel p-6 border border-border-light rounded-2xl">
             <h2 className="text-[16px] font-bold text-white mb-4 flex items-center gap-2">
               <Megaphone size={16} className="text-accent" />
-              New Banner Broadcast
+              {t('new_banner_broadcast')}
             </h2>
             <form onSubmit={handleCreateAnnouncement} className="space-y-4">
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Alert Title</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('alert_title')}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Scheduled Service Outage"
+                  placeholder={t('eg_scheduled_service_outage')}
                   required
                   className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Message Body</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('message_body')}</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Details of the announcement..."
+                  placeholder={t('details_of_the_announcement')}
                   required
                   rows={4}
                   className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
@@ -142,20 +144,20 @@ export default function AdminAnnouncements() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Target Segment</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('target_segment')}</label>
                   <select
                     value={targetSegment}
                     onChange={(e) => setTargetSegment(e.target.value)}
                     className="input-field w-full px-3 py-3 rounded-xl text-[13px] font-medium bg-dark"
                   >
-                    <option value="all">All Users</option>
-                    <option value="runners">Runners Only</option>
-                    <option value="clients">Clients Only</option>
+                    <option value="all">{t('all_users')}</option>
+                    <option value="runners">{t('runners_only')}</option>
+                    <option value="clients">{t('clients_only')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Expiry Date</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('expiry_date')}</label>
                   <input
                     type="datetime-local"
                     value={expiresAt}
@@ -170,7 +172,7 @@ export default function AdminAnnouncements() {
                 disabled={submitting}
                 className="w-full btn-accent py-3.5 rounded-xl text-[13px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
               >
-                <Plus size={16} /> Broadcast Banner
+                <Plus size={16} /> {t('broadcast_banner')}
               </button>
             </form>
           </div>
@@ -182,7 +184,7 @@ export default function AdminAnnouncements() {
               Platform Lock (Maintenance)
             </h2>
             <p className="text-[12px] text-charcoal-light mb-4">
-              Activating maintenance lock prevents clients and runners from initiating or editing tasks, placing bids, or writing messages. Admins retain full dashboard access.
+              {t('activating_maintenance_lock_prevent')}
             </p>
 
             <button
@@ -202,12 +204,12 @@ export default function AdminAnnouncements() {
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-[18px] font-black text-white flex items-center gap-2 mb-2">
             <Bell size={18} className="text-charcoal-light" />
-            Active Announcements Banners
+            {t('active_announcements_banners')}
           </h2>
 
           {announcements.length === 0 ? (
             <div className="glass-panel p-12 text-center text-charcoal-light border border-dashed border-border-light rounded-2xl py-20">
-              No announcements are currently active.
+              {t('no_announcements_are_currently_acti')}
             </div>
           ) : (
             <div className="space-y-4">

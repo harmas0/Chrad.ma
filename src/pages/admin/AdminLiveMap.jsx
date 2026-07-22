@@ -1,9 +1,11 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Map, RefreshCw, Layers, Flame, Navigation, Activity, ShieldCheck, UserCheck, Play, Pause, Search, Filter, Eye, ChevronRight } from 'lucide-react';
 import { supabase } from '../../utils/supabaseClient';
 import MapView from '../../components/MapView';
 
 export default function AdminLiveMap() {
+  const { t } = useI18n();
   const [activeTasks, setActiveTasks] = useState([]);
   const [runnerLocations, setRunnerLocations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,9 +139,9 @@ export default function AdminLiveMap() {
         <div>
           <h1 className="text-[26px] font-black text-white tracking-tight mb-1 flex items-center gap-2.5">
             <Map className="text-accent" size={26} />
-            Live Operations Control Center
+            {t('live_operations_control_center')}
           </h1>
-          <p className="text-[13px] text-charcoal-light font-medium">Real-time GPS dispatch telemetry and order density command center</p>
+          <p className="text-[13px] text-charcoal-light font-medium">{t('realtime_gps_dispatch_telemetry_and')}</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -199,14 +201,14 @@ export default function AdminLiveMap() {
               <span className="w-2.5 h-2.5 rounded-full bg-accent animate-ping" />
               <div>
                 <span className="text-[12px] font-black text-white">{activeTasks.length}</span>
-                <span className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider ml-1.5">Tasks Monitored</span>
+                <span className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider ml-1.5">{t('tasks_monitored')}</span>
               </div>
             </div>
             <div className="glass-panel bg-black/75 backdrop-blur-md px-3.5 py-2 border border-white/10 rounded-xl flex items-center gap-2 pointer-events-auto">
               <span className="w-2.5 h-2.5 rounded-full bg-info animate-pulse" />
               <div>
                 <span className="text-[12px] font-black text-info">{runnerLocations.length}</span>
-                <span className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider ml-1.5">Fleet Runners</span>
+                <span className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider ml-1.5">{t('fleet_runners')}</span>
               </div>
             </div>
           </div>
@@ -242,7 +244,7 @@ export default function AdminLiveMap() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search telemetry..."
+                placeholder={t('search_telemetry')}
                 className="input-field w-full pl-9 pr-3 py-2 rounded-xl text-[12px]"
               />
             </div>
@@ -252,11 +254,11 @@ export default function AdminLiveMap() {
                 onChange={(e) => setSelectedTaskFilter(e.target.value)}
                 className="input-field w-full px-3 py-1.5 rounded-xl text-[11px] font-bold bg-dark border-border"
               >
-                <option value="all">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="bidding">Bidding</option>
-                <option value="accepted">Accepted / In Transit</option>
-                <option value="completed">Completed</option>
+                <option value="all">{t('all_statuses')}</option>
+                <option value="open">{t('open')}</option>
+                <option value="bidding">{t('bidding')}</option>
+                <option value="accepted">{t('accepted_in_transit')}</option>
+                <option value="completed">{t('completed')}</option>
               </select>
             )}
           </div>
@@ -276,7 +278,7 @@ export default function AdminLiveMap() {
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-charcoal-light">
                     <span className="capitalize bg-dark-surface px-2 py-0.5 rounded border border-border">{t.status}</span>
-                    <span className="group-hover:text-accent flex items-center gap-0.5">Focus <ChevronRight size={10} /></span>
+                    <span className="group-hover:text-accent flex items-center gap-0.5">{t('focus')} <ChevronRight size={10} /></span>
                   </div>
                 </div>
               ))
@@ -292,21 +294,21 @@ export default function AdminLiveMap() {
                       <span className="w-2 h-2 rounded-full bg-info" />
                       Runner {r.runnerId?.slice(0, 8)}
                     </span>
-                    <span className="text-[10px] text-info font-bold uppercase">Active GPS</span>
+                    <span className="text-[10px] text-info font-bold uppercase">{t('active_gps')}</span>
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-charcoal-light">
                     <span>{r.taskId ? `Task: ${r.taskId.slice(0, 8)}` : 'Idle / Available'}</span>
-                    <span className="group-hover:text-info flex items-center gap-0.5">Focus <ChevronRight size={10} /></span>
+                    <span className="group-hover:text-info flex items-center gap-0.5">{t('focus')} <ChevronRight size={10} /></span>
                   </div>
                 </div>
               ))
             )}
 
             {activeTab === 'tasks' && filteredTasks.length === 0 && (
-              <div className="text-center py-10 text-[12px] text-charcoal-light">No tasks match filter</div>
+              <div className="text-center py-10 text-[12px] text-charcoal-light">{t('no_tasks_match_filter')}</div>
             )}
             {activeTab === 'runners' && runnerLocations.length === 0 && (
-              <div className="text-center py-10 text-[12px] text-charcoal-light">No active runner telemetry</div>
+              <div className="text-center py-10 text-[12px] text-charcoal-light">{t('no_active_runner_telemetry')}</div>
             )}
           </div>
         </div>

@@ -91,7 +91,7 @@ export default function RunnerFeed() {
               id="view-list"
             >
               <List size={15} strokeWidth={2.5} />
-              List
+              {t('list')}
             </button>
             <button
               onClick={() => setViewMode('map')}
@@ -99,7 +99,7 @@ export default function RunnerFeed() {
               id="view-map"
             >
               <Map size={15} strokeWidth={2.5} />
-              Map
+              {t('map')}
             </button>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function RunnerFeed() {
                     ? 'bg-danger border-danger text-white shadow-[0_0_20px_rgba(255,51,102,0.5)]' 
                     : 'glass-floating border-white/15 text-white hover:border-white/30'
                   }`}
-                title="Toggle Task Hotspots Heatmap"
+                title={t('toggle_task_hotspots_heatmap')}
                 id="heatmap-toggle"
               >
                 <Flame size={20} className={showHeatmap ? 'text-white' : 'text-danger'} />

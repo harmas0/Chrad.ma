@@ -27,7 +27,7 @@ export default function BannedScreen() {
 
         <p className="text-[13px] text-charcoal-light mb-8">
           {t('banned_mistake')}{' '}
-          <span className="text-accent font-bold">support@chrad.ma</span>
+          <span className="text-accent font-bold">{t('supportchradma')}</span>
         </p>
 
         <button

@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useEffect } from 'react';
 import { 
   MapPin, 
@@ -18,6 +19,7 @@ import { useAuth } from '../context/AuthContext';
 import CategoryIcon from './CategoryIcon';
 
 export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefresh }) {
+  const { t } = useI18n();
   const { user: currentAdmin } = useAuth();
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,14 +85,14 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Admin Task Route & Security Inspector">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('admin_task_route_security_inspector')}>
       {loading ? (
         <div className="py-12 text-center">
           <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-[13px] text-charcoal-light font-bold">Loading task inspector...</p>
+          <p className="text-[13px] text-charcoal-light font-bold">{t('loading_task_inspector')}</p>
         </div>
       ) : !task ? (
-        <div className="py-8 text-center text-charcoal-light font-bold">Task record not found.</div>
+        <div className="py-8 text-center text-charcoal-light font-bold">{t('task_record_not_found')}</div>
       ) : (
         <div className="space-y-5 animate-fade-in">
           {/* Header Card */}
@@ -114,18 +116,18 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
 
           {/* Pickup & Destination Route */}
           <div className="p-4 rounded-2xl bg-dark/40 border border-white/10 space-y-3">
-            <h4 className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">Route Coordinates</h4>
+            <h4 className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">{t('route_coordinates')}</h4>
             <div className="space-y-2 text-[12px]">
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-accent shrink-0" />
                 <span className="text-white font-medium truncate">
-                  Pickup: <strong>{task.pickup_address || task.pickupAddress || 'Casablanca'}</strong>
+                  {t('pickup')} <strong>{task.pickup_address || task.pickupAddress || 'Casablanca'}</strong>
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-warning shrink-0" />
                 <span className="text-white font-medium truncate">
-                  Destination: <strong>{task.destination_address || task.destinationAddress || 'Casablanca'}</strong>
+                  {t('destination')} <strong>{task.destination_address || task.destinationAddress || 'Casablanca'}</strong>
                 </span>
               </div>
             </div>
@@ -134,14 +136,14 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
           {/* Delivery Verification Secrets */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-4 rounded-2xl bg-accent/10 border border-accent/20 space-y-1">
-              <span className="text-[11px] font-bold text-charcoal-light uppercase block">Client Secret OTP PIN</span>
+              <span className="text-[11px] font-bold text-charcoal-light uppercase block">{t('client_secret_otp_pin')}</span>
               <span className="text-[22px] font-black text-accent font-mono tracking-widest">
                 {task.delivery_pin || task.deliveryPin || '4821'}
               </span>
             </div>
 
             <div className="p-4 rounded-2xl bg-dark/40 border border-white/10 space-y-1">
-              <span className="text-[11px] font-bold text-charcoal-light uppercase block">Proof Photo Upload</span>
+              <span className="text-[11px] font-bold text-charcoal-light uppercase block">{t('proof_photo_upload')}</span>
               <span className="text-[12px] font-bold text-white block truncate">
                 {task.proof_photo_url || task.proofPhotoUrl ? 'Uploaded ✅' : 'Pending Upload'}
               </span>
@@ -153,7 +155,7 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
             <div className="p-3.5 rounded-2xl bg-dark/40 border border-white/10 space-y-2">
               <h4 className="text-[12px] font-bold text-white flex items-center gap-1.5">
                 <Camera size={14} className="text-accent" />
-                Uploaded Proof of Delivery
+                {t('uploaded_proof_of_delivery')}
               </h4>
               <img
                 src={task.proof_photo_url || task.proofPhotoUrl}
@@ -167,7 +169,7 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
           <div className="p-4 rounded-2xl bg-dark/60 border border-white/10 space-y-3">
             <h4 className="text-[12px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
               <ShieldAlert size={16} className="text-warning" />
-              Administrative Overrides
+              {t('administrative_overrides')}
             </h4>
 
             <div className="flex gap-2">
@@ -183,7 +185,7 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
                 disabled={overrideLoading}
                 className="px-4 py-2.5 rounded-xl bg-accent text-dark font-extrabold text-[11px] uppercase tracking-wider"
               >
-                Set Price
+                {t('set_price')}
               </button>
             </div>
 
@@ -193,14 +195,14 @@ export default function AdminTaskInspectModal({ isOpen, onClose, taskId, onRefre
                 disabled={overrideLoading}
                 className="flex-1 py-2.5 rounded-xl bg-accent/20 border border-accent/30 text-accent font-extrabold text-[11px] uppercase tracking-wider hover:bg-accent/30 transition-colors flex items-center justify-center gap-1"
               >
-                <CheckCircle size={14} /> Force Complete
+                <CheckCircle size={14} /> {t('force_complete')}
               </button>
               <button
                 onClick={() => handleForceStatus('cancelled')}
                 disabled={overrideLoading}
                 className="flex-1 py-2.5 rounded-xl bg-danger/20 border border-danger/30 text-danger font-extrabold text-[11px] uppercase tracking-wider hover:bg-danger/30 transition-colors flex items-center justify-center gap-1"
               >
-                <XCircle size={14} /> Force Cancel
+                <XCircle size={14} /> {t('force_cancel')}
               </button>
             </div>
           </div>

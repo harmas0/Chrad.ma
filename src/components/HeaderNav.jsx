@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Zap } from 'lucide-react';
@@ -8,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, Wallet } from 'lucide-react';
 
 export default function HeaderNav({ title, showBack = false }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user, isAdmin, isRunner } = useAuth();
   const [showWallet, setShowWallet] = useState(false);
@@ -30,11 +32,11 @@ export default function HeaderNav({ title, showBack = false }) {
               </div>
               <div>
                 <span className="font-heading font-black text-white text-[17px] tracking-tight block leading-none">
-                  Chrad<span className="text-accent">.ma</span>
+                  {t('chrad')}<span className="text-accent">{t('ma')}</span>
                 </span>
                 {isRunner && (
                   <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.2 rounded border border-accent/20">
-                    Runner
+                    {t('runner')}
                   </span>
                 )}
               </div>
@@ -48,7 +50,7 @@ export default function HeaderNav({ title, showBack = false }) {
             <button
               onClick={() => setShowWallet(true)}
               className="w-10 h-10 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent hover:bg-accent/20 transition-all active-press"
-              title="Open Wallet"
+              title={t('open_wallet')}
             >
               <Wallet size={18} />
             </button>
@@ -57,7 +59,7 @@ export default function HeaderNav({ title, showBack = false }) {
             <Link
               to="/admin"
               className="p-2 rounded-xl bg-accent/15 border border-accent/30 text-accent hover:bg-accent/25 transition-colors"
-              title="Admin Dashboard"
+              title={t('admin_dashboard')}
             >
               <Shield size={18} />
             </Link>

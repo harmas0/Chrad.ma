@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, ScrollText, LogOut, Zap, Package, Settings, DollarSign, UserCheck, Layers, Megaphone, MessageSquare, Map, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
 
 
 export default function AdminLayout() {
+  const { t } = useI18n();
   const { profile, signOut } = useAuth();
 
   return (
@@ -34,13 +36,13 @@ export default function AdminLayout() {
           </div>
           <div>
             <h1 className="text-[16px] font-black text-white tracking-tight leading-none">CHRAD</h1>
-            <span className="text-[10px] text-accent font-bold uppercase tracking-widest">Admin Panel</span>
+            <span className="text-[10px] text-accent font-bold uppercase tracking-widest">{t('admin_panel')}</span>
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1">
-          <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest px-4 mb-3">Navigation</div>
+          <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest px-4 mb-3">{t('navigation')}</div>
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to}
@@ -62,7 +64,7 @@ export default function AdminLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-bold text-white truncate">{profile?.name || 'Admin'}</p>
-              <p className="text-[10px] text-accent font-bold uppercase tracking-wider">Administrator</p>
+              <p className="text-[10px] text-accent font-bold uppercase tracking-wider">{t('administrator')}</p>
             </div>
           </div>
           <button
@@ -70,7 +72,7 @@ export default function AdminLayout() {
             className="admin-sidebar-link text-danger hover:bg-danger/5 w-full"
           >
             <LogOut size={18} />
-            Sign Out
+            {t('sign_out')}
           </button>
         </div>
       </aside>

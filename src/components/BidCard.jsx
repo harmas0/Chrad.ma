@@ -1,6 +1,8 @@
+import { useI18n } from '../utils/i18n';
 import { Star, Clock, Check, X, MessageCircle, ShieldCheck } from 'lucide-react';
 
 export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProfile, animationDelay = 0 }) {
+  const { t } = useI18n();
   return (
     <div
       className="glass-card rounded-3xl border border-border-light p-5.5 stagger-item hover-lift relative overflow-hidden"
@@ -22,7 +24,7 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
               {bid.runnerInitials}
             </div>
             {bid.runnerCompletedTasks >= 50 && (
-              <span className="absolute -bottom-1 -right-1 bg-accent text-dark p-0.5 rounded-md shadow-md" title="Verified Runner">
+              <span className="absolute -bottom-1 -right-1 bg-accent text-dark p-0.5 rounded-md shadow-md" title={t('verified_runner')}>
                 <ShieldCheck size={12} strokeWidth={3} />
               </span>
             )}
@@ -32,7 +34,7 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
             <div className="flex items-center gap-2 mb-0.5">
               <h4 className="font-heading font-extrabold text-white text-[15px] truncate group-hover/runner:text-accent transition-colors">{bid.runnerName}</h4>
               {bid.runnerCompletedTasks >= 100 && (
-                <span className="text-[9px] font-black text-accent bg-accent/15 border border-accent/30 px-2 py-0.5 rounded-full tracking-wide uppercase">⚡ PRO</span>
+                <span className="text-[9px] font-black text-accent bg-accent/15 border border-accent/30 px-2 py-0.5 rounded-full tracking-wide uppercase">{t('_pro')}</span>
               )}
             </div>
             <div className="flex items-center gap-3">
@@ -57,7 +59,7 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
       {/* ETA Badge */}
       <div className="inline-flex items-center gap-1.5 text-[11px] text-white bg-dark/50 border border-border px-3 py-1 rounded-xl font-bold uppercase tracking-wider mb-4">
         <Clock size={13} className="text-accent" />
-        <span>Est. Arrival: <strong className="text-accent font-black">{bid.eta}</strong></span>
+        <span>{t('est_arrival')} <strong className="text-accent font-black">{bid.eta}</strong></span>
       </div>
 
       {/* Message */}
@@ -79,14 +81,14 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
             id={`accept-bid-${bid.id}`}
           >
             <Check size={16} strokeWidth={3} />
-            Accept
+            {t('accept')}
           </button>
           <button
             onClick={() => onCounter?.(bid)}
             className="flex-1 border border-accent/40 bg-accent/10 text-accent font-black text-[13px] py-3 rounded-2xl hover:bg-accent/20 active-press transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider"
             id={`counter-bid-${bid.id}`}
           >
-            Counter
+            {t('counter')}
           </button>
           <button
             onClick={() => onReject?.(bid)}
@@ -102,7 +104,7 @@ export default function BidCard({ bid, onAccept, onCounter, onReject, onViewProf
       {bid.status === 'accepted' && (
         <div className="flex items-center justify-center gap-2 text-accent text-[13px] font-black bg-accent/15 px-4 py-3 rounded-2xl border border-accent/30 uppercase tracking-wider">
           <Check size={16} strokeWidth={3} />
-          Offer Accepted
+          {t('offer_accepted')}
         </div>
       )}
     </div>

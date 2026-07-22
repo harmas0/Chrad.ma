@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -124,6 +125,7 @@ const taskIcon = new L.DivIcon({
 
 // Custom numbered yellow marker for waypoints (intermediate stops)
 function getWaypointIcon(index) {
+  const { t } = useI18n();
   return new L.DivIcon({
     className: 'custom-marker',
     html: `<div style="
@@ -186,7 +188,7 @@ function MapControls({ onZoomIn, onZoomOut, onRecenter, onToggleStyle, currentLa
       {/* Recenter / Fit Bounds */}
       <button
         onClick={onRecenter}
-        title="Reset View & Center"
+        title={t('reset_view_center')}
         className="glass-panel p-2.5 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-all shadow-xl flex items-center justify-center bg-black/60 backdrop-blur-md active:scale-95"
       >
         <Compass size={18} className="text-accent" />
@@ -196,14 +198,14 @@ function MapControls({ onZoomIn, onZoomOut, onRecenter, onToggleStyle, currentLa
       <div className="glass-panel rounded-xl border border-white/20 overflow-hidden flex flex-col bg-black/60 backdrop-blur-md shadow-xl">
         <button
           onClick={onZoomIn}
-          title="Zoom In"
+          title={t('zoom_in')}
           className="p-2.5 text-white hover:bg-white/10 border-b border-white/10 transition-colors flex items-center justify-center"
         >
           <ZoomIn size={18} />
         </button>
         <button
           onClick={onZoomOut}
-          title="Zoom Out"
+          title={t('zoom_out')}
           className="p-2.5 text-white hover:bg-white/10 transition-colors flex items-center justify-center"
         >
           <ZoomOut size={18} />
@@ -633,7 +635,7 @@ export default function MapView({
             } : undefined}
           >
             <Popup>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#00E676' }}>📍 Pickup Point</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#00E676' }}>{t('_pickup_point')}</div>
               <div style={{ fontSize: 12, color: '#DDD', marginTop: 2 }}>{pickup.address || pickup.name}</div>
             </Popup>
           </Marker>
@@ -674,7 +676,7 @@ export default function MapView({
             } : undefined}
           >
             <Popup>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#EF4444' }}>🏁 Final Destination</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#EF4444' }}>{t('_final_destination')}</div>
               <div style={{ fontSize: 12, color: '#DDD', marginTop: 2 }}>{destination.address || destination.name}</div>
             </Popup>
           </Marker>
@@ -684,8 +686,8 @@ export default function MapView({
         {interpolatedRunnerPos && (
           <Marker position={[interpolatedRunnerPos.lat, interpolatedRunnerPos.lng]} icon={getRotatedRunnerIcon(runnerBearing)}>
             <Popup>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#3B82F6' }}>🏃 Active Runner</div>
-              <div style={{ fontSize: 11, color: '#AAA', marginTop: 2 }}>Live Telemetry Active</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#3B82F6' }}>{t('_active_runner')}</div>
+              <div style={{ fontSize: 11, color: '#AAA', marginTop: 2 }}>{t('live_telemetry_active')}</div>
             </Popup>
           </Marker>
         )}
@@ -767,7 +769,7 @@ export default function MapView({
               >
                 <Popup>
                   <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 4 }}>📦 {cluster.tasks.length} Errands Nearby</div>
-                  <div style={{ fontSize: 11, color: '#888' }}>Click cluster to zoom into neighborhood</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>{t('click_cluster_to_zoom_into_neighbor')}</div>
                 </Popup>
               </Marker>
             );
@@ -789,7 +791,7 @@ export default function MapView({
       {/* Fullscreen Toggle */}
       <button
         onClick={toggleFullscreen}
-        title="Toggle Fullscreen Map"
+        title={t('toggle_fullscreen_map')}
         className="absolute top-4 left-4 z-[1000] glass-panel p-2.5 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-all shadow-xl bg-black/60 backdrop-blur-md active:scale-95"
       >
         {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
@@ -802,14 +804,14 @@ export default function MapView({
             <span className="text-[20px]">📏</span>
             <div>
               <div className="text-[15px] font-black text-accent leading-none">{formatDistance(routeInfo.distance)}</div>
-              <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mt-0.5">Route Distance</div>
+              <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mt-0.5">{t('route_distance')}</div>
             </div>
           </div>
           <div className="glass-panel border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-2xl bg-black/75 backdrop-blur-md pointer-events-auto">
             <span className="text-[20px]">⏱️</span>
             <div>
               <div className="text-[15px] font-black text-white leading-none">{formatDuration(routeInfo.duration)}</div>
-              <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mt-0.5">Estimated Time</div>
+              <div className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider mt-0.5">{t('estimated_time')}</div>
             </div>
           </div>
         </div>

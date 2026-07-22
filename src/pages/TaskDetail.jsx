@@ -108,7 +108,7 @@ export default function TaskDetail() {
   if (!task) {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center">
-        <p className="text-charcoal-light font-bold text-lg">Task not found</p>
+        <p className="text-charcoal-light font-bold text-lg">{t('task_not_found')}</p>
       </div>
     );
   }
@@ -248,7 +248,7 @@ export default function TaskDetail() {
         {/* Task photos */}
         {task.photos && task.photos.length > 0 && (
           <div className="mb-6">
-            <h4 className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-3">Photos</h4>
+            <h4 className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-3">{t('photos')}</h4>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
               {task.photos.map((url, i) => (
                 <img
@@ -264,7 +264,7 @@ export default function TaskDetail() {
 
         {/* Location route */}
         <div className="bg-dark-surface rounded-2xl p-5 border border-border mb-6 relative overflow-hidden">
-          <h4 className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-3">Route details</h4>
+          <h4 className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-3">{t('route_details')}</h4>
           <div className="flex flex-col gap-4 relative z-10">
             <div className="flex items-start gap-3">
               <span className="text-accent bg-accent/10 p-1 rounded-lg border border-accent/20 text-[12px] mt-0.5">📍</span>
@@ -402,7 +402,7 @@ export default function TaskDetail() {
                         type="text"
                         value={bidEta}
                         onChange={(e) => setBidEta(e.target.value)}
-                        placeholder="e.g. 25 min"
+                        placeholder={t('eg_25_min')}
                         className="input-field w-full px-4 py-3 rounded-xl font-medium"
                       />
                     </div>
@@ -412,7 +412,7 @@ export default function TaskDetail() {
                       <textarea
                         value={bidMsg}
                         onChange={(e) => setBidMsg(e.target.value)}
-                        placeholder="Add a message for the client..."
+                        placeholder={t('add_a_message_for_the_client')}
                         rows={3}
                         className="input-field w-full px-4 py-3 rounded-xl font-medium resize-none"
                       />
@@ -437,7 +437,7 @@ export default function TaskDetail() {
             onClick={handleCancelTask}
             className="w-full mt-6 py-4 rounded-xl border border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 transition-colors text-[14px] font-bold uppercase tracking-wider"
           >
-            Cancel Task
+            {t('cancel_task')}
           </button>
         )}
       </div>
@@ -448,7 +448,7 @@ export default function TaskDetail() {
           <div className="p-1">
             <h3 className="text-[20px] font-black text-white mb-2">{t('counter_offer_label')}</h3>
             <p className="text-[13px] text-charcoal-light font-medium mb-6">
-              Propose a different price to the runner.
+              {t('propose_a_different_price_to_the_ru')}
             </p>
 
             <div className="mb-6">
@@ -466,7 +466,7 @@ export default function TaskDetail() {
               <textarea
                 value={counterMsg}
                 onChange={(e) => setCounterMsg(e.target.value)}
-                placeholder="Include a short counter note..."
+                placeholder={t('include_a_short_counter_note')}
                 rows={3}
                 className="input-field w-full px-4 py-3 rounded-xl font-medium resize-none"
               />

@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { ScrollText, Filter, ChevronDown, User, ShieldCheck, Ban, AlertTriangle, RefreshCw } from 'lucide-react';
 import { fetchAuditLog } from '../../data/adminApi';
@@ -14,6 +15,7 @@ const ACTION_CONFIG = {
 };
 
 export default function AdminAuditLog() {
+  const { t } = useI18n();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
@@ -32,8 +34,8 @@ export default function AdminAuditLog() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Audit Log</h1>
-          <p className="text-[14px] text-charcoal-light font-medium">Complete history of admin actions</p>
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('audit_log')}</h1>
+          <p className="text-[14px] text-charcoal-light font-medium">{t('complete_history_of_admin_actions')}</p>
         </div>
         <span className="text-[12px] text-charcoal-light font-medium bg-dark-surface border border-border px-4 py-2 rounded-xl">
           {logs.length} entries
@@ -48,8 +50,8 @@ export default function AdminAuditLog() {
       ) : logs.length === 0 ? (
         <div className="glass-panel rounded-2xl border border-border-light p-12 text-center">
           <ScrollText size={48} className="text-charcoal-light mx-auto mb-4 opacity-50" />
-          <p className="text-[16px] font-bold text-white mb-2">No activity yet</p>
-          <p className="text-[14px] text-charcoal-light">Admin actions will appear here once performed.</p>
+          <p className="text-[16px] font-bold text-white mb-2">{t('no_activity_yet')}</p>
+          <p className="text-[14px] text-charcoal-light">{t('admin_actions_will_appear_here_once')}</p>
         </div>
       ) : (
         <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
@@ -103,7 +105,7 @@ export default function AdminAuditLog() {
                   {isExpanded && entry.details && Object.keys(entry.details).length > 0 && (
                     <div className="px-6 pb-4">
                       <div className="bg-dark rounded-xl p-4 border border-border ml-13">
-                        <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Details</p>
+                        <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('details')}</p>
                         <div className="space-y-1">
                           {Object.entries(entry.details).map(([key, value]) => (
                             <div key={key} className="flex gap-2 text-[12px]">

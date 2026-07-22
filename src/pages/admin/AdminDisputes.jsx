@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, XCircle, Eye, Clock, Search, MessageCircle, X, User, ShieldCheck, DollarSign, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +22,7 @@ const STATUS_CONFIG = {
 };
 
 export default function AdminDisputes() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -134,8 +136,8 @@ export default function AdminDisputes() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Disputes & Conflict Resolution</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Manage user reports, verify completion proofs, and arbitrate escrows</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('disputes_conflict_resolution')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('manage_user_reports_verify_completi')}</p>
       </div>
 
       {/* Status Tabs */}
@@ -164,7 +166,7 @@ export default function AdminDisputes() {
       ) : disputes.length === 0 ? (
         <div className="glass-panel rounded-2xl border border-border-light p-12 text-center">
           <CheckCircle size={48} className="text-accent mx-auto mb-4 opacity-50" />
-          <p className="text-[16px] font-bold text-white mb-2">All clear!</p>
+          <p className="text-[16px] font-bold text-white mb-2">{t('all_clear')}</p>
           <p className="text-[14px] text-charcoal-light">No {statusFilter} disputes at the moment.</p>
         </div>
       ) : (
@@ -207,7 +209,7 @@ export default function AdminDisputes() {
                       className="text-[11px] font-bold text-warning bg-warning/10 border border-warning/20 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors shrink-0 disabled:opacity-50"
                     >
                       <Eye size={12} className="inline mr-1" />
-                      Investigate
+                      {t('investigate')}
                     </button>
                   )}
                 </div>
@@ -224,7 +226,7 @@ export default function AdminDisputes() {
             <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <h3 className="text-[18px] font-extrabold text-white flex items-center gap-1.5">
                 <AlertTriangle size={18} className="text-warning" />
-                Dispute Arbitration Room
+                {t('dispute_arbitration_room')}
               </h3>
               <button onClick={() => setSelectedDispute(null)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
@@ -238,14 +240,14 @@ export default function AdminDisputes() {
                 <span className="text-[13px] font-bold text-white">{REASON_LABELS[selectedDispute.reason] || selectedDispute.reason}</span>
               </div>
               <p className="text-[13px] text-charcoal-light bg-dark rounded-xl p-3 border border-border leading-relaxed">
-                <strong>Dispute Claim:</strong> {selectedDispute.description || 'No description provided'}
+                <strong>{t('dispute_claim')}</strong> {selectedDispute.description || 'No description provided'}
               </p>
             </div>
 
             {/* Evidence Photo Gallery Slider */}
             {selectedDispute.evidence_urls && selectedDispute.evidence_urls.length > 0 && (
               <div className="mb-6">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Submitted Claim Evidence Gallery</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('submitted_claim_evidence_gallery')}</p>
                 <div className="relative aspect-[21/9] rounded-xl overflow-hidden border border-border bg-dark flex items-center justify-center">
                   <img
                     src={selectedDispute.evidence_urls[sliderIndex]}
@@ -278,17 +280,17 @@ export default function AdminDisputes() {
             {/* Proof Comparison Room */}
             {taskDetails && (
               <div className="mb-6">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Proof Verification Room</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('proof_verification_room')}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Left: Requirements */}
                   <div className="bg-dark rounded-xl p-4 border border-border flex flex-col justify-between">
                     <div>
-                      <h4 className="text-[12px] font-bold text-white mb-2">Original Task Details</h4>
+                      <h4 className="text-[12px] font-bold text-white mb-2">{t('original_task_details')}</h4>
                       <p className="text-[13px] text-white font-medium mb-1">{taskDetails.title}</p>
                       <p className="text-[12px] text-charcoal-light mb-3">{taskDetails.description || 'No instruction notes.'}</p>
                     </div>
                     <div className="flex justify-between items-center border-t border-border/50 pt-2 text-[12px] font-bold">
-                      <span className="text-charcoal-light">Escrow Budget:</span>
+                      <span className="text-charcoal-light">{t('escrow_budget')}</span>
                       <span className="text-accent">{taskDetails.offeredPrice + (taskDetails.itemBudget || 0)} MAD</span>
                     </div>
                   </div>
@@ -296,14 +298,14 @@ export default function AdminDisputes() {
                   {/* Right: Runner Completion Proof Photo */}
                   <div className="bg-dark rounded-xl p-4 border border-border flex flex-col justify-between">
                     <div>
-                      <h4 className="text-[12px] font-bold text-white mb-2">Runner Completion Proof Photo</h4>
+                      <h4 className="text-[12px] font-bold text-white mb-2">{t('runner_completion_proof_photo')}</h4>
                       {taskDetails.delivery_photo_url ? (
                         <a href={taskDetails.delivery_photo_url} target="_blank" rel="noreferrer" className="aspect-[16/9] rounded-lg border border-border overflow-hidden bg-black block relative group">
                           <img src={taskDetails.delivery_photo_url} alt="Runner proof" className="w-full h-full object-cover" />
-                          <span className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold">Zoom image</span>
+                          <span className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold">{t('zoom_image')}</span>
                         </a>
                       ) : (
-                        <p className="text-[11px] text-charcoal-light italic py-4 text-center">No completion proof photo uploaded by runner.</p>
+                        <p className="text-[11px] text-charcoal-light italic py-4 text-center">{t('no_completion_proof_photo_uploaded_')}</p>
                       )}
                     </div>
                   </div>
@@ -314,7 +316,7 @@ export default function AdminDisputes() {
             {/* Parties */}
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="bg-dark rounded-xl p-4 border border-border">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Reporter</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('reporter')}</p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[10px] font-black">
                     {reporterProfile?.initials || '?'}
@@ -323,7 +325,7 @@ export default function AdminDisputes() {
                 </div>
               </div>
               <div className="bg-dark rounded-xl p-4 border border-border">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Reported</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('reported')}</p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-danger/10 border border-danger/20 flex items-center justify-center text-danger text-[10px] font-black">
                     {reportedProfile?.initials || '?'}
@@ -336,7 +338,7 @@ export default function AdminDisputes() {
             {/* Arbitration Controls */}
             {['open', 'investigating'].includes(selectedDispute.status) && (
               <div className="border-t border-border pt-4">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-3">Escrow Arbitrage Actions</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-3">{t('escrow_arbitrage_actions')}</p>
                 
                 {/* Fast Action Buttons */}
                 <div className="grid grid-cols-2 gap-3 mb-5">
@@ -345,25 +347,25 @@ export default function AdminDisputes() {
                     disabled={actionLoading || !taskDetails}
                     className="py-3 rounded-xl border border-danger/30 bg-danger/5 hover:bg-danger/10 text-danger font-bold text-[12px] flex items-center justify-center gap-1.5"
                   >
-                    <DollarSign size={14} /> Refund Escrow back to Client
+                    <DollarSign size={14} /> {t('refund_escrow_back_to_client')}
                   </button>
                   <button
                     onClick={handleQuickReleaseToRunner}
                     disabled={actionLoading || !taskDetails}
                     className="py-3 rounded-xl bg-accent text-dark font-bold text-[12px] flex items-center justify-center gap-1.5"
                   >
-                    <Award size={14} /> Release Escrow to Runner
+                    <Award size={14} /> {t('release_escrow_to_runner')}
                   </button>
                 </div>
 
                 <div className="mb-4">
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Internal Audit Notes</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('internal_audit_notes')}</label>
                   <textarea
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                     className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
                     rows={2}
-                    placeholder="Internal moderator logs..."
+                    placeholder={t('internal_moderator_logs')}
                   />
                 </div>
                 <div className="mb-6">
@@ -373,7 +375,7 @@ export default function AdminDisputes() {
                     onChange={(e) => setResolution(e.target.value)}
                     className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
                     rows={2}
-                    placeholder="Provide final explanation..."
+                    placeholder={t('provide_final_explanation')}
                   />
                 </div>
 
@@ -383,14 +385,14 @@ export default function AdminDisputes() {
                     disabled={actionLoading}
                     className="flex-1 py-3 rounded-xl border border-border text-charcoal font-bold text-[13px]"
                   >
-                    Dismiss Dispute
+                    {t('dismiss_dispute')}
                   </button>
                   <button
                     onClick={handleResolve}
                     disabled={actionLoading || !resolution.trim()}
                     className="flex-1 btn-accent py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider"
                   >
-                    Resolve Dispute
+                    {t('resolve_dispute')}
                   </button>
                 </div>
               </div>
@@ -399,7 +401,7 @@ export default function AdminDisputes() {
             {/* Resolved information */}
             {selectedDispute.status === 'resolved' && selectedDispute.resolution && (
               <div className="p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-[11px] text-accent font-bold mb-1">Resolution Summary</p>
+                <p className="text-[11px] text-accent font-bold mb-1">{t('resolution_summary')}</p>
                 <p className="text-[13px] text-charcoal-light leading-relaxed">{selectedDispute.resolution}</p>
               </div>
             )}

@@ -102,7 +102,7 @@ export default function NotificationCenter() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-10 h-10 rounded-2xl bg-dark/60 border border-white/10 flex items-center justify-center text-white hover:border-accent/40 transition-all active-press"
         id="notification-bell-btn"
-        aria-label="Notifications"
+        aria-label={t('notifications')}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -118,7 +118,7 @@ export default function NotificationCenter() {
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
               <Bell size={16} className="text-accent" />
-              <h3 className="font-heading font-black text-white text-[15px]">Notifications</h3>
+              <h3 className="font-heading font-black text-white text-[15px]">{t('notifications')}</h3>
               {unreadCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-accent text-[10px] font-extrabold">
                   {unreadCount} new
@@ -131,7 +131,7 @@ export default function NotificationCenter() {
                 className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1"
               >
                 <CheckCheck size={14} />
-                Mark all read
+                {t('mark_all_read')}
               </button>
             )}
           </div>
@@ -141,7 +141,7 @@ export default function NotificationCenter() {
             {notifications.length === 0 ? (
               <div className="py-8 text-center">
                 <Bell size={28} className="text-muted mx-auto mb-2 opacity-40" />
-                <p className="text-[13px] text-charcoal-light font-bold">No notifications yet</p>
+                <p className="text-[13px] text-charcoal-light font-bold">{t('no_notifications_yet')}</p>
               </div>
             ) : (
               notifications.map((n) => (

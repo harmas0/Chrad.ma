@@ -138,7 +138,7 @@ export default function WalletModal({ isOpen, onClose }) {
       {loading ? (
         <div className="py-12 text-center">
           <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-[13px] text-charcoal-light font-bold">Loading wallet details...</p>
+          <p className="text-[13px] text-charcoal-light font-bold">{t('loading_wallet_details')}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -147,7 +147,7 @@ export default function WalletModal({ isOpen, onClose }) {
             <div className="glass-panel p-4 rounded-2xl border border-accent/30 bg-accent/5 relative overflow-hidden">
               <div className="flex items-center gap-2 mb-1">
                 <Wallet size={16} className="text-accent" />
-                <span className="text-[11px] font-bold text-charcoal-light uppercase tracking-wider">Wallet Balance</span>
+                <span className="text-[11px] font-bold text-charcoal-light uppercase tracking-wider">{t('wallet_balance')}</span>
               </div>
               <p className="text-[22px] font-black text-white font-heading">
                 {formatPrice(summary?.walletBalance || 0)}
@@ -157,7 +157,7 @@ export default function WalletModal({ isOpen, onClose }) {
             <div className="glass-panel p-4 rounded-2xl border border-warning/30 bg-warning/5 relative overflow-hidden">
               <div className="flex items-center gap-2 mb-1">
                 <Clock size={16} className="text-warning" />
-                <span className="text-[11px] font-bold text-charcoal-light uppercase tracking-wider">Escrow Holding</span>
+                <span className="text-[11px] font-bold text-charcoal-light uppercase tracking-wider">{t('escrow_holding')}</span>
               </div>
               <p className="text-[22px] font-black text-warning font-heading">
                 {formatPrice(summary?.escrowBalance || 0)}
@@ -176,7 +176,7 @@ export default function WalletModal({ isOpen, onClose }) {
               }`}
             >
               <Plus size={15} />
-              Top-Up Credit
+              {t('topup_credit')}
             </button>
 
             {isRunner && (
@@ -189,7 +189,7 @@ export default function WalletModal({ isOpen, onClose }) {
                 }`}
               >
                 <Building2 size={15} />
-                Bank RIB Cashout
+                {t('bank_rib_cashout')}
               </button>
             )}
 
@@ -202,7 +202,7 @@ export default function WalletModal({ isOpen, onClose }) {
               }`}
             >
               <Clock size={15} />
-              History
+              {t('history')}
             </button>
           </div>
 
@@ -234,7 +234,7 @@ export default function WalletModal({ isOpen, onClose }) {
                 </div>
                 <input
                   type="number"
-                  placeholder="Or enter custom amount..."
+                  placeholder={t('or_enter_custom_amount')}
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
                   className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white placeholder:text-muted focus:border-accent focus:outline-none"
@@ -243,7 +243,7 @@ export default function WalletModal({ isOpen, onClose }) {
 
               <div>
                 <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-2">
-                  Payment Method
+                  {t('payment_method')}
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
                   {['Card (CMI)', 'Cash on Delivery (COD)'].map((method) => (
@@ -277,11 +277,11 @@ export default function WalletModal({ isOpen, onClose }) {
                 className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[15px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {topUpLoading ? (
-                  <span>Processing...</span>
+                  <span>{t('processing')}</span>
                 ) : (
                   <>
                     <Sparkles size={18} />
-                    <span>Top-Up Wallet</span>
+                    <span>{t('topup_wallet')}</span>
                   </>
                 )}
               </button>
@@ -294,9 +294,9 @@ export default function WalletModal({ isOpen, onClose }) {
               <div className="p-4 rounded-2xl bg-dark/60 border border-white/10 text-[12px] text-charcoal-light space-y-1">
                 <p className="font-bold text-white flex items-center gap-1.5">
                   <ShieldCheck size={16} className="text-accent" />
-                  Moroccan RIB Bank Transfer
+                  {t('moroccan_rib_bank_transfer')}
                 </p>
-                <p>Withdrawals are processed directly to your Moroccan bank account within 24-48 hours upon admin review.</p>
+                <p>{t('withdrawals_are_processed_directly_')}</p>
               </div>
 
               <div>
@@ -305,7 +305,7 @@ export default function WalletModal({ isOpen, onClose }) {
                 </label>
                 <input
                   type="number"
-                  placeholder="e.g. 500"
+                  placeholder={t('eg_500')}
                   value={cashoutAmount}
                   onChange={(e) => setCashoutAmount(e.target.value)}
                   className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white placeholder:text-muted focus:border-accent focus:outline-none"
@@ -314,7 +314,7 @@ export default function WalletModal({ isOpen, onClose }) {
 
               <div>
                 <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1.5">
-                  Bank Name
+                  {t('bank_name')}
                 </label>
                 <select
                   value={bankName}
@@ -331,11 +331,11 @@ export default function WalletModal({ isOpen, onClose }) {
 
               <div>
                 <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1.5">
-                  Account Holder Name
+                  {t('account_holder_name')}
                 </label>
                 <input
                   type="text"
-                  placeholder="Full Name as on Bank Account"
+                  placeholder={t('full_name_as_on_bank_account')}
                   value={accountHolder}
                   onChange={(e) => setAccountHolder(e.target.value)}
                   className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white placeholder:text-muted focus:border-accent focus:outline-none"
@@ -344,11 +344,11 @@ export default function WalletModal({ isOpen, onClose }) {
 
               <div>
                 <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1.5">
-                  24-Digit RIB Number
+                  {t('24digit_rib_number')}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. 230 780 0000000000000000 00"
+                  placeholder={t('eg_230_780_0000000000000000_00')}
                   value={ribNumber}
                   onChange={(e) => setRibNumber(e.target.value)}
                   className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white font-mono placeholder:text-muted focus:border-accent focus:outline-none"
@@ -375,11 +375,11 @@ export default function WalletModal({ isOpen, onClose }) {
                 className="w-full py-4 rounded-2xl bg-accent text-dark font-heading font-black text-[15px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {cashoutLoading ? (
-                  <span>Submitting Request...</span>
+                  <span>{t('submitting_request')}</span>
                 ) : (
                   <>
                     <Building2 size={18} />
-                    <span>Submit Cashout Request</span>
+                    <span>{t('submit_cashout_request')}</span>
                   </>
                 )}
               </button>
@@ -390,11 +390,11 @@ export default function WalletModal({ isOpen, onClose }) {
           {activeTab === 'history' && (
             <div className="space-y-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar animate-fade-in">
               <h4 className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-2">
-                Recent Activity
+                {t('recent_activity')}
               </h4>
               {summary?.transactions?.length === 0 && payoutRequests?.length === 0 ? (
                 <div className="py-8 text-center text-charcoal-light text-[13px] font-bold">
-                  No transaction history yet.
+                  {t('no_transaction_history_yet')}
                 </div>
               ) : (
                 <>

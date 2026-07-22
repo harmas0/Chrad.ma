@@ -1,9 +1,11 @@
+import { useI18n } from '../utils/i18n';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, ArrowLeft, KeyRound } from 'lucide-react';
 
 export default function ResetPassword() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -58,7 +60,7 @@ export default function ResetPassword() {
           <div className="w-16 h-16 bg-dark-surface rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border-light shadow-[0_0_35px_rgba(0,255,135,0.1)]">
             <span className="text-4xl">🔐</span>
           </div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-wider font-heading mb-1.5">Chrad</h1>
+          <h1 className="text-3xl font-black text-white uppercase tracking-wider font-heading mb-1.5">{t('chrad')}</h1>
         </div>
 
         {/* Card */}
@@ -66,10 +68,10 @@ export default function ResetPassword() {
           
           <div className="mb-6">
             <h2 className="text-[22px] font-black text-white font-heading">
-              New Password
+              {t('new_password')}
             </h2>
             <p className="text-[12px] text-charcoal-light mt-1 font-medium">
-              Create a new secure password for your account.
+              {t('create_a_new_secure_password_for_yo')}
             </p>
           </div>
 
@@ -79,9 +81,9 @@ export default function ResetPassword() {
                 <CheckCircle2 size={32} className="animate-pulse" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-[16px] font-black text-white">Password Updated!</h3>
+                <h3 className="text-[16px] font-black text-white">{t('password_updated')}</h3>
                 <p className="text-[12px] text-charcoal-light leading-relaxed font-medium">
-                  Your password has been successfully reset. Redirecting you to the Sign In screen in a few seconds...
+                  {t('your_password_has_been_successfully')}
                 </p>
               </div>
             </div>
@@ -98,7 +100,7 @@ export default function ResetPassword() {
 
               {/* Password */}
               <div className="space-y-1.5">
-                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">New Password</label>
+                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">{t('new_password')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-charcoal-light">
                     <Lock size={18} />
@@ -123,7 +125,7 @@ export default function ResetPassword() {
 
               {/* Confirm Password */}
               <div className="space-y-1.5">
-                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">Confirm New Password</label>
+                <label className="text-[10px] text-charcoal-light font-bold uppercase tracking-wider block">{t('confirm_new_password')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-charcoal-light">
                     <Lock size={18} />
@@ -149,7 +151,7 @@ export default function ResetPassword() {
                   <div className="w-5 h-5 border-2 border-dark border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    Save Password <KeyRound size={16} />
+                    {t('save_password')} <KeyRound size={16} />
                   </>
                 )}
               </button>
@@ -165,7 +167,7 @@ export default function ResetPassword() {
               onClick={() => navigate('/login')}
               className="text-charcoal-light hover:text-white text-[12px] font-bold tracking-wide transition-colors inline-flex items-center gap-1.5 bg-white/[0.02] border border-border px-4 py-2 rounded-xl"
             >
-              <ArrowLeft size={14} /> Back to Sign In
+              <ArrowLeft size={14} /> {t('back_to_sign_in')}
             </button>
           </div>
         )}

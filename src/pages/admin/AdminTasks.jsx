@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Package, Search, Eye, ChevronDown, MapPin, Clock, User, DollarSign, X, CheckCircle, RefreshCw, MessageSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -38,6 +39,7 @@ const CATEGORY_EMOJI = {
 };
 
 export default function AdminTasks() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,8 +177,8 @@ export default function AdminTasks() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Task Management</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Monitor and manage all platform tasks</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('task_management')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('monitor_and_manage_all_platform_tas')}</p>
       </div>
 
       {/* Mini Stats */}
@@ -207,9 +209,9 @@ export default function AdminTasks() {
               onChange={(e) => setBulkStatus(e.target.value)}
               className="input-field px-3 py-1.5 rounded-lg text-[12px] font-bold bg-dark border-border"
             >
-              <option value="">Select Status...</option>
-              <option value="open">Open</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="">{t('select_status')}</option>
+              <option value="open">{t('open')}</option>
+              <option value="cancelled">{t('cancelled')}</option>
               <option value="confirmed">Confirmed (Release)</option>
             </select>
             <button
@@ -217,7 +219,7 @@ export default function AdminTasks() {
               disabled={!bulkStatus || actionLoading}
               className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-3.5 py-2 rounded-lg hover:bg-accent/20"
             >
-              Apply Status
+              {t('apply_status')}
             </button>
             <button
               onClick={() => setSelectedTaskIds([])}
@@ -237,7 +239,7 @@ export default function AdminTasks() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title or ID..."
+            placeholder={t('search_by_title_or_id')}
             className="input-field w-full pl-11 pr-4 py-3 rounded-xl text-[14px] font-medium"
           />
         </div>
@@ -277,12 +279,12 @@ export default function AdminTasks() {
                       className="rounded bg-dark border-border"
                     />
                   </th>
-                  <th>Task</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Price</th>
-                  <th>Created Date</th>
-                  <th>Action</th>
+                  <th>{t('task')}</th>
+                  <th>{t('category')}</th>
+                  <th>{t('status')}</th>
+                  <th>{t('price')}</th>
+                  <th>{t('created_date')}</th>
+                  <th>{t('action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -329,7 +331,7 @@ export default function AdminTasks() {
                         onClick={() => openTaskDetail(task)}
                         className="text-[11px] font-bold text-charcoal-light hover:text-accent bg-dark border border-border px-3 py-1.5 rounded-lg hover:border-accent/30 transition-colors flex items-center gap-1"
                       >
-                        <Eye size={12} /> View
+                        <Eye size={12} /> {t('view')}
                       </button>
                     </td>
                   </tr>
@@ -337,7 +339,7 @@ export default function AdminTasks() {
                 {filteredTasks.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-charcoal-light text-[14px]">
-                      No tasks found
+                      {t('no_tasks_found')}
                     </td>
                   </tr>
                 )}
@@ -380,23 +382,23 @@ export default function AdminTasks() {
             {/* Info Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
               <div className="bg-dark rounded-xl p-3 border border-border">
-                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Price</p>
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">{t('price')}</p>
                 <p className="text-[16px] font-black text-accent">{selectedTask.offeredPrice} MAD</p>
               </div>
               {selectedTask.itemBudget > 0 && (
                 <div className="bg-dark rounded-xl p-3 border border-border">
-                  <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Budget</p>
+                  <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">{t('budget')}</p>
                   <p className="text-[16px] font-bold text-warning">{selectedTask.itemBudget} MAD</p>
                 </div>
               )}
               <div className="bg-dark rounded-xl p-3 border border-border">
-                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Runner Paid</p>
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">{t('runner_paid')}</p>
                 <p className={`text-[14px] font-bold ${selectedTask.runner_paid ? 'text-accent' : 'text-warning'}`}>
                   {selectedTask.runner_paid ? 'Yes' : 'Awaiting Release'}
                 </p>
               </div>
               <div className="bg-dark rounded-xl p-3 border border-border">
-                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">Category</p>
+                <p className="text-[9px] text-charcoal-light font-bold uppercase tracking-wider mb-1">{t('category')}</p>
                 <p className="text-[14px] font-bold text-white capitalize">{selectedTask.category}</p>
               </div>
             </div>
@@ -404,7 +406,7 @@ export default function AdminTasks() {
             {/* Description */}
             {selectedTask.description && (
               <div className="mb-5">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-1.5">Description</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-1.5">{t('description')}</p>
                 <p className="text-[13px] text-charcoal-light leading-relaxed bg-dark rounded-xl p-3 border border-border">{selectedTask.description}</p>
               </div>
             )}
@@ -414,7 +416,7 @@ export default function AdminTasks() {
               <div className="mb-5">
                 <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
                   <ShieldCheck size={14} className="text-accent" />
-                  Proof of Completion Photo
+                  {t('proof_of_completion_photo')}
                 </p>
                 <div className="w-full aspect-[21/9] rounded-xl overflow-hidden border border-border bg-dark">
                   <img src={selectedTask.delivery_photo_url} alt="Delivery Completion Proof" className="w-full h-full object-cover" />
@@ -425,7 +427,7 @@ export default function AdminTasks() {
             {/* Parties */}
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="bg-dark rounded-xl p-3.5 border border-border">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Client</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('client')}</p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent text-[11px] font-black">
                     {clientProfile?.initials || '?'}
@@ -436,7 +438,7 @@ export default function AdminTasks() {
                 </div>
               </div>
               <div className="bg-dark rounded-xl p-3.5 border border-border">
-                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">Runner</p>
+                <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2">{t('runner')}</p>
                 {selectedTask.acceptedRunnerId ? (
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-info/10 border border-info/20 flex items-center justify-center text-info text-[11px] font-black">
@@ -447,7 +449,7 @@ export default function AdminTasks() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-[12px] text-charcoal-light italic pt-1.5">Not assigned</p>
+                  <p className="text-[12px] text-charcoal-light italic pt-1.5">{t('not_assigned')}</p>
                 )}
               </div>
             </div>
@@ -456,7 +458,7 @@ export default function AdminTasks() {
             <div className="mb-6">
               <p className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-2 flex items-center gap-1.5">
                 <MessageSquare size={14} className="text-charcoal-light" />
-                Negotiation Chat Transcript
+                {t('negotiation_chat_transcript')}
               </p>
               {chatLoading ? (
                 <div className="flex justify-center py-6">
@@ -464,7 +466,7 @@ export default function AdminTasks() {
                 </div>
               ) : chatTranscript.length === 0 ? (
                 <div className="bg-dark rounded-xl p-6 text-center border border-border text-[12px] text-charcoal-light italic">
-                  No conversation logs created for this task.
+                  {t('no_conversation_logs_created_for_th')}
                 </div>
               ) : (
                 <div className="bg-dark rounded-xl p-4 border border-border max-h-[160px] overflow-y-auto space-y-3">
@@ -492,7 +494,7 @@ export default function AdminTasks() {
             <div className="border-t border-border pt-4">
               <h4 className="text-[10px] text-charcoal-light font-bold uppercase tracking-widest mb-3 flex items-center gap-1">
                 <AlertTriangle size={12} className="text-warning" />
-                Escrow & Moderation Controls
+                {t('escrow_moderation_controls')}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {['accepted', 'picked_up', 'en_route', 'delivered'].includes(selectedTask.status) && (
@@ -501,7 +503,7 @@ export default function AdminTasks() {
                     disabled={actionLoading}
                     className="px-4 py-2.5 rounded-xl bg-accent text-dark font-bold text-[12px] hover:bg-accent-hover transition-all flex items-center gap-1"
                   >
-                    <CheckCircle size={14} /> Force Release Escrow Payout
+                    <CheckCircle size={14} /> {t('force_release_escrow_payout')}
                   </button>
                 )}
 
@@ -511,7 +513,7 @@ export default function AdminTasks() {
                     disabled={actionLoading}
                     className="px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/5 text-danger font-bold text-[12px] hover:bg-danger/10 transition-all"
                   >
-                    Force Cancel Task
+                    {t('force_cancel_task')}
                   </button>
                 )}
 
@@ -521,7 +523,7 @@ export default function AdminTasks() {
                     disabled={actionLoading}
                     className="px-4 py-2.5 rounded-xl border border-border text-charcoal-light font-bold text-[12px] hover:text-white transition-all"
                   >
-                    Reopen Task Listing
+                    {t('reopen_task_listing')}
                   </button>
                 )}
               </div>

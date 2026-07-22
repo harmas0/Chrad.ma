@@ -45,7 +45,7 @@ export default function LanguageSwitcher({ compact = false }) {
         <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-dark/95 backdrop-blur-xl border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.6)] py-2 z-[9999] animate-scale-in">
           <div className="px-3 py-1.5 mb-1 border-b border-white/10 flex items-center gap-1.5 text-[10px] font-extrabold text-muted uppercase tracking-wider">
             <Globe size={12} />
-            <span>Select Language</span>
+            <span>{t('select_language')}</span>
           </div>
           {LANGUAGES.map((l) => {
             const isSelected = l.code === lang;

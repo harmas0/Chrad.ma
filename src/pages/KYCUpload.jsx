@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Camera, Check, Shield, AlertCircle, Clock, X, ChevronRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import { compressImage } from '../utils/imageCompressor';
 const STEPS = ['ID Document', 'Selfie', 'Vehicle Docs', 'Review'];
 
 export default function KYCUpload() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
   const [step, setStep] = useState(0);
@@ -39,16 +41,16 @@ export default function KYCUpload() {
               <div className="w-20 h-20 rounded-full bg-accent/10 border-2 border-accent mx-auto mb-5 flex items-center justify-center shadow-[0_0_30px_rgba(0,255,135,0.15)]">
                 <Check size={36} className="text-accent" />
               </div>
-              <h2 className="text-[22px] font-black text-white mb-2">Identity Verified</h2>
-              <p className="text-[14px] text-charcoal-light font-medium">Your identity has been verified. You can now accept runner tasks.</p>
+              <h2 className="text-[22px] font-black text-white mb-2">{t('identity_verified')}</h2>
+              <p className="text-[14px] text-charcoal-light font-medium">{t('your_identity_has_been_verified_you')}</p>
             </>
           ) : (
             <>
               <div className="w-20 h-20 rounded-full bg-warning/10 border-2 border-warning mx-auto mb-5 flex items-center justify-center animate-pulse-glow" style={{ '--tw-shadow-color': 'rgba(255,176,32,0.3)' }}>
                 <Clock size={36} className="text-warning" />
               </div>
-              <h2 className="text-[22px] font-black text-white mb-2">Verification Pending</h2>
-              <p className="text-[14px] text-charcoal-light font-medium">Your documents are being reviewed. This usually takes 1-2 business days.</p>
+              <h2 className="text-[22px] font-black text-white mb-2">{t('verification_pending')}</h2>
+              <p className="text-[14px] text-charcoal-light font-medium">{t('your_documents_are_being_reviewed_t')}</p>
             </>
           )}
           <button
@@ -130,9 +132,9 @@ export default function KYCUpload() {
           <div className="w-20 h-20 rounded-full bg-accent/10 border-2 border-accent mx-auto mb-5 flex items-center justify-center shadow-[0_0_30px_rgba(0,255,135,0.15)]">
             <Check size={36} className="text-accent" />
           </div>
-          <h2 className="text-[22px] font-black text-white mb-2">Documents Submitted!</h2>
+          <h2 className="text-[22px] font-black text-white mb-2">{t('documents_submitted')}</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
-            Our team will review your documents within 1-2 business days. You'll be notified once verified.
+            {t('our_team_will_review_your_documents')}
           </p>
           <button
             onClick={() => navigate('/profile')}
@@ -155,7 +157,7 @@ export default function KYCUpload() {
           </button>
           <div className="flex items-center gap-2">
             <Shield size={18} className="text-accent" />
-            <span className="text-[14px] font-bold text-white">Identity Verification</span>
+            <span className="text-[14px] font-bold text-white">{t('identity_verification')}</span>
           </div>
           <div className="w-10" />
         </div>
@@ -166,7 +168,7 @@ export default function KYCUpload() {
             <div className="flex items-start gap-3">
               <AlertCircle size={18} className="text-danger shrink-0 mt-0.5" />
               <div>
-                <p className="text-[13px] font-bold text-danger mb-1">Previous submission rejected</p>
+                <p className="text-[13px] font-bold text-danger mb-1">{t('previous_submission_rejected')}</p>
                 <p className="text-[12px] text-charcoal-light">{profile?.kyc_rejection_reason || 'Please resubmit with clearer documents.'}</p>
               </div>
             </div>
@@ -201,7 +203,7 @@ export default function KYCUpload() {
       {/* Step 0: ID Document */}
       {step === 0 && (
         <div className="animate-fade-in-up">
-          <h2 className="text-[22px] font-black text-white mb-2">Upload your ID</h2>
+          <h2 className="text-[22px] font-black text-white mb-2">{t('upload_your_id')}</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
             Take a clear photo of the front of your National ID card (CIN) or passport.
           </p>
@@ -234,14 +236,14 @@ export default function KYCUpload() {
                 <Camera size={28} />
               </div>
               <div className="text-center">
-                <p className="text-[14px] font-bold text-white mb-1">Tap to capture or upload</p>
-                <p className="text-[12px] text-charcoal-light">JPEG, PNG • Max 10MB</p>
+                <p className="text-[14px] font-bold text-white mb-1">{t('tap_to_capture_or_upload')}</p>
+                <p className="text-[12px] text-charcoal-light">{t('jpeg_png_max_10mb')}</p>
               </div>
             </button>
           )}
 
           <div className="bg-dark-surface rounded-xl p-4 border border-border mb-6">
-            <p className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Tips for a good photo</p>
+            <p className="text-[11px] font-bold text-charcoal-light uppercase tracking-widest mb-2">{t('tips_for_a_good_photo')}</p>
             <ul className="space-y-1.5">
               {['Make sure all text is readable', 'Avoid glare and shadows', 'Include all four corners', 'Use a flat, dark background'].map((tip, i) => (
                 <li key={i} className="text-[12px] text-charcoal-light flex items-center gap-2">
@@ -256,7 +258,7 @@ export default function KYCUpload() {
             disabled={!idFile}
             className="w-full btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Continue <ChevronRight size={18} strokeWidth={3} />
+            {t('continue')} <ChevronRight size={18} strokeWidth={3} />
           </button>
         </div>
       )}
@@ -264,9 +266,9 @@ export default function KYCUpload() {
       {/* Step 1: Selfie */}
       {step === 1 && (
         <div className="animate-fade-in-up">
-          <h2 className="text-[22px] font-black text-white mb-2">Take a Selfie</h2>
+          <h2 className="text-[22px] font-black text-white mb-2">{t('take_a_selfie')}</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
-            Take a clear selfie of yourself holding your ID card next to your face.
+            {t('take_a_clear_selfie_of_yourself_hol')}
           </p>
 
           <input
@@ -301,8 +303,8 @@ export default function KYCUpload() {
                 <Camera size={28} />
               </div>
               <div className="text-center z-10">
-                <p className="text-[14px] font-bold text-white mb-1">Take a selfie with your ID</p>
-                <p className="text-[12px] text-charcoal-light">Hold your ID next to your face</p>
+                <p className="text-[14px] font-bold text-white mb-1">{t('take_a_selfie_with_your_id')}</p>
+                <p className="text-[12px] text-charcoal-light">{t('hold_your_id_next_to_your_face')}</p>
               </div>
             </button>
           )}
@@ -319,7 +321,7 @@ export default function KYCUpload() {
               disabled={!selfieFile}
               className="flex-1 btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Continue <ChevronRight size={18} strokeWidth={3} />
+              {t('continue')} <ChevronRight size={18} strokeWidth={3} />
             </button>
           </div>
         </div>
@@ -328,9 +330,9 @@ export default function KYCUpload() {
       {/* Step 2: Vehicle Docs */}
       {step === 2 && (
         <div className="animate-fade-in-up">
-          <h2 className="text-[22px] font-black text-white mb-2">Vehicle Documents</h2>
+          <h2 className="text-[22px] font-black text-white mb-2">{t('vehicle_documents')}</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
-            Upload a clear photo of your motorcycle / vehicle registration, permit, or insurance.
+            {t('upload_a_clear_photo_of_your_motorc')}
           </p>
 
           <input
@@ -361,8 +363,8 @@ export default function KYCUpload() {
                 <Camera size={28} />
               </div>
               <div className="text-center">
-                <p className="text-[14px] font-bold text-white mb-1">Tap to capture or upload</p>
-                <p className="text-[12px] text-charcoal-light">Registration, Insurance or Permit</p>
+                <p className="text-[14px] font-bold text-white mb-1">{t('tap_to_capture_or_upload')}</p>
+                <p className="text-[12px] text-charcoal-light">{t('registration_insurance_or_permit')}</p>
               </div>
             </button>
           )}
@@ -379,7 +381,7 @@ export default function KYCUpload() {
               disabled={!vehicleFile}
               className="flex-1 btn-accent py-4 rounded-2xl text-[15px] font-extrabold uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Continue <ChevronRight size={18} strokeWidth={3} />
+              {t('continue')} <ChevronRight size={18} strokeWidth={3} />
             </button>
           </div>
         </div>
@@ -388,35 +390,35 @@ export default function KYCUpload() {
       {/* Step 3: Review & Submit */}
       {step === 3 && (
         <div className="animate-fade-in-up">
-          <h2 className="text-[22px] font-black text-white mb-2">Review & Submit</h2>
+          <h2 className="text-[22px] font-black text-white mb-2">{t('review_submit')}</h2>
           <p className="text-[14px] text-charcoal-light font-medium mb-6">
-            Make sure all uploaded document photos are clear and legible before submitting.
+            {t('make_sure_all_uploaded_document_pho')}
           </p>
 
           <div className="grid grid-cols-3 gap-3 mb-8">
             <div>
-              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">ID Document</p>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">{t('id_document')}</p>
               <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
                 <img src={idPreview} alt="ID" className="w-full h-full object-cover" />
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Selfie</p>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">{t('selfie')}</p>
               <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
-                <img src={selfiePreview} alt="Selfie" className="w-full h-full object-cover" />
+                <img src={selfiePreview} alt={t('selfie')} className="w-full h-full object-cover" />
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">Vehicle Docs</p>
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-widest mb-2">{t('vehicle_docs')}</p>
               <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border-light shadow-lg">
-                <img src={vehiclePreview} alt="Vehicle Docs" className="w-full h-full object-cover" />
+                <img src={vehiclePreview} alt={t('vehicle_docs')} className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
 
           <div className="bg-dark-surface rounded-xl p-4 border border-border mb-6">
             <p className="text-[12px] text-charcoal-light leading-relaxed">
-              By submitting, you confirm that these are genuine documents and you consent to identity verification. Your documents are stored securely and only accessible to our verification team.
+              {t('by_submitting_you_confirm_that_thes')}
             </p>
           </div>
 
@@ -437,7 +439,7 @@ export default function KYCUpload() {
               ) : (
                 <>
                   <Upload size={18} strokeWidth={2.5} />
-                  Submit
+                  {t('submit')}
                 </>
               )}
             </button>

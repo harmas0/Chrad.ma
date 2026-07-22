@@ -1,8 +1,10 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Sparkles, Tag, ArrowRight, Globe } from 'lucide-react';
 import { fetchActiveAds, recordAdImpression, recordAdClick } from '../data/adsApi';
 
 export default function AdBanner({ placement = 'home_banner', className = '' }) {
+  const { t } = useI18n();
   const [ad, setAd] = useState(null);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
   const adsenseRef = useRef(null);
@@ -68,7 +70,7 @@ export default function AdBanner({ placement = 'home_banner', className = '' }) 
           <div className="flex items-center justify-between mb-2 px-1">
             <span className="text-[9px] font-black uppercase tracking-widest text-info bg-info/10 border border-info/20 px-2 py-0.5 rounded-full flex items-center gap-1">
               <Globe size={10} />
-              Google AdSense Network
+              {t('google_adsense_network')}
             </span>
             <span className="text-[10px] text-charcoal-light font-bold">{ad.advertiser || 'Google Partner'}</span>
           </div>
@@ -103,7 +105,7 @@ export default function AdBanner({ placement = 'home_banner', className = '' }) 
           <div className="flex items-center justify-between mb-2">
             <span className="text-[9px] font-black uppercase tracking-widest text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-full flex items-center gap-1">
               <Sparkles size={10} />
-              Sponsored Partner
+              {t('sponsored_partner')}
             </span>
             <span className="text-[10px] text-charcoal-light font-bold">{ad.advertiser || 'Partner'}</span>
           </div>

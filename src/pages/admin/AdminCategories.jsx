@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Settings, Plus, Edit2, Trash2, Eye, Award, CheckSquare, Square, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -5,6 +6,7 @@ import { fetchCategories, createCategory, updateCategory, deleteCategory } from 
 import CategoryIcon from '../../components/CategoryIcon';
 
 export default function AdminCategories() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,8 +117,8 @@ export default function AdminCategories() {
     <div className="animate-fade-in pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Categories Management</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Manage chore types, commission rates, and featured triggers</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('categories_management')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('manage_chore_types_commission_rates')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -125,7 +127,7 @@ export default function AdminCategories() {
           <div className="bg-info/5 border border-info/20 rounded-xl p-4 flex gap-2.5 mb-2">
             <Info className="text-info shrink-0 mt-0.5" size={16} />
             <p className="text-[12px] text-charcoal-light leading-relaxed">
-              Commission rates set per category are dynamically applied to the platform GMV calculation. Featured categories display on the client home page dashboard first.
+              {t('commission_rates_set_per_category_a')}
             </p>
           </div>
 
@@ -134,11 +136,11 @@ export default function AdminCategories() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Icon</th>
-                    <th>ID / Name</th>
-                    <th>Commission Rate</th>
-                    <th>Home Featured</th>
-                    <th>Actions</th>
+                    <th>{t('icon')}</th>
+                    <th>{t('id_name')}</th>
+                    <th>{t('commission_rate')}</th>
+                    <th>{t('home_featured')}</th>
+                    <th>{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,9 +162,9 @@ export default function AdminCategories() {
                       </td>
                       <td>
                         {cat.is_featured ? (
-                          <span className="badge badge-approved">Featured</span>
+                          <span className="badge badge-approved">{t('featured')}</span>
                         ) : (
-                          <span className="badge badge-none">Hidden</span>
+                          <span className="badge badge-none">{t('hidden')}</span>
                         )}
                       </td>
                       <td>
@@ -199,25 +201,25 @@ export default function AdminCategories() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Category ID</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('category_id')}</label>
                 <input
                   type="text"
                   value={id}
                   onChange={(e) => setId(e.target.value)}
                   disabled={!!editId}
-                  placeholder="e.g. food-run"
+                  placeholder={t('eg_foodrun')}
                   required
                   className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">English Label</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('english_label')}</label>
                 <input
                   type="text"
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
-                  placeholder="e.g. Food Delivery"
+                  placeholder={t('eg_food_delivery')}
                   required
                   className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium"
                 />
@@ -225,22 +227,22 @@ export default function AdminCategories() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">French Label</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('french_label')}</label>
                   <input
                     type="text"
                     value={nameFr}
                     onChange={(e) => setNameFr(e.target.value)}
-                    placeholder="e.g. Restauration"
+                    placeholder={t('eg_restauration')}
                     className="input-field w-full px-3.5 py-3 rounded-xl text-[13px] font-medium"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Arabic Label</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('arabic_label')}</label>
                   <input
                     type="text"
                     value={nameAr}
                     onChange={(e) => setNameAr(e.target.value)}
-                    placeholder="e.g. توصيل طعام"
+                    placeholder={t('eg_')}
                     className="input-field w-full px-3.5 py-3 rounded-xl text-[13px] font-medium"
                   />
                 </div>
@@ -248,7 +250,7 @@ export default function AdminCategories() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Emoji Icon</label>
+                  <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('emoji_icon')}</label>
                   <input
                     type="text"
                     value={icon}
@@ -271,11 +273,11 @@ export default function AdminCategories() {
               </div>
 
               <div>
-                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">Description</label>
+                <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-wider mb-2 block">{t('description')}</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Short description of this chore..."
+                  placeholder={t('short_description_of_this_chore')}
                   rows={2}
                   className="input-field w-full px-4 py-3 rounded-xl text-[13px] font-medium resize-none"
                 />
@@ -291,7 +293,7 @@ export default function AdminCategories() {
                 ) : (
                   <Square size={16} className="text-charcoal-light" />
                 )}
-                <span className="text-[13px] text-white font-medium">Feature on Dashboard Home</span>
+                <span className="text-[13px] text-white font-medium">{t('feature_on_dashboard_home')}</span>
               </div>
 
               <div className="flex gap-2">
@@ -301,7 +303,7 @@ export default function AdminCategories() {
                     onClick={handleResetForm}
                     className="flex-1 py-3 rounded-xl border border-border text-charcoal-light font-bold text-[13px]"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                 )}
                 <button
@@ -309,7 +311,7 @@ export default function AdminCategories() {
                   disabled={saving}
                   className="flex-1 btn-accent py-3 rounded-xl text-[13px] font-bold uppercase tracking-wider"
                 >
-                  Save Category
+                  {t('save_category')}
                 </button>
               </div>
             </form>

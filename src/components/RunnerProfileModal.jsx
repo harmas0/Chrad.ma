@@ -39,14 +39,14 @@ export default function RunnerProfileModal({ isOpen, onClose, runnerId }) {
   const tier = profile?.runner_tier || (completedCount >= 50 ? 'Gold' : completedCount >= 20 ? 'Silver' : 'Bronze');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Verified Runner Profile">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('verified_runner_profile')}>
       {loading ? (
         <div className="py-12 text-center">
           <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-[13px] text-charcoal-light font-bold">Loading profile & reviews...</p>
+          <p className="text-[13px] text-charcoal-light font-bold">{t('loading_profile_reviews')}</p>
         </div>
       ) : !profile ? (
-        <div className="py-8 text-center text-charcoal-light font-bold">Runner details unavailable</div>
+        <div className="py-8 text-center text-charcoal-light font-bold">{t('runner_details_unavailable')}</div>
       ) : (
         <div className="space-y-6 animate-fade-in">
           {/* Header Banner */}
@@ -59,7 +59,7 @@ export default function RunnerProfileModal({ isOpen, onClose, runnerId }) {
                 alt={profile.name}
                 className="w-16 h-16 rounded-2xl object-cover border-2 border-accent/50 shadow-[0_0_20px_rgba(0,255,135,0.2)]"
               />
-              <span className="absolute -bottom-1 -right-1 bg-accent text-dark p-1 rounded-lg shadow-md" title="Verified Runner">
+              <span className="absolute -bottom-1 -right-1 bg-accent text-dark p-1 rounded-lg shadow-md" title={t('verified_runner')}>
                 <ShieldCheck size={14} strokeWidth={3} />
               </span>
             </div>
@@ -84,34 +84,34 @@ export default function RunnerProfileModal({ isOpen, onClose, runnerId }) {
                 <Star size={16} fill="currentColor" />
                 <span className="text-[16px] font-black text-white">{ratingVal}</span>
               </div>
-              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Average Rating</span>
+              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">{t('average_rating')}</span>
             </div>
 
             <div className="glass-panel p-3.5 rounded-2xl border border-white/10">
               <div className="text-[16px] font-black text-accent mb-1">{completedCount}</div>
-              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Tasks Done</span>
+              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">{t('tasks_done')}</span>
             </div>
 
             <div className="glass-panel p-3.5 rounded-2xl border border-white/10">
               <div className="flex items-center justify-center gap-1 text-accent mb-1">
                 <CheckCircle size={16} />
-                <span className="text-[14px] font-black text-white">Verified</span>
+                <span className="text-[14px] font-black text-white">{t('verified')}</span>
               </div>
-              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Identity KYC</span>
+              <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">{t('identity_kyc')}</span>
             </div>
           </div>
 
           {/* Past Reviews List */}
           <div>
             <h4 className="text-[13px] font-bold text-charcoal-light uppercase tracking-wider mb-3 flex items-center justify-between">
-              <span>Client Reviews & Compliments</span>
+              <span>{t('client_reviews_compliments')}</span>
               <span className="text-[11px] text-accent font-extrabold">{reviews.length} reviews</span>
             </h4>
 
             <div className="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
               {reviews.length === 0 ? (
                 <div className="py-6 text-center text-charcoal-light text-[12px] font-bold">
-                  No public reviews written yet for this runner.
+                  {t('no_public_reviews_written_yet_for_t')}
                 </div>
               ) : (
                 reviews.map((rev) => (

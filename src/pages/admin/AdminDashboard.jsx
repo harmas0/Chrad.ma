@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, ShieldCheck, AlertTriangle, Package, TrendingUp, Ban, ArrowRight, Clock } from 'lucide-react';
@@ -17,6 +18,7 @@ const ACTION_LABELS = {
 import { supabase } from '../../utils/supabaseClient';
 
 export default function AdminDashboard() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -70,8 +72,8 @@ export default function AdminDashboard() {
     <div className="animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Dashboard</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Overview of your platform activity</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('dashboard')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('overview_of_your_platform_activity')}</p>
       </div>
 
       {/* Stats Grid */}
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
               <ShieldCheck size={24} />
             </div>
             <div className="flex-1">
-              <h3 className="text-[16px] font-bold text-white mb-0.5">Review KYC Applications</h3>
+              <h3 className="text-[16px] font-bold text-white mb-0.5">{t('review_kyc_applications')}</h3>
               <p className="text-[13px] text-charcoal-light">{stats.pendingKyc} pending verification{stats.pendingKyc !== 1 ? 's' : ''}</p>
             </div>
             <ArrowRight size={20} className="text-charcoal-light group-hover:text-warning group-hover:translate-x-1 transition-all" />
@@ -129,7 +131,7 @@ export default function AdminDashboard() {
               <AlertTriangle size={24} />
             </div>
             <div className="flex-1">
-              <h3 className="text-[16px] font-bold text-white mb-0.5">Open Disputes</h3>
+              <h3 className="text-[16px] font-bold text-white mb-0.5">{t('open_disputes')}</h3>
               <p className="text-[13px] text-charcoal-light">{stats.openDisputes} dispute{stats.openDisputes !== 1 ? 's' : ''} need attention</p>
             </div>
             <ArrowRight size={20} className="text-charcoal-light group-hover:text-danger group-hover:translate-x-1 transition-all" />
@@ -141,12 +143,12 @@ export default function AdminDashboard() {
       <div>
         <h2 className="text-[18px] font-bold text-white mb-4 flex items-center gap-2">
           <Clock size={18} className="text-charcoal-light" />
-          Recent Activity
+          {t('recent_activity')}
         </h2>
         <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
           {recentActivity.length === 0 ? (
             <div className="px-6 py-10 text-center">
-              <p className="text-charcoal-light text-[14px] font-medium">No admin activity yet</p>
+              <p className="text-charcoal-light text-[14px] font-medium">{t('no_admin_activity_yet')}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">

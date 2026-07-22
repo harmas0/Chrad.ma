@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { 
   Megaphone, 
@@ -20,6 +21,7 @@ import Modal from '../../components/Modal';
 import { fetchAllAds, createAd, toggleAdActive, deleteAd } from '../../data/adsApi';
 
 export default function AdminAds() {
+  const { t } = useI18n();
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -127,10 +129,10 @@ export default function AdminAds() {
         <div>
           <h1 className="text-[28px] font-black text-white tracking-tight mb-1 flex items-center gap-2.5">
             <Megaphone size={28} className="text-accent" />
-            Multi-Provider Custom Ads Manager
+            {t('multiprovider_custom_ads_manager')}
           </h1>
           <p className="text-[14px] text-charcoal-light font-medium">
-            Manage Google AdSense, Custom Banners, and HTML Embed campaigns with real-time CTR analytics
+            {t('manage_google_adsense_custom_banner')}
           </p>
         </div>
 
@@ -139,7 +141,7 @@ export default function AdminAds() {
           className="px-5 py-3 rounded-2xl bg-accent text-dark font-heading font-black text-[13px] uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,135,0.3)] hover:scale-105 transition-all flex items-center justify-center gap-2 self-start sm:self-auto"
         >
           <Plus size={18} strokeWidth={3} />
-          Create New Campaign
+          {t('create_new_campaign')}
         </button>
       </div>
 
@@ -147,7 +149,7 @@ export default function AdminAds() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
         <div className="glass-panel p-6 border border-white/10 rounded-2xl bg-dark/60">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">Active Campaigns</span>
+            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">{t('active_campaigns')}</span>
             <Sparkles size={18} className="text-accent" />
           </div>
           <div className="text-[26px] font-black text-white">{activeCount} / {ads.length}</div>
@@ -155,7 +157,7 @@ export default function AdminAds() {
 
         <div className="glass-panel p-6 border border-white/10 rounded-2xl bg-dark/60">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">Total Impressions</span>
+            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">{t('total_impressions')}</span>
             <Eye size={18} className="text-info" />
           </div>
           <div className="text-[26px] font-black text-info">{totalImpressions.toLocaleString()} views</div>
@@ -163,7 +165,7 @@ export default function AdminAds() {
 
         <div className="glass-panel p-6 border border-white/10 rounded-2xl bg-dark/60">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">Total Clicks</span>
+            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">{t('total_clicks')}</span>
             <MousePointer size={18} className="text-warning" />
           </div>
           <div className="text-[26px] font-black text-warning">{totalClicks.toLocaleString()} clicks</div>
@@ -171,7 +173,7 @@ export default function AdminAds() {
 
         <div className="glass-panel p-6 border border-white/10 rounded-2xl bg-dark/60">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">Click Through Rate</span>
+            <span className="text-[12px] font-bold text-charcoal-light uppercase tracking-wider">{t('click_through_rate')}</span>
             <TrendingUp size={18} className="text-accent" />
           </div>
           <div className="text-[26px] font-black text-accent">{avgCTR}% CTR</div>
@@ -181,7 +183,7 @@ export default function AdminAds() {
       {/* Campaigns Table */}
       <div className="glass-panel rounded-2xl border border-border-light overflow-hidden">
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
-          <h3 className="font-heading font-black text-white text-[16px]">Active Multi-Provider Ad Campaigns</h3>
+          <h3 className="font-heading font-black text-white text-[16px]">{t('active_multiprovider_ad_campaigns')}</h3>
           <button
             onClick={loadData}
             className="p-2 rounded-xl bg-dark/60 border border-white/10 text-charcoal-light hover:text-white transition-colors"
@@ -194,14 +196,14 @@ export default function AdminAds() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Provider</th>
-                <th>Campaign & Advertiser</th>
-                <th>Placement Slot</th>
-                <th>Views</th>
-                <th>Clicks</th>
-                <th>CTR %</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{t('provider')}</th>
+                <th>{t('campaign_advertiser')}</th>
+                <th>{t('placement_slot')}</th>
+                <th>{t('views')}</th>
+                <th>{t('clicks')}</th>
+                <th>{t('ctr_')}</th>
+                <th>{t('status')}</th>
+                <th>{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -251,12 +253,12 @@ export default function AdminAds() {
                         {item.is_active ? (
                           <>
                             <ToggleRight size={26} className="text-accent" />
-                            <span className="text-[11px] font-bold text-accent">Active</span>
+                            <span className="text-[11px] font-bold text-accent">{t('active')}</span>
                           </>
                         ) : (
                           <>
                             <ToggleLeft size={26} className="text-muted" />
-                            <span className="text-[11px] font-bold text-muted">Paused</span>
+                            <span className="text-[11px] font-bold text-muted">{t('paused')}</span>
                           </>
                         )}
                       </button>
@@ -265,7 +267,7 @@ export default function AdminAds() {
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="p-2 rounded-xl bg-danger/10 text-danger hover:bg-danger/20 transition-colors"
-                        title="Delete Campaign"
+                        title={t('delete_campaign')}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -276,7 +278,7 @@ export default function AdminAds() {
               {ads.length === 0 && (
                 <tr>
                   <td colSpan={8} className="text-center py-12 text-charcoal-light text-[14px]">
-                    No custom ad campaigns created yet.
+                    {t('no_custom_ad_campaigns_created_yet')}
                   </td>
                 </tr>
               )}
@@ -286,7 +288,7 @@ export default function AdminAds() {
       </div>
 
       {/* CREATE NEW AD MODAL */}
-      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New Ad Campaign">
+      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('create_new_ad_campaign')}>
         <div className="space-y-4">
           {/* Provider Selection Tabs */}
           <div className="flex bg-dark/60 p-1 rounded-2xl border border-white/10 mb-4">
@@ -298,7 +300,7 @@ export default function AdminAds() {
               }`}
             >
               <Image size={14} />
-              Custom Banner
+              {t('custom_banner')}
             </button>
             <button
               type="button"
@@ -308,7 +310,7 @@ export default function AdminAds() {
               }`}
             >
               <Globe size={14} />
-              Google AdSense
+              {t('google_adsense')}
             </button>
             <button
               type="button"
@@ -318,19 +320,19 @@ export default function AdminAds() {
               }`}
             >
               <Code size={14} />
-              HTML / JS Embed
+              {t('html_js_embed')}
             </button>
           </div>
 
           <form onSubmit={handleCreateSubmit} className="space-y-4">
             <div>
               <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                Campaign Title *
+                {t('campaign_title_')}
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. McDonald's Fast Delivery Promo"
+                placeholder={t('eg_mcdonalds_fast_delivery_promo')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
@@ -339,11 +341,11 @@ export default function AdminAds() {
 
             <div>
               <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                Advertiser / Partner Name
+                {t('advertiser_partner_name')}
               </label>
               <input
                 type="text"
-                placeholder="e.g. McDonald's Casablanca"
+                placeholder={t('eg_mcdonalds_casablanca')}
                 value={advertiser}
                 onChange={(e) => setAdvertiser(e.target.value)}
                 className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
@@ -355,12 +357,12 @@ export default function AdminAds() {
               <>
                 <div>
                   <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                    Banner Image URL *
+                    {t('banner_image_url_')}
                   </label>
                   <input
                     type="url"
                     required
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder={t('httpsimagesunsplashcom')}
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
@@ -373,7 +375,7 @@ export default function AdminAds() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. https://mcdonalds.ma or /post"
+                    placeholder={t('eg_httpsmcdonaldsma_or_post')}
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
                     className="w-full bg-dark/60 border border-white/10 rounded-2xl p-3.5 text-[14px] text-white focus:border-accent focus:outline-none"
@@ -383,11 +385,11 @@ export default function AdminAds() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                      Badge Label
+                      {t('badge_label')}
                     </label>
                     <input
                       type="text"
-                      placeholder="SPONSORED"
+                      placeholder={t('sponsored')}
                       value={badgeText}
                       onChange={(e) => setBadgeText(e.target.value)}
                       className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
@@ -395,11 +397,11 @@ export default function AdminAds() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                      CTA Button Text
+                      {t('cta_button_text')}
                     </label>
                     <input
                       type="text"
-                      placeholder="View Offer"
+                      placeholder={t('view_offer')}
                       value={ctaText}
                       onChange={(e) => setCtaText(e.target.value)}
                       className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
@@ -414,7 +416,7 @@ export default function AdminAds() {
               <div className="space-y-4 p-4 rounded-2xl bg-info/5 border border-info/20">
                 <p className="text-[12px] text-info font-bold flex items-center gap-1.5">
                   <Globe size={16} />
-                  Google AdSense Publisher Integration
+                  {t('google_adsense_publisher_integratio')}
                 </p>
                 <div>
                   <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
@@ -422,7 +424,7 @@ export default function AdminAds() {
                   </label>
                   <input
                     type="text"
-                    placeholder="ca-pub-1234567890123456"
+                    placeholder={t('capub1234567890123456')}
                     value={adsenseClientId}
                     onChange={(e) => setAdsenseClientId(e.target.value)}
                     className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[13px] text-white font-mono focus:border-info focus:outline-none"
@@ -430,7 +432,7 @@ export default function AdminAds() {
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                    AdSense Slot ID
+                    {t('adsense_slot_id')}
                   </label>
                   <input
                     type="text"
@@ -448,7 +450,7 @@ export default function AdminAds() {
               <div className="space-y-3 p-4 rounded-2xl bg-warning/5 border border-warning/20">
                 <p className="text-[12px] text-warning font-bold flex items-center gap-1.5">
                   <Code size={16} />
-                  Custom HTML / JS Embed Snippet
+                  {t('custom_html_js_embed_snippet')}
                 </p>
                 <textarea
                   rows={4}
@@ -462,16 +464,16 @@ export default function AdminAds() {
 
             <div>
               <label className="block text-[11px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                Placement Slot
+                {t('placement_slot')}
               </label>
               <select
                 value={placement}
                 onChange={(e) => setPlacement(e.target.value)}
                 className="w-full bg-dark/60 border border-white/10 rounded-xl p-3 text-[12px] text-white focus:border-accent focus:outline-none"
               >
-                <option value="home_banner" className="bg-dark text-white">Home Banner</option>
-                <option value="feed_card" className="bg-dark text-white">Feed In-Card</option>
-                <option value="task_detail" className="bg-dark text-white">Task Detail</option>
+                <option value="home_banner" className="bg-dark text-white">{t('home_banner')}</option>
+                <option value="feed_card" className="bg-dark text-white">{t('feed_incard')}</option>
+                <option value="task_detail" className="bg-dark text-white">{t('task_detail')}</option>
               </select>
             </div>
 

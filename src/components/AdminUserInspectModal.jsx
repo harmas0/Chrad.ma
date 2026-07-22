@@ -1,3 +1,4 @@
+import { useI18n } from '../utils/i18n';
 import { useState, useEffect } from 'react';
 import { 
   User, 
@@ -22,6 +23,7 @@ import { topUpWallet } from '../data/walletApi';
 import { useAuth } from '../context/AuthContext';
 
 export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefresh }) {
+  const { t } = useI18n();
   const { user: currentAdmin } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -119,14 +121,14 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Admin User Inspector & Controls">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('admin_user_inspector_controls')}>
       {loading ? (
         <div className="py-12 text-center">
           <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-[13px] text-charcoal-light font-bold">Loading user records...</p>
+          <p className="text-[13px] text-charcoal-light font-bold">{t('loading_user_records')}</p>
         </div>
       ) : !profile ? (
-        <div className="py-8 text-center text-charcoal-light font-bold">User profile not found.</div>
+        <div className="py-8 text-center text-charcoal-light font-bold">{t('user_profile_not_found')}</div>
       ) : (
         <div className="space-y-5 animate-fade-in">
           {/* User Header */}
@@ -160,19 +162,19 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
               onClick={() => setActiveTab('overview')}
               className={`flex-1 py-2 rounded-xl transition-all ${activeTab === 'overview' ? 'bg-accent text-dark font-black' : 'text-charcoal-light'}`}
             >
-              Overview & KYC
+              {t('overview_kyc')}
             </button>
             <button
               onClick={() => setActiveTab('financials')}
               className={`flex-1 py-2 rounded-xl transition-all ${activeTab === 'financials' ? 'bg-accent text-dark font-black' : 'text-charcoal-light'}`}
             >
-              Wallet & Bank RIB
+              {t('wallet_bank_rib')}
             </button>
             <button
               onClick={() => setActiveTab('actions')}
               className={`flex-1 py-2 rounded-xl transition-all ${activeTab === 'actions' ? 'bg-accent text-dark font-black' : 'text-charcoal-light'}`}
             >
-              Admin Actions
+              {t('admin_actions')}
             </button>
           </div>
 
@@ -181,7 +183,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
             <div className="space-y-4 animate-fade-in">
               <div className="grid grid-cols-3 gap-2.5 text-center">
                 <div className="p-3 rounded-2xl bg-dark/40 border border-white/5">
-                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">KYC Status</span>
+                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">{t('kyc_status')}</span>
                   <span className={`text-[12px] font-extrabold uppercase ${
                     profile.kyc_status === 'approved' ? 'text-accent' :
                     profile.kyc_status === 'rejected' ? 'text-danger' : 'text-warning'
@@ -191,12 +193,12 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                 </div>
 
                 <div className="p-3 rounded-2xl bg-dark/40 border border-white/5">
-                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">Tasks Done</span>
+                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">{t('tasks_done')}</span>
                   <span className="text-[14px] font-black text-white">{profile.completed_tasks || 0}</span>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-dark/40 border border-white/5">
-                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">Account State</span>
+                  <span className="text-[10px] text-charcoal-light font-bold uppercase block mb-1">{t('account_state')}</span>
                   <span className={`text-[12px] font-black uppercase ${profile.is_banned ? 'text-danger' : 'text-accent'}`}>
                     {profile.is_banned ? 'BANNED' : 'Active'}
                   </span>
@@ -208,7 +210,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                 <div className="p-3.5 rounded-2xl bg-dark/40 border border-white/10 space-y-2">
                   <h4 className="text-[12px] font-bold text-white flex items-center gap-1.5">
                     <FileText size={14} className="text-accent" />
-                    Uploaded Identity Document
+                    {t('uploaded_identity_document')}
                   </h4>
                   <img
                     src={profile.kyc_id_url}
@@ -225,12 +227,12 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
             <div className="space-y-4 animate-fade-in">
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-4 rounded-2xl bg-accent/10 border border-accent/20">
-                  <span className="text-[11px] font-bold text-charcoal-light uppercase block mb-1">Available Wallet</span>
+                  <span className="text-[11px] font-bold text-charcoal-light uppercase block mb-1">{t('available_wallet')}</span>
                   <span className="text-[20px] font-black text-accent">{Number(profile.wallet_balance || 0)} MAD</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-warning/10 border border-warning/20">
-                  <span className="text-[11px] font-bold text-charcoal-light uppercase block mb-1">Escrow Holding</span>
+                  <span className="text-[11px] font-bold text-charcoal-light uppercase block mb-1">{t('escrow_holding')}</span>
                   <span className="text-[20px] font-black text-warning">{Number(profile.escrow_balance || 0)} MAD</span>
                 </div>
               </div>
@@ -239,20 +241,20 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
               <div className="p-4 rounded-2xl bg-dark/40 border border-white/10 space-y-1">
                 <p className="text-[12px] font-bold text-white flex items-center gap-1.5">
                   <Building2 size={16} className="text-accent" />
-                  Moroccan Bank RIB Details
+                  {t('moroccan_bank_rib_details')}
                 </p>
                 <p className="text-[12px] text-charcoal-light font-medium">
-                  Bank: <strong className="text-white">{profile.bank_name || 'Not provided'}</strong>
+                  {t('bank')} <strong className="text-white">{profile.bank_name || 'Not provided'}</strong>
                 </p>
                 <p className="text-[12px] text-charcoal-light font-mono">
-                  RIB: <strong className="text-accent">{profile.bank_rib || 'Not provided'}</strong>
+                  {t('rib')} <strong className="text-accent">{profile.bank_rib || 'Not provided'}</strong>
                 </p>
               </div>
 
               {/* Wallet Adjustment Form */}
               <div className="p-4 rounded-2xl bg-dark/60 border border-white/10 space-y-3">
                 <h4 className="text-[12px] font-bold text-white uppercase tracking-wider">
-                  Admin Wallet Balance Adjustment
+                  {t('admin_wallet_balance_adjustment')}
                 </h4>
                 <div className="flex gap-2">
                   <input
@@ -276,14 +278,14 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                     disabled={adjustLoading}
                     className="flex-1 py-2.5 rounded-xl bg-accent text-dark font-extrabold text-[12px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-105 transition-all"
                   >
-                    <Plus size={14} /> Credit Wallet
+                    <Plus size={14} /> {t('credit_wallet')}
                   </button>
                   <button
                     onClick={() => handleWalletAdjust(false)}
                     disabled={adjustLoading}
                     className="flex-1 py-2.5 rounded-xl bg-danger/20 border border-danger/30 text-danger font-extrabold text-[12px] uppercase tracking-wider flex items-center justify-center gap-1 hover:bg-danger/30 transition-colors"
                   >
-                    <Minus size={14} /> Deduct Wallet
+                    <Minus size={14} /> {t('deduct_wallet')}
                   </button>
                 </div>
               </div>
@@ -295,7 +297,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
             <div className="space-y-4 animate-fade-in">
               <div>
                 <label className="block text-[12px] font-bold text-charcoal-light uppercase tracking-wider mb-2">
-                  Change Account Role
+                  {t('change_account_role')}
                 </label>
                 <select
                   value={profile.role || (profile.is_runner ? 'runner' : 'client')}
@@ -304,7 +306,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                 >
                   <option value="client" className="bg-dark text-white">Client (Standard User)</option>
                   <option value="runner" className="bg-dark text-white">Runner (Task Executor)</option>
-                  <option value="admin" className="bg-dark text-white">Super Admin</option>
+                  <option value="admin" className="bg-dark text-white">{t('super_admin')}</option>
                 </select>
               </div>
 
@@ -312,7 +314,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
               <div className="p-4 rounded-2xl bg-danger/10 border border-danger/20 space-y-3">
                 <h4 className="text-[13px] font-black text-danger uppercase tracking-wider flex items-center gap-1.5">
                   <Ban size={16} />
-                  Account Ban Status
+                  {t('account_ban_status')}
                 </h4>
                 {profile.is_banned ? (
                   <div>
@@ -323,14 +325,14 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                       onClick={handleBanToggle}
                       className="w-full py-3 rounded-xl bg-accent text-dark font-black text-[12px] uppercase tracking-wider"
                     >
-                      Unban User Account
+                      {t('unban_user_account')}
                     </button>
                   </div>
                 ) : (
                   <div>
                     <input
                       type="text"
-                      placeholder="Specify ban reason..."
+                      placeholder={t('specify_ban_reason')}
                       value={banReasonInput}
                       onChange={(e) => setBanReasonInput(e.target.value)}
                       className="w-full bg-dark/80 border border-danger/30 rounded-xl p-3 text-[12px] text-white placeholder:text-muted mb-3 focus:outline-none"
@@ -339,7 +341,7 @@ export default function AdminUserInspectModal({ isOpen, onClose, userId, onRefre
                       onClick={handleBanToggle}
                       className="w-full py-3 rounded-xl bg-danger text-white font-black text-[12px] uppercase tracking-wider hover:scale-[1.01] transition-all"
                     >
-                      Ban User Account
+                      {t('ban_user_account')}
                     </button>
                   </div>
                 )}

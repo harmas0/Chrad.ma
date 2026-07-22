@@ -1,3 +1,4 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { ShieldCheck, ShieldX, Eye, Check, X, Clock, ChevronDown, RotateCw, ZoomIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +12,7 @@ const STATUS_TABS = [
 ];
 
 export default function AdminKYC() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,8 +69,8 @@ export default function AdminKYC() {
     <div className="animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">KYC Review</h1>
-        <p className="text-[14px] text-charcoal-light font-medium">Verify runner identity documents</p>
+        <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('kyc_review')}</h1>
+        <p className="text-[14px] text-charcoal-light font-medium">{t('verify_runner_identity_documents')}</p>
       </div>
 
       {/* Tabs */}
@@ -97,7 +99,7 @@ export default function AdminKYC() {
       ) : applications.length === 0 ? (
         <div className="glass-panel rounded-2xl border border-border-light p-12 text-center">
           <ShieldCheck size={48} className="text-charcoal-light mx-auto mb-4 opacity-50" />
-          <p className="text-[16px] font-bold text-white mb-2">No applications</p>
+          <p className="text-[16px] font-bold text-white mb-2">{t('no_applications')}</p>
           <p className="text-[14px] text-charcoal-light">
             {activeTab === 'pending' ? 'All KYC applications have been reviewed!' : 'No applications with this status.'}
           </p>
@@ -129,15 +131,15 @@ export default function AdminKYC() {
                 >
                   {app.kyc_id_url ? (
                     <>
-                      <img src={app.kyc_id_url} alt="ID Document" className="w-full h-full object-cover" />
+                      <img src={app.kyc_id_url} alt={t('id_document')} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                         <ZoomIn size={24} className="text-white" />
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">No ID</div>
+                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">{t('no_id')}</div>
                   )}
-                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">ID Card</div>
+                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">{t('id_card')}</div>
                 </div>
                 <div
                   onClick={(e) => { e.stopPropagation(); if (app.kyc_selfie_url) openDocViewer(app.kyc_selfie_url); }}
@@ -145,15 +147,15 @@ export default function AdminKYC() {
                 >
                   {app.kyc_selfie_url ? (
                     <>
-                      <img src={app.kyc_selfie_url} alt="Selfie" className="w-full h-full object-cover" />
+                      <img src={app.kyc_selfie_url} alt={t('selfie')} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                         <ZoomIn size={24} className="text-white" />
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">No Selfie</div>
+                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">{t('no_selfie')}</div>
                   )}
-                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">Selfie</div>
+                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">{t('selfie')}</div>
                 </div>
                 <div
                   onClick={(e) => { e.stopPropagation(); if (app.kyc_vehicle_url) openDocViewer(app.kyc_vehicle_url); }}
@@ -161,15 +163,15 @@ export default function AdminKYC() {
                 >
                   {app.kyc_vehicle_url ? (
                     <>
-                      <img src={app.kyc_vehicle_url} alt="Vehicle Docs" className="w-full h-full object-cover" />
+                      <img src={app.kyc_vehicle_url} alt={t('vehicle_docs')} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                         <ZoomIn size={24} className="text-white" />
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">No Vehicle</div>
+                    <div className="w-full h-full flex items-center justify-center text-charcoal-light text-[12px] font-medium">{t('no_vehicle')}</div>
                   )}
-                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">Vehicle</div>
+                  <div className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">{t('vehicle')}</div>
                 </div>
               </div>
 
@@ -184,13 +186,13 @@ export default function AdminKYC() {
                       disabled={actionLoading}
                       className="text-[11px] font-bold text-accent bg-accent/10 border border-accent/20 px-4 py-2 rounded-lg hover:bg-accent/20 transition-colors disabled:opacity-50 flex items-center gap-1"
                     >
-                      <Check size={12} /> Approve
+                      <Check size={12} /> {t('approve')}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setSelectedApp(app); setShowRejectModal(true); }}
                       className="text-[11px] font-bold text-danger bg-danger/10 border border-danger/20 px-4 py-2 rounded-lg hover:bg-danger/20 transition-colors flex items-center gap-1"
                     >
-                      <X size={12} /> Reject
+                      <X size={12} /> {t('reject')}
                     </button>
                   </div>
                 )}
@@ -198,7 +200,7 @@ export default function AdminKYC() {
 
               {app.kyc_status === 'rejected' && app.kyc_rejection_reason && (
                 <div className="mt-3 p-3 rounded-xl bg-danger/5 border border-danger/20">
-                  <p className="text-[11px] text-danger font-bold mb-1">Rejection Reason</p>
+                  <p className="text-[11px] text-danger font-bold mb-1">{t('rejection_reason')}</p>
                   <p className="text-[12px] text-charcoal-light">{app.kyc_rejection_reason}</p>
                 </div>
               )}
@@ -242,7 +244,7 @@ export default function AdminKYC() {
                 <div className="w-10 h-10 rounded-xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
                   <ShieldX size={20} />
                 </div>
-                <h3 className="text-[18px] font-extrabold text-white">Reject KYC</h3>
+                <h3 className="text-[18px] font-extrabold text-white">{t('reject_kyc')}</h3>
               </div>
               <button onClick={() => setShowRejectModal(false)} className="w-9 h-9 rounded-full bg-dark border border-border flex items-center justify-center text-charcoal-light hover:text-white transition-colors">
                 <X size={18} />
@@ -250,17 +252,17 @@ export default function AdminKYC() {
             </div>
 
             <p className="text-[14px] text-charcoal-light mb-4">
-              Rejecting KYC for <strong className="text-white">{selectedApp.name}</strong>. Please provide a reason so they can resubmit with correct documents.
+              {t('rejecting_kyc_for')} <strong className="text-white">{selectedApp.name}</strong>{t('_please_provide_a_reason_so_they_ca')}
             </p>
 
             <div className="mb-6">
-              <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">Rejection Reason</label>
+              <label className="text-[11px] text-charcoal-light font-bold uppercase tracking-widest mb-2 block">{t('rejection_reason')}</label>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="input-field w-full px-4 py-3.5 rounded-xl text-[14px] font-medium resize-none"
                 rows={3}
-                placeholder="e.g., ID photo is blurry, selfie doesn't match ID..."
+                placeholder={t('eg_id_photo_is_blurry_selfie_doesnt')}
               />
             </div>
 
@@ -269,7 +271,7 @@ export default function AdminKYC() {
                 onClick={() => setShowRejectModal(false)}
                 className="flex-1 py-3.5 rounded-xl border border-border text-charcoal-light font-bold text-[14px] hover:text-white hover:border-border-light transition-colors"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleReject}
@@ -281,7 +283,7 @@ export default function AdminKYC() {
                 ) : (
                   <>
                     <ShieldX size={16} />
-                    Reject
+                    {t('reject')}
                   </>
                 )}
               </button>

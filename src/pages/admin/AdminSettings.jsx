@@ -1,9 +1,11 @@
+import { useI18n } from '../../utils/i18n';
 import { useState, useEffect } from 'react';
 import { Settings, Globe, Bell, Shield, Database, Save, Check, Info, Loader2 } from 'lucide-react';
 import { fetchPlatformSettings, updatePlatformSettings } from '../../data/settingsApi';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminSettings() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -114,8 +116,8 @@ export default function AdminSettings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">Platform Settings</h1>
-          <p className="text-[14px] text-charcoal-light font-medium">Configure platform behavior and policies</p>
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-1">{t('platform_settings')}</h1>
+          <p className="text-[14px] text-charcoal-light font-medium">{t('configure_platform_behavior_and_pol')}</p>
         </div>
         <button
           onClick={handleSave}
@@ -129,9 +131,9 @@ export default function AdminSettings() {
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : saved ? (
-            <><Check size={16} /> Saved!</>
+            <><Check size={16} /> {t('saved')}</>
           ) : (
-            <><Save size={16} /> Save Changes</>
+            <><Save size={16} /> {t('save_changes')}</>
           )}
         </button>
       </div>
@@ -140,7 +142,7 @@ export default function AdminSettings() {
       <div className="bg-info/5 border border-info/20 rounded-xl p-4 mb-8 flex items-start gap-3">
         <Info size={18} className="text-info shrink-0 mt-0.5" />
         <p className="text-[13px] text-charcoal-light">
-          Platform configurations are stored securely inside the database and sync instantly with all active clients and runners.
+          {t('platform_configurations_are_stored_')}
         </p>
       </div>
 
