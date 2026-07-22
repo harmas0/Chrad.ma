@@ -8,6 +8,7 @@ import AdBanner from '../components/AdBanner';
 import { fetchOpenTasks, TASK_CATEGORIES, fetchActiveCategories } from '../data/tasksApi';
 import { countBidsForTask } from '../data/bidsApi';
 import TaskCard from '../components/TaskCard';
+import CategoryIcon from '../components/CategoryIcon';
 import { useI18n } from '../utils/i18n';
 
 const howItWorks = [
